@@ -11,6 +11,17 @@ urls = [
     "https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets"
 ]
 
+def debug_site(url):
+    scrape_result = app.scrape_url(url)
+
+    # Debugging: gesamten FireCrawl-Output ausgeben
+    print(f"FireCrawl Output für {url}: {scrape_result}")
+
+    html_content = scrape_result.get("html", "")
+    if not html_content:
+        print(f"Kein HTML-Inhalt für {url} gefunden.")
+        return None
+
 # Funktion zur Extraktion von Header, Subheader und Paragraphen
 def extract_details(url):
     try:
@@ -54,3 +65,6 @@ for url in urls:
         print(f"Inhalte in '{filename}' gespeichert.")
     else:
         print(f"Keine Inhalte auf {url} gefunden oder Fehler aufgetreten.")
+        print()
+
+debug_site("https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets")
