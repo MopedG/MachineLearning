@@ -1,59 +1,56 @@
-import requests
+from firecrawl import FirecrawlApp
 from bs4 import BeautifulSoup
 
-# Liste der URLs, deren Inhalte heruntergeladen werden sollen
+# FireCrawl-App initialisieren
+app = FirecrawlApp(api_key="fc-f8ec1aa3e2e54d64acfefd7411b6b3aa")  # Ersetze YOUR_API_KEY durch deinen Schlüssel
+
+# Liste der URLs
 urls = [
     "https://www.artbasel.com/stories/suzanne-valadon-centre-pompidou-19th-century-women-artist",
     "https://www.artbasel.com/stories/seven-trailblazing-galleries-debuting-at-art-basel-hong-kong-in-2025",
     "https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets"
 ]
 
-# Funktion, um Heading, Subheading und <p>-Inhalte einer Webseite zu extrahieren
-def extract_paragraphs(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
+# Funktion zur Extraktion von Header, Subheader und Paragraphen
+def extract_details(url):
     try:
-        # HTTP-Request mit User-Agent
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Fehler werfen bei HTTP-Problemen
+        # Webseite mit FireCrawl scrapen
+        scrape_result = app.scrape_url(url)
+        html_content = scrape_result.get("html", "")
+        if not html_content:
+            print(f"Kein Inhalt für {url} gefunden.")
+            return None
 
         # HTML-Inhalt analysieren
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(html_content, "html.parser")
 
-        # Versuch, Heading (<h1>) zu finden
-        heading = soup.find("h1")
-        heading_text = heading.get_text(strip=True) if heading else "Kein Heading gefunden"
+        # Header extrahieren
+        header = soup.find("h1").get_text(strip=True) if soup.find("h1") else "Keine Überschrift gefunden"
 
-        # Versuch, Subheading (<p> mit Klasse 'subheading') zu finden
-        subheading = soup.find("p", class_="subheading")
-        subheading_text = subheading.get_text(strip=True) if subheading else "Kein Subheading gefunden"
+        # Subheader extrahieren
+        subheader = soup.find("p", class_="subheading").get_text(strip=True) if soup.find("p", class_="subheading") else "Keine Unterüberschrift gefunden"
 
-        # Alle <p>-Tags finden und den Text extrahieren
-        paragraphs = [p.get_text(strip=True) for p in soup.find_all("p")]
+        # Paragraphen extrahieren
+        paragraphs = [p.get_text(strip=True) for p in soup.find_all("p") if "subheading" not in p.get("class", [])]
 
-        # Heading und Subheading zu den Paragraphen hinzufügen
-        content = [f"H1: {heading_text}", f"Subheading: {subheading_text}"] + paragraphs
-
-        # Debug: Ausgeben der gefundenen Werte
-        print(f"URL: {url}\nHeading: {heading_text}\nSubheading: {subheading_text}\n")
-        return content
+        return header, subheader, paragraphs
 
     except Exception as e:
         print(f"Fehler beim Verarbeiten von {url}: {e}")
-        return []
+        return None
 
 # Inhalte speichern
 for url in urls:
     print(f"Verarbeite: {url}")
-    content = extract_paragraphs(url)
+    result = extract_details(url)
 
-    if content:
-        # Dateiname für die Textdatei
-        filename = f"./Textfiles/{url.replace('https://', '').replace('http://', '').replace('/', '_')}.txt"
-        # Datei öffnen und Inhalte schreiben
+    if result:
+        header, subheader, paragraphs = result
+        filename = f"{url.replace('https://', '').replace('http://', '').replace('/', '_')}.txt"
         with open(filename, "w", encoding="utf-8") as file:
-            file.write("\n\n".join(content))
+            file.write(f"Header:\n{header}\n\n")
+            file.write(f"Subheader:\n{subheader}\n\n")
+            file.write("Content:\n" + "\n\n".join(paragraphs))
         print(f"Inhalte in '{filename}' gespeichert.")
     else:
         print(f"Keine Inhalte auf {url} gefunden oder Fehler aufgetreten.")

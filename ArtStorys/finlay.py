@@ -32,6 +32,16 @@ def documentToWord2Vec():
 
     return document_models
 
+def tokenizeText(text):
+    data = []
+    for i in sent_tokenize(text):
+        temp = []
+
+        for j in word_tokenize(i):
+            temp.append(j.lower())
+
+        data.append(temp)
+
 
 def filesToStrings():
     textfiles_folder = "./Textfiles"
@@ -60,23 +70,39 @@ def rank_art_stories_python_function(query):
     documents = documentToWord2Vec()
     query_tokens = word_tokenize(query.lower())
 
+    query_vectors = []
+    for token in query_tokens:
+        if token in documents[0]["model"].wv:
+            query_vectors.append(documents[0]["model"].wv[token])
+
+    query_vector = sum(query_vectors) / len(query_vectors)
+
     rankings = []
     for document in documents:
-
+        document_vectors = [document["model"].wv[word] for word in word_tokenize(document["content"].lower()) if
+            word in document["model"].wv]
         similarities = []
 
-        for token in query_tokens:
+        for doc_vector in document["model"]:
+            # Berechne die Cosinus-Ähnlichkeit zwischen dem Dokumenten-Vektor und dem Anfrage-Vektor
+            similarities.append(document["model"].wv.similarity(query_vector))
 
-            if token in document["model"].wv:
-
-                similarities.append(document["model"].wv.similarity(token, token))
-
-        if similarities:
-            average_similarity = sum(similarities) / len(similarities)
-            print(average_similarity)
-        else:
-            average_similarity = 0
+            # Berechne den Durchschnitt der Ähnlichkeiten für das Dokument
+        average_similarity = sum(similarities) / len(similarities)
         rankings.append((document["site"], average_similarity))
+
+        #for token in query_tokens:
+
+            #if token in document["model"].wv:
+
+                #similarities.append(document["model"].wv.similarity(query_vector))
+
+        #if similarities:
+            #average_similarity = sum(similarities) / len(similarities)
+            #print(average_similarity)
+        #else:
+            #average_similarity = 0
+        #rankings.append((document["site"], average_similarity))
 
     rankings.sort(key=lambda x: x[1], reverse=True)
 
@@ -85,5 +111,5 @@ def rank_art_stories_python_function(query):
 
 
 if __name__ == "__main__":
-    query = "hong kong architecture"
+    query = "architecture notre-dame"
     rank_art_stories_python_function(query)
