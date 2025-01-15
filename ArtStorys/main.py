@@ -58,6 +58,17 @@ def filesToStrings():
     return site_texts
 
 
+'''
+def get_vec_from_word_2_vec(input_txt, model):
+    tokens = [word.lower() for word in word_tokenize(input_txt)]
+    vectors = [model.wv[word] for word in tokens if word in model.wv.key_to_index]
+    if len(vectors) > 0:
+        return np.mean(vectors, axis=0)
+    else:
+        return np.zeros(model.vector_size)
+'''
+
+
 def rank_art_stories_python_function(query):
 
     if is_word2vec:
