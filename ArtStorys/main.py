@@ -6,6 +6,8 @@ import warnings
 import nltk
 
 
+is_word2vec = True
+
 # Converts a (document) string to a model for Word2Vec Embedding
 def documentToWord2Vec():
     site_texts = filesToStrings()
@@ -57,31 +59,36 @@ def filesToStrings():
 
 
 def rank_art_stories_python_function(query):
-    documents = documentToWord2Vec()
-    query_tokens = word_tokenize(query.lower())
 
-    rankings = []
-    for document in documents:
+    if is_word2vec:
+        documents = documentToWord2Vec()
+        query_tokens = word_tokenize(query.lower())
 
-        similarities = []
+        rankings = []
+        for document in documents:
 
-        for token in query_tokens:
+            similarities = []
 
-            if token in document["model"].wv:
+            for token in query_tokens:
 
-                similarities.append(document["model"].wv.similarity(token, token))
+                if token in document["model"].wv:
 
-        if similarities:
-            average_similarity = sum(similarities) / len(similarities)
-            print(average_similarity)
-        else:
-            average_similarity = 0
-        rankings.append((document["site"], average_similarity))
+                    similarities.append(document["model"].wv.similarity(token, token))
 
-    rankings.sort(key=lambda x: x[1], reverse=True)
+            if similarities:
+                average_similarity = sum(similarities) / len(similarities)
+                print(average_similarity)
+            else:
+                average_similarity = 0
+            rankings.append((document["site"], average_similarity))
 
-    for rank in rankings:
-        print(f"Document: {rank[0]}, Similarity: {rank[1]}")
+        rankings.sort(key=lambda x: x[1], reverse=True)
+
+        for rank in rankings:
+            print(f"Document: {rank[0]}, Similarity: {rank[1]}")
+
+    else:
+        pass
 
 
 if __name__ == "__main__":
