@@ -32,6 +32,14 @@ def documentToWord2Vec():
 
     return document_models
 
+
+def documentToDoc2Vec():
+    docs = filesToStrings()
+    print(docs)
+    # WIP
+
+
+
 def tokenizeText(text):
     data = []
     for i in sent_tokenize(text):
@@ -111,5 +119,6 @@ def rank_art_stories_python_function(query):
 
 
 if __name__ == "__main__":
-    query = "architecture notre-dame"
-    rank_art_stories_python_function(query)
+    documentToDoc2Vec()
+    #query = "architecture notre-dame"
+    #rank_art_stories_python_function(query)

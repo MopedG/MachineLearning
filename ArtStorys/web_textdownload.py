@@ -1,3 +1,5 @@
+from sqlite3.dbapi2 import paramstyle
+
 from firecrawl import FirecrawlApp
 from bs4 import BeautifulSoup
 
@@ -12,7 +14,7 @@ urls = [
 ]
 
 def debug_site(url):
-    scrape_result = app.scrape_url(url)
+    scrape_result = app.scrape_url(url, { 'formats': ['html'] })
 
     # Debugging: gesamten FireCrawl-Output ausgeben
     print(f"FireCrawl Output für {url}: {scrape_result}")
@@ -26,8 +28,9 @@ def debug_site(url):
 def extract_details(url):
     try:
         # Webseite mit FireCrawl scrapen
-        scrape_result = app.scrape_url(url)
+        scrape_result = app.scrape_url(url, { 'formats': ['html'] })
         html_content = scrape_result.get("html", "")
+
         if not html_content:
             print(f"Kein Inhalt für {url} gefunden.")
             return None
@@ -49,6 +52,9 @@ def extract_details(url):
     except Exception as e:
         print(f"Fehler beim Verarbeiten von {url}: {e}")
         return None
+
+
+
 
 # Inhalte speichern
 for url in urls:
