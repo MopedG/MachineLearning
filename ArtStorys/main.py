@@ -38,12 +38,14 @@ def documentToWord2Vec():
 
 
 def filesToStrings():
-    textfiles_folder = "./Textfiles"
+    textfiles_folder = "C:\\Entw\\MachineLearning\\ArtStorys\\Textfiles"
     site_texts = []
     # Überprüfen, ob der Ordner existiert
     if os.path.exists(textfiles_folder):
         # Alle Dateien im Ordner durchlaufen
+        print(f"Der Ordner {textfiles_folder} existiert")
         for filename in os.listdir(textfiles_folder):
+            print(f"Lese Datei: {filename}")
             file_path = os.path.join(textfiles_folder, filename)
             # Überprüfen, ob es sich um eine Datei handelt
             if os.path.isfile(file_path):
@@ -72,11 +74,10 @@ def get_vec_from_word_2_vec(input_txt, model):
 
 
 def rank_art_stories_python_function(query):
-
     if is_word2vec:
-        # similarity_score_each_token(query)
-        # similarity_score_single_token(query)
-        similarity_score_query_to_article(query)
+        # Rufe die Methode auf und speichere die Rankings in einer Variable
+        rankings = similarity_score_query_to_article(query)
+        return rankings
     else:
         pass
 
@@ -178,8 +179,8 @@ def similarity_score_query_to_article(query):
     # Rank the articles based on similarity scores
     rankings.sort(key=lambda x: x[1], reverse=True)
 
-    for rank in rankings:
-        print(f"Document: {rank[0]}, Similarity: {rank[1]}")
+    # Gib die Rankings als Liste zurück
+    return rankings
 
 if __name__ == "__main__":
     query = "traces polychrome"
