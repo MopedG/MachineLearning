@@ -73,4 +73,4 @@ for url in urls:
         print(f"Keine Inhalte auf {url} gefunden oder Fehler aufgetreten.")
         print()
 
-debug_site("https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets")
+# debug_site("https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets")

@@ -1,9 +1,46 @@
 import os
 from gensim.models import Word2Vec
 import gensim
+from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 from nltk.tokenize import sent_tokenize, word_tokenize
-import warnings
 import nltk
+
+def doc_2_vec(site_texts, user_input: str):
+    nltk.download('punkt_tab')
+    tagged_data = [
+        TaggedDocument(
+            words=word_tokenize(doc['content'].lower().replace('-', ' ')), # case for covering dashes inbetween words (e.g. notre-dame)
+            tags=[str(i)]
+        )
+            for i, doc in enumerate(site_texts)
+    ]
+
+    model = Doc2Vec(tagged_data, min_count=2, vector_size=100, epochs=50)
+    model.build_vocab(tagged_data)
+    model.train(tagged_data, total_examples=model.corpus_count, epochs=model.epochs)
+
+    user_input_vector = model.infer_vector(word_tokenize(user_input.lower()))
+
+    document_vectors = [
+        model.infer_vector(
+            word_tokenize(doc['content'].lower())
+        )
+            for doc in site_texts
+    ]
+
+    similarities = model.wv.cosine_similarities(user_input_vector, document_vectors)
+
+    ranking = []
+    for i in range(len(site_texts)):
+        ranking.append(
+            {
+                'document': site_texts[i],
+                'similarity': similarities[i]
+            }
+        )
+
+    ranking.sort(key=lambda x: x['similarity'], reverse=True)
+    return ranking
 
 
 # Converts a (document) string to a model for Word2Vec Embedding
@@ -29,6 +66,9 @@ def documentToWord2Vec():
                 "model": model
             }
         )
+
+
+
 
     return document_models
 
@@ -85,5 +125,13 @@ def rank_art_stories_python_function(query):
 
 
 if __name__ == "__main__":
-    query = "hong kong architecture"
-    rank_art_stories_python_function(query)
+    query = ("notre dame")
+    site_texts = filesToStrings()
+    ranking = doc_2_vec(site_texts, query)
+
+    print(f"Query: {query}")
+    for r in ranking:
+        print(f'file {r["document"]["filename"]}, similarity {r["similarity"]} ')
+
+
+    #rank_art_stories_python_function(query)

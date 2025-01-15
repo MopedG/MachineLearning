@@ -2,9 +2,6 @@ import os
 from gensim.models import Word2Vec
 import gensim
 from nltk.tokenize import sent_tokenize, word_tokenize
-import warnings
-import nltk
-
 
 # Converts a (document) string to a model for Word2Vec Embedding
 def documentToWord2Vec():
@@ -31,12 +28,6 @@ def documentToWord2Vec():
         )
 
     return document_models
-
-
-def documentToDoc2Vec():
-    docs = filesToStrings()
-    print(docs)
-    # WIP
 
 
 
@@ -119,6 +110,5 @@ def rank_art_stories_python_function(query):
 
 
 if __name__ == "__main__":
-    documentToDoc2Vec()
-    #query = "architecture notre-dame"
-    #rank_art_stories_python_function(query)
+    query = "architecture notre-dame"
+    rank_art_stories_python_function(query)
