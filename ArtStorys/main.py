@@ -6,6 +6,8 @@ import warnings
 import nltk
 
 
+is_word2vec = True
+
 # Converts a (document) string to a model for Word2Vec Embedding
 def documentToWord2Vec():
     site_texts = filesToStrings()
@@ -57,31 +59,41 @@ def filesToStrings():
 
 
 def rank_art_stories_python_function(query):
-    documents = documentToWord2Vec()
-    query_tokens = word_tokenize(query.lower())
 
-    rankings = []
-    for document in documents:
+    # Dieser Ansatz vergleicht die Cosine Similarity jedes Tokens der Query, innerhalb der word2vec Models der einzelnen Artikel.
+    # Daraufhin wird die durchschnittliche Similarity der Tokens innerhalb jedes Artikels berechnet.
+    # Die Artikel werden dann nach der durchschnittlichen Similarity absteigend sortiert bzw. gerankt.
+    if is_word2vec:
+        documents = documentToWord2Vec()
+        query_tokens = word_tokenize(query.lower())
 
-        similarities = []
+        rankings = []
+        for document in documents:
+            similarities = []
+            for i in range(len(query_tokens)):
+                for j in range(i + 1, len(query_tokens)):
+                    token1 = query_tokens[i]
+                    token2 = query_tokens[j]
+                    if token1 in document["model"].wv and token2 in document["model"].wv:
+                        similarity = document["model"].wv.similarity(token1, token2)
+                        similarities.append(similarity)
+                    else:
+                        similarities.append(0)
 
-        for token in query_tokens:
+            if similarities:
+                average_similarity = sum(similarities) / len(similarities)
+            else:
+                average_similarity = 0
+            rankings.append((document["site"], average_similarity))
 
-            if token in document["model"].wv:
+        rankings.sort(key=lambda x: x[1], reverse=True)
 
-                similarities.append(document["model"].wv.similarity(token, token))
+        #TODO: Return the rankings to the frontend !!! Only for Word2Vec
+        for rank in rankings:
+            print(f"Document: {rank[0]}, Similarity: {rank[1]}")
 
-        if similarities:
-            average_similarity = sum(similarities) / len(similarities)
-            print(average_similarity)
-        else:
-            average_similarity = 0
-        rankings.append((document["site"], average_similarity))
-
-    rankings.sort(key=lambda x: x[1], reverse=True)
-
-    for rank in rankings:
-        print(f"Document: {rank[0]}, Similarity: {rank[1]}")
+    else:
+        pass
 
 
 if __name__ == "__main__":
