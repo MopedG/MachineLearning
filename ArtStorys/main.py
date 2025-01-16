@@ -6,30 +6,36 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 import nltk
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import pandas as pd
 
 is_word2vec = True
 
-def doc_2_vec(site_texts, user_input: str):
+def doc_2_vec(query: str):
     nltk.download('punkt_tab')
+
+    site_texts = filesToStrings()
+
+    formatted_query = query.replace('-', ' ')
+    formatted_documents = list(map(lambda site_text: site_text['content'].lower().replace('-', ' '), site_texts))
+
     tagged_data = [
         TaggedDocument(
-            words=word_tokenize(doc['content'].lower().replace('-', ' ')), # case for covering dashes inbetween words (e.g. notre-dame)
+            words=word_tokenize(document), # case for covering dashes inbetween words (e.g. notre-dame)
             tags=[str(i)]
         )
-            for i, doc in enumerate(site_texts)
+            for i, document in enumerate(formatted_documents)
     ]
 
     model = Doc2Vec(tagged_data, min_count=2, vector_size=100, epochs=50)
     model.build_vocab(tagged_data)
     model.train(tagged_data, total_examples=model.corpus_count, epochs=model.epochs)
 
-    user_input_vector = model.infer_vector(word_tokenize(user_input.lower()))
-
+    user_input_vector = model.infer_vector(word_tokenize(formatted_query))
     document_vectors = [
         model.infer_vector(
-            word_tokenize(doc['content'].lower())
+            word_tokenize(document)
         )
-            for doc in site_texts
+            for document in formatted_documents
     ]
 
     similarities = model.wv.cosine_similarities(user_input_vector, document_vectors)
@@ -42,11 +48,12 @@ def doc_2_vec(site_texts, user_input: str):
                 'similarity': similarities[i]
             }
         )
-
     ranking.sort(key=lambda x: x['similarity'], reverse=True)
-    return ranking
 
-
+    return pd.DataFrame({
+        'artstory': (rank['document'] for rank in ranking),
+        'similarity': (rank['similarity'] for rank in ranking)
+    })
 
 
 # Converts a (document) string to a model for Word2Vec Embedding
@@ -77,7 +84,7 @@ def documentToWord2Vec():
 
 
 def filesToStrings():
-    textfiles_folder = "C:\\Entw\\MachineLearning\\ArtStorys\\Textfiles"
+    textfiles_folder = "./Textfiles"
     site_texts = []
     # Überprüfen, ob der Ordner existiert
     if os.path.exists(textfiles_folder):
@@ -113,12 +120,7 @@ def get_vec_from_word_2_vec(input_txt, model):
 
 
 def rank_art_stories_python_function(query):
-    if is_word2vec:
-        # Rufe die Methode auf und speichere die Rankings in einer Variable
-        rankings = similarity_score_query_to_article(query)
-        return rankings
-    else:
-        pass
+    return similarity_score_query_to_article(query) if is_word2vec else doc_2_vec(query)
 
 # Dieser Ansatz vergleicht die Cosine Similarity jedes Tokens der Query, innerhalb der word2vec Models der einzelnen Artikel.
 # Daraufhin wird die durchschnittliche Similarity der Tokens innerhalb jedes Artikels berechnet.
