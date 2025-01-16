@@ -84,7 +84,7 @@ def documentToWord2Vec():
 
 
 def filesToStrings():
-    textfiles_folder = "./Textfiles"
+    textfiles_folder = "C:\\Entw\\MachineLearning\\ArtStorys\\Textfiles"
     site_texts = []
     # Überprüfen, ob der Ordner existiert
     if os.path.exists(textfiles_folder):
