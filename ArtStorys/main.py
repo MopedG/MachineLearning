@@ -183,7 +183,7 @@ def similarity_score_single_token(query):
 # Dieser Ansatz trainiert ein Word2Vec Model auf dem gesamten Korpus und repräsentiert jeden Artikel als Vektor (Durchschnitt der Wortvektoren).
 # Daraufhin wird die query als Vektor eingebettet und mit den Artikel-Vektoren verglichen.
 def similarity_score_query_to_article(query):
-    documents = documentToWord2Vec()
+    documents = filesToStrings()
     query_tokens = word_tokenize(query.lower())
 
     # Train a Word2Vec model on the entire corpus
