@@ -4,11 +4,12 @@ import gensim
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 from nltk.tokenize import sent_tokenize, word_tokenize
 import nltk
-from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-is_word2vec = True
+is_word2vec = False
 
 def doc_2_vec(query: str):
     nltk.download('punkt_tab')
@@ -55,36 +56,8 @@ def doc_2_vec(query: str):
         'similarity': (rank['similarity'] for rank in ranking)
     })
 
-
-# Converts a (document) string to a model for Word2Vec Embedding
-def documentToWord2Vec():
-    site_texts = filesToStrings()
-    document_models = []
-    for site_text in site_texts:
-        data = []
-        for i in sent_tokenize(site_text["content"]):
-            temp = []
-
-            for j in word_tokenize(i):
-                temp.append(j.lower())
-
-            data.append(temp)
-
-        model = gensim.models.Word2Vec(data, min_count=1, vector_size=100, window=5)
-
-        document_models.append(
-            {
-                "site": site_text["filename"],
-                "content": site_text["content"],
-                "model": model
-            }
-        )
-
-    return document_models
-
-
 def filesToStrings():
-    textfiles_folder = "C:\\Entw\\MachineLearning\\ArtStorys\\Textfiles"
+    textfiles_folder = ".\\Textfiles"
     site_texts = []
     # Überprüfen, ob der Ordner existiert
     if os.path.exists(textfiles_folder):
@@ -107,83 +80,17 @@ def filesToStrings():
 
     return site_texts
 
-
-'''
-def get_vec_from_word_2_vec(input_txt, model):
-    tokens = [word.lower() for word in word_tokenize(input_txt)]
-    vectors = [model.wv[word] for word in tokens if word in model.wv.key_to_index]
-    if len(vectors) > 0:
-        return np.mean(vectors, axis=0)
-    else:
-        return np.zeros(model.vector_size)
-'''
-
-
 def rank_art_stories_python_function(query):
-    return similarity_score_query_to_article(query) if is_word2vec else doc_2_vec(query)
 
-# Dieser Ansatz vergleicht die Cosine Similarity jedes Tokens der Query, innerhalb der word2vec Models der einzelnen Artikel.
-# Daraufhin wird die durchschnittliche Similarity der Tokens innerhalb jedes Artikels berechnet.
-# Die Artikel werden dann nach der durchschnittlichen Similarity absteigend sortiert bzw. gerankt.
-def similarity_score_each_token(query):
-    documents = documentToWord2Vec()
-    query_tokens = word_tokenize(query.lower())
+    return similarity_score_query_to_article_with_idf(query) if is_word2vec else doc_2_vec(query)
 
-    rankings = []
-    for document in documents:
-        similarities = []
-        for i in range(len(query_tokens)):
-            for j in range(i + 1, len(query_tokens)):
-                token1 = query_tokens[i]
-                token2 = query_tokens[j]
-                if token1 in document["model"].wv and token2 in document["model"].wv:
-                    similarity = document["model"].wv.similarity(token1, token2)
-                    similarities.append(similarity)
-                else:
-                    similarities.append(0)
 
-        if similarities:
-            average_similarity = sum(similarities) / len(similarities)
-        else:
-            average_similarity = 0
-        rankings.append((document["site"], average_similarity))
-
-    rankings.sort(key=lambda x: x[1], reverse=True)
-
-    # TODO: Return the rankings to the frontend !!! Only for Word2Vec
-    for rank in rankings:
-        print(f"Document: {rank[0]}, Similarity: {rank[1]}")
-
-def similarity_score_single_token(query):
-    documents = documentToWord2Vec()
-    query_tokens = word_tokenize(query.lower())
-
-    rankings = []
-    for document in documents:
-
-        similarities = []
-
-        for token in query_tokens:
-
-            if token in document["model"].wv:
-                similarities.append(document["model"].wv.similarity(token, token))
-
-        if similarities:
-            average_similarity = sum(similarities) / len(similarities)
-            print(average_similarity)
-        else:
-            average_similarity = 0
-        rankings.append((document["site"], average_similarity))
-
-    rankings.sort(key=lambda x: x[1], reverse=True)
-
-    for rank in rankings:
-        print(f"Document: {rank[0]}, Similarity: {rank[1]}")
 
 # Dieser Ansatz trainiert ein Word2Vec Model auf dem gesamten Korpus und repräsentiert jeden Artikel als Vektor (Durchschnitt der Wortvektoren).
 # Daraufhin wird die query als Vektor eingebettet und mit den Artikel-Vektoren verglichen.
 def similarity_score_query_to_article(query):
-    documents = documentToWord2Vec()
+    print("Hallo?")
+    documents = filesToStrings()
     query_tokens = word_tokenize(query.lower())
 
     # Train a Word2Vec model on the entire corpus
@@ -202,7 +109,7 @@ def similarity_score_query_to_article(query):
             document_vector = np.mean(vectors, axis=0)
         else:
             document_vector = np.zeros(model.vector_size)
-        document_vectors.append((document["site"], document_vector))
+        document_vectors.append((document["filename"], document_vector))
 
     # Embed the query using the same Word2Vec model
     query_vectors = [model.wv[token] for token in query_tokens if token in model.wv]
@@ -219,10 +126,41 @@ def similarity_score_query_to_article(query):
 
     # Rank the articles based on similarity scores
     rankings.sort(key=lambda x: x[1], reverse=True)
+    # TODO: Pandas Dataframe oder sowas, ka!
+    for rank in rankings:
+        print(f"Document: {rank[0]}, Similarity: {rank[1]}")
 
     # Gib die Rankings als Liste zurück
+
+    return rankings
+
+
+
+def similarity_score_query_to_article_with_idf(query):
+    documents = filesToStrings()
+    corpus = [doc["content"] for doc in documents]
+
+    # Initialize the TF-IDF Vectorizer
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(corpus)
+
+    # Transform the query into the same TF-IDF space
+    query_vector = vectorizer.transform([query])
+
+    # Calculate cosine similarity between the query and each document
+    similarity_scores = cosine_similarity(query_vector, tfidf_matrix).flatten()
+
+    # Rank the documents based on similarity scores
+    rankings = [(documents[i]["filename"], score) for i, score in enumerate(similarity_scores)]
+    rankings.sort(key=lambda x: x[1], reverse=True)
+
+    for rank in rankings:
+        print(f"Document: {rank[0]}, Similarity: {rank[1]}")
+
     return rankings
 
 if __name__ == "__main__":
-    query = "traces polychrome"
+
+    query = "cathedral fire france excavation notre-dame reconstruction"
+    print("query: ", query)
     rank_art_stories_python_function(query)
