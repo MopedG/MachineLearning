@@ -1,70 +1,93 @@
-from firecrawl import FirecrawlApp
+import time
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
-# FireCrawl-App initialisieren
-app = FirecrawlApp(api_key="fc-f8ec1aa3e2e54d64acfefd7411b6b3aa")  # Ersetze YOUR_API_KEY durch deinen Schlüssel
-
-# Liste der URLs
+# List of URLs to scrape
 urls = [
     "https://www.artbasel.com/stories/suzanne-valadon-centre-pompidou-19th-century-women-artist",
     "https://www.artbasel.com/stories/seven-trailblazing-galleries-debuting-at-art-basel-hong-kong-in-2025",
     "https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets"
 ]
 
-def debug_site(url):
-    scrape_result = app.scrape_url(url)
+# Initialize Selenium WebDriver
+def init_driver():
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service)
+    driver.maximize_window()
+    return driver
 
-    # Debugging: gesamten FireCrawl-Output ausgeben
-    print(f"FireCrawl Output für {url}: {scrape_result}")
-
-    html_content = scrape_result.get("html", "")
-    if not html_content:
-        print(f"Kein HTML-Inhalt für {url} gefunden.")
-        return None
-
-# Funktion zur Extraktion von Header, Subheader und Paragraphen
-def extract_details(url):
+# Function to extract details from a webpage
+def extract_details_with_selenium(driver, url):
     try:
-        # Webseite mit FireCrawl scrapen
-        scrape_result = app.scrape_url(url)
-        html_content = scrape_result.get("html", "")
-        if not html_content:
-            print(f"Kein Inhalt für {url} gefunden.")
+        # Load the webpage
+        driver.get(url)
+        time.sleep(5)  # Wait for the page to load fully
+
+        # Parse the page source with BeautifulSoup
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+
+        # Locate the content div
+        content_div = soup.find('div', class_='content')
+        if not content_div:
+            print(f"Keine classe 'content' im div gefunden für {url}")
             return None
 
-        # HTML-Inhalt analysieren
-        soup = BeautifulSoup(html_content, "html.parser")
+        # Extract main heading (h1)
+        header = content_div.find("h1").get_text(strip=True) if content_div.find("h1") else "Keine Überschrift für den Artikel gefunden!"
 
-        # Header extrahieren
-        header = soup.find("h1").get_text(strip=True) if soup.find("h1") else "Keine Überschrift gefunden"
+        # Extract subheader (p with class 'subheading')
+        subheader = content_div.find("p", class_="subheading").get_text(strip=True) if content_div.find("p", class_="subheading") else "Keine Unterüberschrift für den Artikel gefunden!"
 
-        # Subheader extrahieren
-        subheader = soup.find("p", class_="subheading").get_text(strip=True) if soup.find("p", class_="subheading") else "Keine Unterüberschrift gefunden"
+        # Extract other paragraphs excluding subheader
+        subheader_paragraphs = [
+            p.get_text(strip=True) for p in content_div.find_all("p")
+        ]
 
-        # Paragraphen extrahieren
-        paragraphs = [p.get_text(strip=True) for p in soup.find_all("p") if "subheading" not in p.get("class", [])]
+        paragraphs = [
+            p.get_text(strip=True) for p in soup.find_all("p") if p not in subheader_paragraphs or p != subheader
+        ]
 
-        return header, subheader, paragraphs
+        return header, subheader, subheader_paragraphs, paragraphs
 
     except Exception as e:
-        print(f"Fehler beim Verarbeiten von {url}: {e}")
+        print(f"Error while processing {url}: {e}")
         return None
 
-# Inhalte speichern
-for url in urls:
-    print(f"Verarbeite: {url}")
-    result = extract_details(url)
+# Save extracted content to a text file
+def save_to_file(url, header, subheader, subheader_paragraphs, paragraphs):
+    try:
+        # Generate a safe filename from the URL
+        filename = url.replace("https://", "").replace("http://", "").replace("/", "_") + ".txt"
 
-    if result:
-        header, subheader, paragraphs = result
-        filename = f"{url.replace('https://', '').replace('http://', '').replace('/', '_')}.txt"
+        # Write content to the file
         with open(filename, "w", encoding="utf-8") as file:
-            file.write(f"Header:\n{header}\n\n")
-            file.write(f"Subheader:\n{subheader}\n\n")
-            file.write("Content:\n" + "\n\n".join(paragraphs))
-        print(f"Inhalte in '{filename}' gespeichert.")
-    else:
-        print(f"Keine Inhalte auf {url} gefunden oder Fehler aufgetreten.")
-        print()
+            file.write(f"Überschrift:\n{header}\n\n")
+            file.write(f"Unterüberschrift:\n{subheader}\n\n")
+            file.write("Artikelinformation\n" +"\n\n".join(subheader_paragraphs))
+            file.write("Inhalt:\n" + "\n\n".join(paragraphs))
 
-debug_site("https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets")
+        print(f"Inhalte in '{filename}' gespeichert.")
+
+    except Exception as e:
+        print(f"Kein HTML-Inhalt gefunden für {url} gefunden: Fehler {e}")
+
+# Main script
+def main():
+    driver = init_driver()
+
+    for url in urls:
+        print(f"Verarbeite: {url}")
+        result = extract_details_with_selenium(driver, url)
+
+        if result:
+            header, subheader, subheader_paragraphs, paragraphs = result
+            save_to_file(url, header, subheader, subheader_paragraphs, paragraphs)
+        else:
+            print(f"Kein Inhalt für {url} gefunden")
+
+    driver.quit()
+
+if __name__ == "__main__":
+    main()
