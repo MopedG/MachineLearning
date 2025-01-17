@@ -4,11 +4,36 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-# List of URLs to scrape
+# Liste der URLs
 urls = [
     "https://www.artbasel.com/stories/suzanne-valadon-centre-pompidou-19th-century-women-artist",
     "https://www.artbasel.com/stories/seven-trailblazing-galleries-debuting-at-art-basel-hong-kong-in-2025",
-    "https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets"
+    "https://www.artbasel.com/stories/paris-recommendations-david-lebovitz-gisela-mcdaniel-peter-freeman-justine-durrett-robbie-fitzpatrick",
+    "https://www.artbasel.com/stories/notre-dame-de-paris-reopening-2025-secrets",
+    "https://www.artbasel.com/stories/art-brut-outsider-art-art-basel-paris?lang=en",
+    "https://www.artbasel.com/stories/christian-berst-art-brut-is-a-synthesis-between-the-personal-and-the-universal?lang=en",
+    "https://www.artbasel.com/stories/art-basel-vip-collector-buy-art-in-person",
+    "https://www.artbasel.com/stories/guide-art-basel-ubs-survey-of-global-collecting-2024",
+    "https://www.artbasel.com/stories/art-collector-legacy-survey-legal-art-bequests",
+    "https://www.artbasel.com/stories/american-collectors-art-market-2024",
+    "https://www.artbasel.com/stories/great-wealth-transfer-survey-global-collecting-art-market-2024",
+    "https://www.artbasel.com/stories/ieoh-ming-pei-life-in-architecture-retrospective-m-hong-kong",
+    "https://www.artbasel.com/stories/architects-johnston-marklee-redefining-art-spaces-conversation-about-innovative-designs-collaborations",
+    "https://www.artbasel.com/stories/simona-malvezzi-architecture-berlin",
+    "https://www.artbasel.com/stories/havens-prisons-women-only-exhibitions",
+    "https://www.artbasel.com/stories/women-collectors-patronage-lisa-perry-komal-shah-survey-global-collecting-ubs",
+    "https://www.artbasel.com/stories/nova-sector-miami-beach-picks",
+    "https://www.artbasel.com/stories/nft-crypto-art-market-transformation",
+    "https://www.artbasel.com/stories/art-market-report-nfts-simon-denny",
+    "https://www.artbasel.com/stories/digital-forum-nft-crypto-art",
+    "https://www.artbasel.com/stories/art-basel-2022-exhibiting-metaverse",
+    "https://www.artbasel.com/stories/kandis-williams-on-plants-and-the-black-body-night-gallery",
+    "https://www.artbasel.com/stories/immersive-installations-digital-experiences-in-the-exhibition",
+    "https://www.artbasel.com/stories/natasha-tontey-museum-macan-jakarta-audemars-piguet",
+    "https://www.artbasel.com/stories/how-parley-for-the-oceans-is-fighting-to-save-our-seas",
+    "https://www.artbasel.com/stories/artist-nolan-oswald-dennis-world-weather-network-lichen",
+    "https://www.artbasel.com/stories/one-work-error-fabrice-hyber",
+    "https://www.artbasel.com/stories/world-weather-network"
 ]
 
 # Initialize Selenium WebDriver
