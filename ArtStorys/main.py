@@ -12,7 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 is_word2vec = True
 
 def doc_2_vec(query: str):
-    #nltk.download('punkt_tab')
+    nltk.download('punkt_tab')
     documents = filesToStrings()
     formatted_query = query.replace('-', ' ')
     formatted_documents = list(map(lambda site_text: site_text['content'].lower().replace('-', ' '), documents))
@@ -53,7 +53,8 @@ def doc_2_vec(query: str):
     })
 
 def filesToStrings():
-    textfiles_folder = "C:\\Entw\\MachineLearning\\ArtStorys\\Textfiles"
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    textfiles_folder = os.path.join(current_directory, 'Textfiles')
     site_texts = []
     if os.path.exists(textfiles_folder):
         for filename in os.listdir(textfiles_folder):
@@ -137,7 +138,18 @@ def similarity_score_query_to_article_with_idf(query):
 
     return df_rankings
 
+
+"""
+user_ranking: e.g. [1, 0, None, 3, 2]
+"""
+def map_at_k(k, user_ranking):
+    map_at_k_sum = 0
+    for i in range(k):
+        map_at_k_sum += sum(1 for x in user_ranking[:(i + 1)] if x is not None and x <= i) / (i + 1)
+
+    return map_at_k_sum / k
+
 if __name__ == "__main__":
     query = "cathedral fire france excavation notre-dame reconstruction"
     print("query: ", query)
-    rank_art_stories_python_function(query)
+    rank_art_stories_python_function(query, isWord2Vec=False)
