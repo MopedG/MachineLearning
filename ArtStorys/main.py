@@ -3,11 +3,14 @@ from gensim.models import Word2Vec
 import gensim
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 from nltk.tokenize import sent_tokenize, word_tokenize
+from top2vec import Top2Vec
 import nltk
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 is_word2vec = True
 
@@ -149,7 +152,62 @@ def map_at_k(k, user_ranking):
 
     return map_at_k_sum / k
 
+def recommend_art_stories_python_function(identifier_of_visited_art_stories_list):
+    # Einlesen der Art Stories
+    documents = filesToStrings()
+    corpus = [doc["content"] for doc in documents]
+    filenames = [doc["filename"] for doc in documents]
+
+    # Top2Vec-Modell trainieren
+    # speed="deep-learn" für Doc2Vec, workers=4 für schnelleres Training, min_count=2 für seltenere Wörter
+    model = Top2Vec(documents=corpus, speed="deep-learn", workers=4, min_count=2)
+
+    # Holen der Dokumentenvektoren und -themen
+    doc_vectors = model.document_vectors
+    doc_topics, _ = model.get_documents_topics()
+
+    # Gelesene Dokumente finden und Vektoren extrahieren
+    # URLs für die Dateinamen
+    read_indices = [filenames.index(url) for url in identifier_of_visited_art_stories_list if url in filenames]
+    read_vectors = doc_vectors[read_indices]
+
+    # Ähnlichkeitsberechnung zwischen Dokumenten
+    unread_indices = [i for i in range(len(doc_vectors)) if i not in read_indices]
+    unread_vectors = doc_vectors[unread_indices]
+    similarities = cosine_similarity(read_vectors, unread_vectors)
+
+    # Ähnlichkeit für ungelesene Dokumente berechnen
+    avg_similarities = similarities.mean(axis=0)
+    ranked_indices = np.argsort(avg_similarities)[::-1][:3] # Top-3 Indizes
+
+    # Erstelle DataFrame mit Top-3 Empfehlungen
+    top_indices = [unread_indices[i] for i in ranked_indices]
+    top_stories = [(filenames[idx], avg_similarities[ranked_indices[i]]) for i, idx in enumerate(top_indices)]
+    recommendations_df = pd.DataFrame(top_stories, columns=["Art Story", "Similarity"])
+
+    # T-SNE-Visualisierung der Cluster
+    tsne = TSNE(n_components=2, random_state=10)
+    tsne_results = tsne.fit_transform(doc_vectors)
+
+    # Plot erstellen
+    plt.figure(figsize=(10, 8))
+    plt.scatter(tsne_results[:, 0], tsne_results[:, 1], c=doc_topics, cmap="viridis", alpha=0.7)
+    plt.colorbar(label="Cluster ID")
+    plt.title("t-SNE Visualisierung der Art Stories Cluster")
+    plt.xlabel("Dimension 1")
+    plt.ylabel("Dimension 2")
+    plt.show()
+
+    return recommendations_df
+
 if __name__ == "__main__":
     query = "cathedral fire france excavation notre-dame reconstruction"
     print("query: ", query)
+    visited_stories = [
+        "www.artbasel.com_stories_digital-forum-nft-crypto-art.txt",
+        "www.artforum.com_stories_the-rise-of-digital-art.txt",
+        "www.moma.org_stories_modernism-and-its-legacies.txt"
+    ]
+    recommendations = recommend_art_stories_python_function(visited_stories)
     rank_art_stories_python_function(query, isWord2Vec=False)
+    print(recommendations)
