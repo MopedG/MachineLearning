@@ -15,6 +15,7 @@ df['Event_Year'] = df['Event Name'].apply(lambda x: int(x.split()[-1]))
 df = df.sort_values(by=['Event_Year', 'Relative show day'])
 
 # Funktion zur Prüfung der Stationarität und Anwendung von Differenzierung
+# TODO: ACF und PACF requires stationary Series, Machen wir mit dieser Funktion, Trotzdem zeigt der Plot fehler auf!
 def make_stationary(series):
     adf_result = adfuller(series.dropna())
     if adf_result[1] < 0.05:
