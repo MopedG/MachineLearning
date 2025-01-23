@@ -29,7 +29,7 @@ def map_at_k_input_validation(k, user_ranking):
     return None
 
 
-
+# Streamlit Layout
 st.title("Ranking von Art Stories")
 st.subheader("Finden Sie die ähnlichsten Geschichten zu Ihrer Anfrage")
 
@@ -92,27 +92,57 @@ except:
     pass
 
 
-if ranking is not None:
-    if not ranking.empty:
-        st.write("Ranking der Ähnlichkeiten pro Token:")
-        st.table(st.session_state['ranking'])
+if ranking is not None and not ranking.empty:
+    st.write("Ranking der Ähnlichkeiten pro Token:")
+    st.table(ranking)
 
-        st.markdown("#### Berechne MAP@K")
-        user_ranking = {}
-        col1, col2 = st.columns([1, 10])
-        for i in range(len(ranking)):
-            col1.text_input(label=str(i), label_visibility="hidden", key=str(i) + "indicator", disabled=True, value=str(i))
-            user_ranking[i] = col2.text_input(label=str(i), label_visibility="hidden", key=i)
+    # Auswahl besuchter Geschichten
+    st.markdown("#### Wählen Sie Geschichten aus, die Sie besucht haben:")
+    visited_stories = []
+    for idx, row in ranking.iterrows():
+        if st.checkbox(f"Besucht: {row['Document']}", key=row['Document']):
+            visited_stories.append(idx)
 
-        k = st.text_input(label="K", placeholder="K", value=str(len(ranking)))
+    st.session_state['visited_stories'] = visited_stories
 
-        if st.button('Berechne MAP@K'):
-            err_msg = map_at_k_input_validation(k, user_ranking.values())
+    # Empfehlungen anzeigen
+    if visited_stories:
+        st.subheader("Empfohlene Geschichten basierend auf Ihren Besuchen:")
+        recommendations = main.recommend_art_stories_python_function(visited_stories)
+        print(f"Besuchte Dokumente: {visited_stories}")
+        print(f"Empfehlungen: {recommendations}")
 
-            if err_msg:
-                st.error(err_msg)
-            else:
-                map_at_k = main.map_at_k(int(k), list(map(lambda x: None if x.strip() == "" else int(x), user_ranking.values())))
-                st.markdown(f"MAP@K (K={k}): `{map_at_k}`")
+        if not recommendations.empty:
+            st.write(recommendations)
+        else:
+            st.warning("Keine Empfehlungen verfügbar.")
     else:
-        st.warning("Keine Ähnlichkeiten gefunden.")
+        st.warning("Keine ähnlichen Geschichten gefunden.")
+
+if ranking is not None:
+    st.markdown("#### Berechne MAP@K")
+    user_ranking = {}
+    col1, col2 = st.columns([1, 10])
+    for i in range(len(ranking)):
+        col1.text_input(label=str(i), label_visibility="hidden", key=str(i) + "indicator", disabled=True, value=str(i))
+        user_ranking[i] = col2.text_input(label=str(i), label_visibility="hidden", key=i)
+
+    k = st.text_input(label="K", placeholder="K", value=str(len(ranking)))
+
+    if st.button('Berechne MAP@K'):
+        err_msg = map_at_k_input_validation(k, user_ranking.values())
+
+        if err_msg:
+            st.error(err_msg)
+        else:
+            map_at_k = main.map_at_k(int(k), list(map(lambda x: None if x.strip() == "" else int(x), user_ranking.values())))
+            st.markdown(f"MAP@K (K={k}): `{map_at_k}`")
+else:
+    st.warning("Keine Ähnlichkeiten gefunden.")
+
+### TODO: implement logic for fetching indices of visited art stories and plot results for recommendations via tSNE
+
+def update_visited_stories(story_index):
+    if 'visited_stories' not in st.session_state:
+        st.session_state['visited_stories'] = []
+    st.session_state['visited_stories'].append(story_index)

@@ -1,16 +1,18 @@
 import os
+from itertools import count
+
 from gensim.models import Word2Vec
 import gensim
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 from nltk.tokenize import sent_tokenize, word_tokenize
-from top2vec import Top2Vec
+from bertopic import BERTopic
 import nltk
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE ## NEW
+import matplotlib.pyplot as plt ## NEW
 
 is_word2vec = True
 
@@ -62,7 +64,7 @@ def filesToStrings():
     if os.path.exists(textfiles_folder):
         for filename in os.listdir(textfiles_folder):
             file_path = os.path.join(textfiles_folder, filename)
-            if os.path.isfile(file_path):
+            if os.path.isfile(file_path) and file_path.endswith(".txt"):
                 with open(file_path, "r", encoding="utf-8") as file:
                     content = file.read()
                     site_texts.append(
@@ -72,6 +74,9 @@ def filesToStrings():
                         }
                     )
     return site_texts
+
+def fetch_index_for_stories():
+    return None
 
 def rank_art_stories_python_function(query, isWord2Vec):
     return similarity_score_query_to_article_with_idf(query) if isWord2Vec else doc_2_vec(query)
@@ -152,62 +157,58 @@ def map_at_k(k, user_ranking):
 
     return map_at_k_sum / k
 
-def recommend_art_stories_python_function(identifier_of_visited_art_stories_list):
-    # Einlesen der Art Stories
+
+"""
+visited_stories: indices for visited stories, e.g. [1, 2, 5]
+"""
+def recommend_art_stories_python_function(visited_stories):
+    ## Recommends the top-3 art stories based on the visited
+    ## @param visited_stories: List of visited art stories
+    ## @return: DataFrame with top-3 recommendations for next documents
     documents = filesToStrings()
     corpus = [doc["content"] for doc in documents]
-    filenames = [doc["filename"] for doc in documents]
+    ## Train BERT model
+    topic_model = BERTopic()
+    topics, probs = topic_model.fit_transform(corpus)
+    # Maybe fit, then transform first? Are topics relevant, are documents empty??
+    newDocs = topic_model.transform(visited_stories)
+    document_info = topic_model.get_document_info(corpus)
+    help1 = topic_model.get_topics()
+    help2 = topic_model.get_topic_info(13)
+    print(f"NewDocs: {newDocs}")
+    print(f"Topics: {help1}")
+    print(f"Topic Info: {help2}")
+    print(f"Documents: {document_info}")
+    ## frontend: visited_stories = 13, 10
+    # Sammle die Themen der besuchten Stories
+    visited_topics = [
+        document_info.loc[document_info["Document"] == documents[idx]["content"], "Topic"].values[0]
+        for idx in visited_stories
+    ]
 
-    # Top2Vec-Modell trainieren
-    # speed="deep-learn" für Doc2Vec, workers=4 für schnelleres Training, min_count=2 für seltenere Wörter
-    model = Top2Vec(documents=corpus, speed="deep-learn", workers=4, min_count=2)
+    # Generiere Empfehlungen basierend auf den besuchten Themen
+    recommendations = []
+    for topic_id in visited_topics:
+        similar_docs = topic_model.get_representative_docs(topic_id)
+        if not similar_docs:
+            continue
 
-    # Holen der Dokumentenvektoren und -themen
-    doc_vectors = model.document_vectors
-    doc_topics, _ = model.get_documents_topics()
+        # Füge nicht besuchte Dokumente mit Ähnlichkeitswert hinzu
+        # TODO: Refactor to use fields from methods .get_topics or get_representative_docs to access these similarities!
+        for doc in similar_docs:
+            doc_id = next((d["id"] for d in documents if d["content"] == doc), None)
+            if doc_id is not None and doc_id not in visited_stories:
+                recommendations.append({"Art Story": doc_id, "Similarity": probs[doc_id]})
 
-    # Gelesene Dokumente finden und Vektoren extrahieren
-    # URLs für die Dateinamen
-    read_indices = [filenames.index(url) for url in identifier_of_visited_art_stories_list if url in filenames]
-    read_vectors = doc_vectors[read_indices]
-
-    # Ähnlichkeitsberechnung zwischen Dokumenten
-    unread_indices = [i for i in range(len(doc_vectors)) if i not in read_indices]
-    unread_vectors = doc_vectors[unread_indices]
-    similarities = cosine_similarity(read_vectors, unread_vectors)
-
-    # Ähnlichkeit für ungelesene Dokumente berechnen
-    avg_similarities = similarities.mean(axis=0)
-    ranked_indices = np.argsort(avg_similarities)[::-1][:3] # Top-3 Indizes
-
-    # Erstelle DataFrame mit Top-3 Empfehlungen
-    top_indices = [unread_indices[i] for i in ranked_indices]
-    top_stories = [(filenames[idx], avg_similarities[ranked_indices[i]]) for i, idx in enumerate(top_indices)]
-    recommendations_df = pd.DataFrame(top_stories, columns=["Art Story", "Similarity"])
-
-    # T-SNE-Visualisierung der Cluster
-    tsne = TSNE(n_components=2, random_state=10)
-    tsne_results = tsne.fit_transform(doc_vectors)
-
-    # Plot erstellen
-    plt.figure(figsize=(10, 8))
-    plt.scatter(tsne_results[:, 0], tsne_results[:, 1], c=doc_topics, cmap="viridis", alpha=0.7)
-    plt.colorbar(label="Cluster ID")
-    plt.title("t-SNE Visualisierung der Art Stories Cluster")
-    plt.xlabel("Dimension 1")
-    plt.ylabel("Dimension 2")
-    plt.show()
-
-    return recommendations_df
+    # Sortiere nach Ähnlichkeit und gebe die Top-3 Empfehlungen zurück
+    sorted_recommendations = sorted(recommendations, key=lambda x: x["Similarity"], reverse=True)[:3]
+    return pd.DataFrame(sorted_recommendations) if sorted_recommendations else pd.DataFrame(
+        columns=["Art Story", "Similarity"])
 
 if __name__ == "__main__":
+    ## TEST FOR DEBUGGING IN BACKEND
     query = "cathedral fire france excavation notre-dame reconstruction"
     print("query: ", query)
-    visited_stories = [
-        "www.artbasel.com_stories_digital-forum-nft-crypto-art.txt",
-        "www.artforum.com_stories_the-rise-of-digital-art.txt",
-        "www.moma.org_stories_modernism-and-its-legacies.txt"
-    ]
-    recommendations = recommend_art_stories_python_function(visited_stories)
-    rank_art_stories_python_function(query, isWord2Vec=False)
-    print(recommendations)
+    #rank_art_stories_python_function(query, isWord2Vec=False)
+    recommended = recommend_art_stories_python_function(visited_stories=[3, 2, 4])
+    print(recommended)

@@ -1,3 +1,4 @@
+import os
 import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -48,7 +49,7 @@ def extract_details_with_selenium(driver, url):
     try:
         # Load the webpage
         driver.get(url)
-        time.sleep(5)  # Wait for the page to load fully
+        time.sleep(10)  # Wait for the page to load fully
 
         # Parse the page source with BeautifulSoup
         soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -77,7 +78,7 @@ def extract_details_with_selenium(driver, url):
         return header, subheader, subheader_paragraphs, paragraphs
 
     except Exception as e:
-        print(f"Error while processing {url}: {e}")
+        print(f"Fehler bei Verarbeitung von {url}: {e}")
         return None
 
 # Save extracted content to a text file
@@ -86,14 +87,18 @@ def save_to_file(url, header, subheader, subheader_paragraphs, paragraphs):
         # Generate a safe filename from the URL
         filename = url.replace("https://", "").replace("http://", "").replace("/", "_") + ".txt"
 
-        # Write content to the file
-        with open(filename, "w", encoding="utf-8") as file:
+        textfiles_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Textfiles')
+        if not os.path.exists(textfiles_folder):
+            os.makedirs(textfiles_folder, exist_ok=True)
+
+        file_path = os.path.join(textfiles_folder, filename)
+        with open(file_path, "w", encoding="utf-8") as file:
             file.write(f"Überschrift:\n{header}\n\n")
             file.write(f"Unterüberschrift:\n{subheader}\n\n")
-            file.write("Artikelinformation\n" +"\n\n".join(subheader_paragraphs))
-            file.write("Inhalt:\n" + "\n\n".join(paragraphs))
+            file.write("Artikelinformation:\n" + "\n\n".join(subheader_paragraphs) + "\n\n")
+            file.write("Inhalt:\n" + "\n\n".join(paragraphs) + "\n\n")
 
-        print(f"Inhalte in '{filename}' gespeichert.")
+        print(f"Inhalt gespeichert unter '{file_path}'.")
 
     except Exception as e:
         print(f"Kein HTML-Inhalt gefunden für {url} gefunden: Fehler {e}")
@@ -110,7 +115,7 @@ def main():
             header, subheader, subheader_paragraphs, paragraphs = result
             save_to_file(url, header, subheader, subheader_paragraphs, paragraphs)
         else:
-            print(f"Kein Inhalt für {url} gefunden")
+            print(f"Keine Inhalte gefunden für {url}")
 
     driver.quit()
 

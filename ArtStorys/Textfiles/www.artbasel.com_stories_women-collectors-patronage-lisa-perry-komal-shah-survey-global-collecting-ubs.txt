@@ -4,14 +4,16 @@ Women are spending more on art than men – we look at why
 Unterüberschrift:
 ‘A sense of patronage is embedded in their buying power’
 
-Artikelinformation
+Artikelinformation:
 ‘A sense of patronage is embedded in their buying power’
 
 By Sarah P. Hanson
 
 Mar 7, 2024
 
-5 min readInhalt:
+5 min read
+
+Inhalt:
 
 
 Global Lead Partner
@@ -227,4 +229,6 @@ These cookies may be set through our site by our advertising partners. They may 
 These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in or filling in forms. You can set your browser to block or alert you about these cookies, but some parts of the site will not then work. These cookies do not store any personally identifiable information.
 
 These cookies enable the website to provide enhanced functionality and personalisation. They may be set by us or by third party providers whose services we have added to our pages. If you do not allow these cookies then some or all of these services may not function properly.
+
+
 

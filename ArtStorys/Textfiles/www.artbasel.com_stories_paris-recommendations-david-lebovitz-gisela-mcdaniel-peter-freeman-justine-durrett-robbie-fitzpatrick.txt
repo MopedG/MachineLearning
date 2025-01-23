@@ -4,14 +4,16 @@ Our Paris: 5 Americans on what to eat, enjoy, and embrace in the French capital
 Unterüberschrift:
 Buttery baked goods, artist-made fountains, and trendy neighborhoods are among their highlights
 
-Artikelinformation
+Artikelinformation:
 Buttery baked goods, artist-made fountains, and trendy neighborhoods are among their highlights
 
 By Art Basel Editorial
 
 Sep 18, 2024
 
-5 min readInhalt:
+5 min read
+
+Inhalt:
 
 
 Global Lead Partner
@@ -303,4 +305,6 @@ Diese Cookies können über unsere Website von unseren Werbepartnern gesetzt wer
 Diese Cookies sind zur Funktion der Website erforderlich und können in Ihren Systemen nicht deaktiviert werden. In der Regel werden diese Cookies nur als Reaktion auf von Ihnen getätigte Aktionen gesetzt, die einer Dienstanforderung entsprechen, wie etwa dem Festlegen Ihrer Datenschutzeinstellungen, dem Anmelden oder dem Ausfüllen von Formularen. Sie können Ihren Browser so einstellen, dass diese Cookies blockiert oder Sie über diese Cookies benachrichtigt werden. Einige Bereiche der Website funktionieren dann aber nicht. Diese Cookies speichern keine personenbezogenen Daten.
 
 Mit diesen Cookies ist die Website in der Lage, erweiterte Funktionalität und Personalisierung bereitzustellen. Sie können von uns oder von Drittanbietern gesetzt werden, deren Dienste wir auf unseren Seiten verwenden. Wenn Sie diese Cookies nicht zulassen, funktionieren einige oder alle dieser Dienste möglicherweise nicht einwandfrei.
+
+
 

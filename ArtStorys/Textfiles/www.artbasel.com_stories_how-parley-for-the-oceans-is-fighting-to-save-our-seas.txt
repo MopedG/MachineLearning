@@ -4,12 +4,14 @@ How Parley for the Oceans is fighting to save our seas
 Unterüberschrift:
 Collaborating with world-famous artists, the organization spotlights the urgent need to make peace with our planet’s most vital resource
 
-Artikelinformation
+Artikelinformation:
 Collaborating with world-famous artists, the organization spotlights the urgent need to make peace with our planet’s most vital resource
 
 Jun 8, 2024
 
-7 min readInhalt:
+7 min read
+
+Inhalt:
 
 
 Global Lead Partner
@@ -215,4 +217,6 @@ These cookies may be set through our site by our advertising partners. They may 
 These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in or filling in forms. You can set your browser to block or alert you about these cookies, but some parts of the site will not then work. These cookies do not store any personally identifiable information.
 
 These cookies enable the website to provide enhanced functionality and personalisation. They may be set by us or by third party providers whose services we have added to our pages. If you do not allow these cookies then some or all of these services may not function properly.
+
+
 
