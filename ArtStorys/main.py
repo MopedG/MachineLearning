@@ -171,16 +171,18 @@ def recommend_art_stories_python_function(visited_stories):
     topic_model = BERTopic()
     topics, probs = topic_model.fit_transform(corpus)
     # Maybe fit, then transform first? Are topics relevant, are documents empty??
-    newDocs = topic_model.transform(visited_stories)
-    document_info = topic_model.get_document_info(corpus)
+    #newDocs = topic_model.transform(visited_stories)
+    ## TODO: Basierend auf den allgemeinen Dokumenten die Topics vergleichen!
+    document_info = topic_model.get_document_info(corpus) # seems to
     help1 = topic_model.get_topics()
     help2 = topic_model.get_topic_info(13)
-    print(f"NewDocs: {newDocs}")
+    #print(f"NewDocs: {newDocs}")
     print(f"Topics: {help1}")
     print(f"Topic Info: {help2}")
     print(f"Documents: {document_info}")
     ## frontend: visited_stories = 13, 10
     # Sammle die Themen der besuchten Stories
+    # ANDERER ANSATZ HIER!!! Es muss die Topic-ID aus dem Dokument geholt werden, nicht die Topic-ID aus dem Topic-Modell
     visited_topics = [
         document_info.loc[document_info["Document"] == documents[idx]["content"], "Topic"].values[0]
         for idx in visited_stories
