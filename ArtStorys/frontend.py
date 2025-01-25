@@ -1,4 +1,8 @@
+import numpy as np
 import streamlit as st
+from matplotlib import pyplot as plt
+from sklearn.manifold import TSNE
+
 import main
 
 def map_at_k_input_validation(k, user_ranking):
@@ -28,6 +32,51 @@ def map_at_k_input_validation(k, user_ranking):
 
     return None
 
+def plot_tsne(vectors, documents, visited_stories, recommendations):
+    """
+    Plots a t-SNE visualization of the ranking data.
+    :param vectors: List of vectors to visualize.
+    :param labels: List of document labels corresponding to the vectors.
+    """
+    if len(vectors) < 2:
+        st.warning("Nicht genug Datenpunkte für die t-SNE Visualisierung.")
+        return
+    # Extract recommended filenames
+    recommended_filenames = recommendations["artstory"].tolist()
+    vectors = np.array(vectors)
+    tsne = TSNE(n_components=2, random_state=24, perplexity=min(5, len(vectors-1)))
+    vectors_2d = tsne.fit_transform(vectors)
+
+    plt.clf()
+    plt.figure(figsize=(12, 8))
+    for i, doc in enumerate(documents):
+
+        '''
+        plt.scatter(vectors_2d[i, 0], vectors_2d[i, 1], label=label if i < 10 else None, alpha=0.7)
+        '''
+        labels_added = {"Besucht": False, "Empfohlen": False, "Andere": False}
+
+        x, y = vectors_2d[i]
+        if i in visited_stories:
+            plt.scatter(x, y, c="blue", label="Besucht" if not labels_added["Besucht"] else None, s=80,
+                        edgecolors="black")
+            labels_added["Besucht"] = True
+        elif doc["filename"] in recommended_filenames:
+            plt.scatter(x, y, c="red", label="Empfohlen" if not labels_added["Empfohlen"] else None, s=100,
+                        edgecolors="black")
+            labels_added["Empfohlen"] = True
+
+        else:
+            plt.scatter(x, y, c="gray", label="Andere" if not labels_added["Andere"] else None, alpha=0.5)
+            labels_added["Andere"] = True
+
+    # Add titles and labels
+    plt.title("t-SNE Visualisierung der Art Story Cluster", fontsize=16)
+    plt.xlabel("X-Achse", fontsize=12)
+    plt.ylabel("Y-Achse", fontsize=12)
+    plt.legend(bbox_to_anchor=(1,1.2), title='Besucht', loc= "upper left")
+    # plt.colorbar()
+    st.pyplot(plt)
 
 # Streamlit Layout
 st.title("Ranking von Art Stories")
@@ -61,36 +110,17 @@ if st.button("Ähnliche Geschichten finden"):
             st.session_state['isWord2Vec'] = isWord2Vec
             # Aufruf der Ranking-Funktion NACH dem Button-Klick
             st.session_state['ranking'] = main.rank_art_stories_python_function(user_query, isWord2Vec=isWord2Vec)
-
         else:
             st.warning("Bitte geben Sie eine gültige Anfrage ein.")
 
-
-query = None
-try:
-    query = st.session_state['query']
-except:
-    pass
+query = st.session_state.get('query', None)
 
 if query:
-
-    isWord2Vec_session_state = None
-    try:
-        isWord2Vec_session_state = st.session_state['isWord2Vec']
-    except:
-        pass
-
     st.write(f"Ihre Anfrage: '{query}' wird verarbeitet...")
-    st.write(f"Verwendetes Modell: {'Word2Vec' if isWord2Vec_session_state else 'Doc2Vec'}")
+    st.write(f"Verwendetes Modell: {'Word2Vec' if st.session_state['isWord2Vec'] else 'Doc2Vec'}")
 
 # Ausgabe der Rankings als Tabelle
-
-ranking = None
-try:
-    ranking = st.session_state['ranking']
-except:
-    pass
-
+ranking = st.session_state.get('ranking', None)
 
 if ranking is not None and not ranking.empty:
     st.write("Ranking der Ähnlichkeiten pro Token:")
@@ -108,16 +138,27 @@ if ranking is not None and not ranking.empty:
     # Empfehlungen anzeigen
     if visited_stories:
         st.subheader("Empfohlene Geschichten basierend auf Ihren Besuchen:")
-        recommendations = main.recommend_art_stories_python_function(visited_stories)
+        result = main.recommend_art_stories_python_function(visited_stories)
+        recommendations = result['recommendations']
+        document_vectors = result['document_vectors']
+        documents = result['documents']
+
+        print(f"Besuchte Dokumente: {visited_stories}")
+        print(f"Empfehlungen: {recommendations}")
+        if not recommendations.empty:
+            #st.write(recommendations)
+            st.dataframe(recommendations)
+
+            st.subheader("t-SNE Visualisierung der Empfehlungen und Cluster:")
+            plot_tsne(document_vectors, documents, visited_stories, recommendations)
+        else:
+            st.warning("Keine Empfehlungen verfügbar.")
+
         print(f"Besuchte Dokumente: {visited_stories}")
         print(f"Empfehlungen: {recommendations}")
 
-        if not recommendations.empty:
-            st.write(recommendations)
-        else:
-            st.warning("Keine Empfehlungen verfügbar.")
     else:
-        st.warning("Keine ähnlichen Geschichten gefunden.")
+        st.warning("Bitte wählen Sie besuchte Geschichten aus.")
 
 if ranking is not None:
     st.markdown("#### Berechne MAP@K")
@@ -139,8 +180,6 @@ if ranking is not None:
             st.markdown(f"MAP@K (K={k}): `{map_at_k}`")
 else:
     st.warning("Keine Ähnlichkeiten gefunden.")
-
-### TODO: implement logic for fetching indices of visited art stories and plot results for recommendations via tSNE
 
 def update_visited_stories(story_index):
     if 'visited_stories' not in st.session_state:

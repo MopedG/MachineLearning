@@ -4,6 +4,8 @@ from itertools import count
 from gensim.models import Word2Vec
 import gensim
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
+from nltk import corpus
+from nltk.parse.util import taggedsents_to_conll
 from nltk.tokenize import sent_tokenize, word_tokenize
 from bertopic import BERTopic
 import nltk
@@ -15,6 +17,16 @@ from sklearn.manifold import TSNE ## NEW
 import matplotlib.pyplot as plt ## NEW
 
 is_word2vec = True
+
+def train_doc2vec_model(documents):
+    formatted_documents = [doc["content"].lower().replace("-", " ") for doc in documents]
+    tagged_document_data = [TaggedDocument(words=word_tokenize(doc), tags=[str(i)]) for i, doc in enumerate(formatted_documents)]
+
+    model = Doc2Vec(tagged_document_data, min_count=2, vector_size=100, epochs=50)
+    model.build_vocab(tagged_document_data)
+    model.train(tagged_document_data, total_examples=model.corpus_count, epochs=model.epochs)
+
+    return model
 
 def doc_2_vec(query: str):
     nltk.download('punkt_tab')
@@ -74,9 +86,6 @@ def filesToStrings():
                         }
                     )
     return site_texts
-
-def fetch_index_for_stories():
-    return None
 
 def rank_art_stories_python_function(query, isWord2Vec):
     return similarity_score_query_to_article_with_idf(query) if isWord2Vec else doc_2_vec(query)
@@ -167,50 +176,47 @@ def recommend_art_stories_python_function(visited_stories):
     ## @return: DataFrame with top-3 recommendations for next documents
     documents = filesToStrings()
     corpus = [doc["content"] for doc in documents]
-    ## Train BERT model
-    topic_model = BERTopic()
-    topics, probs = topic_model.fit_transform(corpus)
-    # Maybe fit, then transform first? Are topics relevant, are documents empty??
-    #newDocs = topic_model.transform(visited_stories)
-    ## TODO: Basierend auf den allgemeinen Dokumenten die Topics vergleichen!
-    document_info = topic_model.get_document_info(corpus) # seems to
-    help1 = topic_model.get_topics()
-    help2 = topic_model.get_topic_info(13)
-    #print(f"NewDocs: {newDocs}")
-    print(f"Topics: {help1}")
-    print(f"Topic Info: {help2}")
-    print(f"Documents: {document_info}")
-    ## frontend: visited_stories = 13, 10
-    # Sammle die Themen der besuchten Stories
-    # ANDERER ANSATZ HIER!!! Es muss die Topic-ID aus dem Dokument geholt werden, nicht die Topic-ID aus dem Topic-Modell
-    visited_topics = [
-        document_info.loc[document_info["Document"] == documents[idx]["content"], "Topic"].values[0]
-        for idx in visited_stories
+    doc2vec_model = train_doc2vec_model(documents)
+
+    # Calculate document vectors
+    document_vectors = [doc2vec_model.infer_vector(word_tokenize(doc["content"])) for doc in documents]
+    visited_vectors = [document_vectors[i] for i in visited_stories]
+
+    # Calculate average vector for visited stories
+    avg_vector = np.mean(visited_vectors, axis=0)
+
+    # Calculate cosine similarity between average vector and all document vectors
+    similarities = cosine_similarity([avg_vector], document_vectors).flatten()
+
+    # Sort documents by similarity
+    recommendations = [
+        {"artstory": documents[i]["filename"], "similarity": similarities[i]}
+        for i in range(len(documents)) if i not in visited_stories
     ]
+    recommendations = sorted(recommendations, key=lambda x: x["similarity"], reverse=True)[:3]
 
-    # Generiere Empfehlungen basierend auf den besuchten Themen
-    recommendations = []
-    for topic_id in visited_topics:
-        similar_docs = topic_model.get_representative_docs(topic_id)
-        if not similar_docs:
-            continue
+    # Prepare data for clustering
+    labels = {
+        doc["filename"]: {"filename": doc["filename"], "is_visited": i in visited_stories, "is_recommended": False}
+        for i, doc in enumerate(documents)
+    }
+    # Mark recommended documents
+    for rec in recommendations:
+        if rec["artstory"] in labels:
+            labels[rec["artstory"]]["is_recommended"] = True
 
-        # Füge nicht besuchte Dokumente mit Ähnlichkeitswert hinzu
-        # TODO: Refactor to use fields from methods .get_topics or get_representative_docs to access these similarities!
-        for doc in similar_docs:
-            doc_id = next((d["id"] for d in documents if d["content"] == doc), None)
-            if doc_id is not None and doc_id not in visited_stories:
-                recommendations.append({"Art Story": doc_id, "Similarity": probs[doc_id]})
+    recommendation_df = pd.DataFrame(recommendations)
+    print(recommendation_df)
 
-    # Sortiere nach Ähnlichkeit und gebe die Top-3 Empfehlungen zurück
-    sorted_recommendations = sorted(recommendations, key=lambda x: x["Similarity"], reverse=True)[:3]
-    return pd.DataFrame(sorted_recommendations) if sorted_recommendations else pd.DataFrame(
-        columns=["Art Story", "Similarity"])
+    '''
+    # Optional: t-SNE-Visualisierung
+    plot_tsne(document_vectors, [doc["filename"] for doc in documents])
+    '''
 
+    return {"recommendations": recommendation_df, "document_vectors": document_vectors, "documents": documents}
 if __name__ == "__main__":
     ## TEST FOR DEBUGGING IN BACKEND
     query = "cathedral fire france excavation notre-dame reconstruction"
     print("query: ", query)
     #rank_art_stories_python_function(query, isWord2Vec=False)
     recommended = recommend_art_stories_python_function(visited_stories=[3, 2, 4])
-    print(recommended)
