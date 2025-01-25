@@ -18,8 +18,8 @@ st.title("ARIMA/SARIMA Time Series Analysis Dashboard")
 # Upload dataset files
 uploaded_files = {
     "AirPassengers.csv": os.path.abspath("C:\\Entw\\MachineLearning\\Ticketverkäufe\\AirPassengers.csv"),
-    "monthly_sales.csv": "monthly_sales.csv",
-    "gold_monthly.csv": "gold_monthly.csv"
+    "monthly_sales.csv": "C:\\Entw\\MachineLearning\\Ticketverkäufe\\monthly_sales.csv",
+    "gold_monthly.csv": "C:\\Entw\\MachineLearning\\Ticketverkäufe\\gold_monthly.csv"
 }
 
 # Sidebar selection
