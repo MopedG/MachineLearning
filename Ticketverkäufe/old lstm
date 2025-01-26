@@ -1,0 +1,71 @@
+
+# Daten vorbereiten für LSTM
+def prepare_data_lstm(time_series, time_steps=3):
+    X, y = [], []
+    for i in range(len(time_series) - time_steps):
+        X.append(time_series[i:(i + time_steps)])
+        y.append(time_series[i + time_steps])
+    return np.array(X), np.array(y)
+
+# LSTM Modell erstellen
+def build_lstm_model(input_shape):
+    model = Sequential()
+    model.add(LSTM(50, return_sequences=True, input_shape=input_shape))
+    model.add(LSTM(50))
+    model.add(Dense(1))  # Nur eine Ausgabe für die nächste Vorhersage
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    return model
+
+# Ticketverkaufsdaten normalisieren
+def normalize_series(timeSeriesSelected):
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    return scaler.fit_transform(np.array(timeSeriesSelected).reshape(-1, 1)), scaler
+
+# Ticketverkauf Zeitreihe plotten und Vorhersage visualisieren
+def plot_predictions(timeSeriesSelected, predicted_data, year):
+    plt.figure(figsize=(10, 6))
+
+    real_data = timeSeriesSelected['Sum Tickets sold']
+    plt.plot(timeSeriesSelected['Relative show day'], real_data, color='blue', label='Echte Daten')
+
+    plt.plot(timeSeriesSelected['Relative show day'][-len(predicted_data):], predicted_data, color='red',
+             label='Vorhersage')
+
+    plt.xlabel('Relative show day')
+    plt.ylabel('Sum Tickets sold')
+    plt.title(f'Vorhersage der Ticketverkäufe für ART SHOW YEAR {year} mit LSTM')
+    plt.legend()
+    plt.grid(True)
+    return plt
+
+# Hauptfunktion, die LSTM durchführt und Vorhersagen ausgibt
+def lstm_ticket_sales_prediction(timeSeriesSelected, time_steps=3, year=None):
+    ticket_sales, scaler = normalize_series(timeSeriesSelected['Sum Tickets sold'].values)
+
+    # Daten für LSTM vorbereiten
+    X, y = prepare_data_lstm(ticket_sales, time_steps)
+
+    # LSTM-kompatible Daten
+    X = np.reshape(X, (X.shape[0], X.shape[1], 1))
+
+    # LSTM Modell erstellen
+    model = build_lstm_model((X.shape[1], 1))
+
+    # Modell trainieren - hier kein Split auf Trainings- und Testdaten
+    model.fit(X, y, epochs=50, batch_size=32)
+
+    # Vorhersagen für die gesamte Zeitreihe machen
+    predictions = model.predict(X)
+    predictions = scaler.inverse_transform(predictions)
+    real_sales = scaler.inverse_transform(y.reshape(-1, 1))
+
+    # Plot der Vorhersagen und realen Daten
+    plt.figure(figsize=(10, 6))
+    plt.plot(timeSeriesSelected['Relative show day'], real_sales, label="Echte Ticketverkäufe", color='blue')
+    plt.plot(timeSeriesSelected['Relative show day'][time_steps:], predictions, label="LSTM Vorhersagen", color='red')
+    plt.xlabel('Relative show day')
+    plt.ylabel('Sum Tickets sold')
+    plt.title(f'Ticketverkäufe mit LSTM Vorhersage - Jahr {year}')
+    plt.legend()
+    plt.grid(True)
+    return plt
