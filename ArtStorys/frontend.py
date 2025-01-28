@@ -134,7 +134,6 @@ if ranking is not None and not ranking.empty:
             visited_stories.append(idx)
 
     st.session_state['visited_stories'] = visited_stories
-
     # Empfehlungen anzeigen
     if visited_stories:
         st.subheader("Empfohlene Geschichten basierend auf Ihren Besuchen:")
@@ -142,12 +141,9 @@ if ranking is not None and not ranking.empty:
         recommendations = result['recommendations']
         document_vectors = result['document_vectors']
         documents = result['documents']
-
-        print(f"Besuchte Dokumente: {visited_stories}")
-        print(f"Empfehlungen: {recommendations}")
         if not recommendations.empty:
-            #st.write(recommendations)
-            st.dataframe(recommendations)
+            st.write(recommendations)
+            #st.dataframe(recommendations)
 
             st.subheader("t-SNE Visualisierung der Empfehlungen und Cluster:")
             plot_tsne(document_vectors, documents, visited_stories, recommendations)

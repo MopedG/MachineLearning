@@ -43,6 +43,10 @@ query2 = "How many tickets exist for the event 'Art Basel'?"
 query3 = "Welche Tickets haben den TicketType ""Premium Ticket""?"
 query4 = "Welche PersonAccounts kommen aus dem BillingState 'USA'?"
 
+queryAufbau = "WELCHE X  HAT Y "
+X = "X: bspw. PersonAccount, Contact, Artwork, Ticket, User, Account, Event"
+Y = "Y: bspw. Name, Title, TicketType, BillingState, EventName, AccountName"
+
 dict = {
     "query1": "Aus welchem Land kommt der Account 'Wealth Management AG'?",
     "query2": "Welches Artwork hat den Titel 'Golden Statue'?",
