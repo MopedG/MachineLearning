@@ -68,7 +68,7 @@ results = main.doSarima(rawTimeSeriesSelected)
 st.write(f"Das SARIMA-Modell wurde erfolgreich erstellt. Die Modellparameter sind: (2, 1, 1), (1, 1, 1, 7).")
 st.pyplot(main.plotTimeSeriesWithSARIMA(rawTimeSeriesSelected, results))
 
-st.subheader("Vorhersage der Ticketverkäufe mit LSTM")
+#st.subheader("Vorhersage der Ticketverkäufe mit LSTM")
 
 # Plot in Streamlit anzeigen
-st.pyplot(main.LSTMTraining())
+#st.pyplot(main.LSTMTraining())

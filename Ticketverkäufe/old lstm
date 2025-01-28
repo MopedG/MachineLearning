@@ -69,3 +69,88 @@ def lstm_ticket_sales_prediction(timeSeriesSelected, time_steps=3, year=None):
     plt.legend()
     plt.grid(True)
     return plt
+
+
+OLD LSTM 2:
+
+'''
+
+LSTM Model Training
+
+'''
+
+#Prepare Data for LSTM Model
+
+def prepare_data_lstm(time_series, time_steps=3):
+    X, y = [], []
+    for i in range(len(time_series) - time_steps):
+        X.append(time_series[i:(i + time_steps)])
+        y.append(time_series[i + time_steps])
+    return np.array(X), np.array(y)
+
+def normalize_series(timeSeriesSelected):
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    return scaler.fit_transform(np.array(timeSeriesSelected).reshape(-1, 1)), scaler
+
+
+# Build and train the LSTM model
+
+def build_lstm_model(input_shape):
+    model = Sequential()
+    model.add(LSTM(50, return_sequences=True, input_shape=input_shape))
+    model.add(LSTM(50))
+    model.add(Dense(1))  # Only one output for the next prediction
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    return model
+
+
+
+# Predictions for Art SHow 4
+
+def predict_future_sales(model, scaler, time_series, time_steps=3, future_steps=30):
+    predictions = []
+    current_input = time_series[-time_steps:]
+    for _ in range(future_steps):
+        current_input = np.reshape(current_input, (1, time_steps, 1))
+        next_prediction = model.predict(current_input)
+        predictions.append(next_prediction[0, 0])
+        current_input = np.append(current_input[:, 1:, :], np.reshape(next_prediction, (1, 1, 1)), axis=1)
+    return scaler.inverse_transform(np.array(predictions).reshape(-1, 1))
+
+
+def LSTMTraining():
+
+    # Load the data
+    df = getCsvData()
+    # Combine the data from all three art shows
+    combined_data = df[df['Event_Year'].isin([1, 2, 3])]
+
+    # Normalize the combined data
+    ticket_sales, scaler = normalize_series(combined_data['Sum Tickets sold'].values)
+
+    # Prepare the data for LSTM
+    time_steps = 3
+    X, y = prepare_data_lstm(ticket_sales, time_steps)
+
+    # Reshape the data for LSTM
+    X = np.reshape(X, (X.shape[0], X.shape[1], 1))
+
+    # Build the LSTM model
+    model = build_lstm_model((X.shape[1], 1))
+
+    # Train the model
+    model.fit(X, y, epochs=50, batch_size=32)
+    # Predict future sales for Art Show 4
+    future_steps = 60  # Number of days to predict
+    predicted_sales = predict_future_sales(model, scaler, ticket_sales, time_steps, future_steps)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(len(combined_data)), combined_data['Sum Tickets sold'], label='Historical Sales')
+    plt.plot(range(len(combined_data), len(combined_data) + future_steps), predicted_sales,
+             label='Predicted Sales for Art Show 4', color='red')
+    plt.xlabel('Relative show day')
+    plt.ylabel('Sum Tickets sold')
+    plt.title('Predicted Ticket Sales for Art Show 4')
+    plt.legend()
+    plt.grid(True)
+    return plt
