@@ -121,3 +121,4 @@ def doSarima(stationarySeries):
     )
     results = model.fit()
     return results
+
