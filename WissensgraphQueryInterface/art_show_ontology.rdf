@@ -1,0 +1,237 @@
+@prefix : <http://example.org/schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .  # (Optional for ontologies)
+@base <http://example.org/> .
+
+#################################################################
+# Simple Schema Declarations (Optional)
+#################################################################
+
+:Account a rdfs:Class .
+:Contact a rdfs:Class .
+:PersonAccount a rdfs:Class .
+:Ticket a rdfs:Class .
+:GuestDesignation a rdfs:Class .
+:GuestTracking a rdfs:Class .
+:Artwork a rdfs:Class .
+:ArtworkMedium a rdfs:Class .
+:ArtworkSale a rdfs:Class .
+
+:accountID a rdf:Property .
+:accountName a rdf:Property .
+:billingCountry a rdf:Property .
+:isFairSponsor a rdf:Property .
+:applicationStatusAsShowExhibitor a rdf:Property .
+:designationContingent a rdf:Property .
+
+:contactID a rdf:Property .
+:contactFullName a rdf:Property .
+:email a rdf:Property .
+:VIPStatus a rdf:Property .
+:VIPRepresentativeFullName a rdf:Property .
+:employedBy a rdf:Property .        # Contact → Account
+
+:personAccountID a rdf:Property .
+:fullName a rdf:Property .
+
+:ticketID a rdf:Property .
+:barcodeIsScanned a rdf:Property .
+:fairName a rdf:Property .
+:ticketType a rdf:Property .
+:boughtBy a rdf:Property .          # Ticket → Contact/PersonAccount
+
+:guestDesignationID a rdf:Property .
+:designatingAccount a rdf:Property .
+:designatedContact a rdf:Property .
+:designatedPerson a rdf:Property .
+
+:guestTrackingID a rdf:Property .
+:numberOfConfirmedGuestsBeforeTheShow a rdf:Property .
+:guestContact a rdf:Property .
+:guestPerson a rdf:Property .
+:guestVIPDesignation a rdf:Property .
+
+:artworkID a rdf:Property .
+:title a rdf:Property .
+:artistFullName a rdf:Property .
+:artworkMedium a rdf:Property .     # Artwork → ArtworkMedium
+
+:artMediumID a rdf:Property .
+:artMediumTitle a rdf:Property .
+
+:artworkSaleID a rdf:Property .
+:soldArtwork a rdf:Property .
+:priceInUSD a rdf:Property .
+:sellingAccount a rdf:Property .
+:soldAtShow a rdf:Property .
+
+#################################################################
+# Instance Data from the Sample SQL
+#################################################################
+
+### Accounts
+:Account_1 a :Account ;
+    :accountID "1"^^xsd:string ;
+    :accountName "Art Gallery Inc."^^xsd:string ;
+    :billingCountry "USA"^^xsd:string ;
+    :isFairSponsor "false"^^xsd:boolean ;
+    :applicationStatusAsShowExhibitor "Accepted"^^xsd:string ;
+    :designationContingent "10"^^xsd:integer .
+
+:Account_2 a :Account ;
+    :accountID "2"^^xsd:string ;
+    :accountName "Kunstmuseum AG"^^xsd:string ;
+    :billingCountry "Deutschland"^^xsd:string ;
+    :isFairSponsor "false"^^xsd:boolean ;
+    :applicationStatusAsShowExhibitor "Accepted"^^xsd:string ;
+    :designationContingent "20"^^xsd:integer .
+
+:Account_3 a :Account ;
+    :accountID "3"^^xsd:string ;
+    :accountName "Wealth Management AG"^^xsd:string ;
+    :billingCountry "Schweiz"^^xsd:string ;
+    :isFairSponsor "true"^^xsd:boolean ;
+    :applicationStatusAsShowExhibitor "Accepted"^^xsd:string ;
+    :designationContingent "50"^^xsd:integer .
+
+:Account_4 a :Account ;
+    :accountID "4"^^xsd:string ;
+    :accountName "L´Art Moderne"^^xsd:string ;
+    :billingCountry "Frankreich"^^xsd:string ;
+    :isFairSponsor "false"^^xsd:boolean ;
+    :applicationStatusAsShowExhibitor "Rejected"^^xsd:string .
+
+### Contacts (employees of Accounts)
+:Contact_10 a :Contact ;
+    :contactID "10"^^xsd:string ;
+    :contactFullName "Henry Smith"^^xsd:string ;
+    :email "10@test.com"^^xsd:string ;
+    :employedBy :Account_1 .
+
+:Contact_11 a :Contact ;
+    :contactID "11"^^xsd:string ;
+    :contactFullName "Sarah Benz"^^xsd:string ;
+    :email "11@test.com"^^xsd:string ;
+    :VIPStatus "VIP"^^xsd:string ;
+    :VIPRepresentativeFullName "Heidi Feld"^^xsd:string ;
+    :employedBy :Account_2 .
+
+### PersonAccounts (individuals not employed by an Account)
+:PersonAccount_100 a :PersonAccount ;
+    :personAccountID "100"^^xsd:string ;
+    :fullName "Barack Obama"^^xsd:string ;
+    :email "100@test.com"^^xsd:string ;
+    :billingCountry "USA"^^xsd:string ;
+    :VIPStatus "First Choice VIP"^^xsd:string ;
+    :VIPRepresentativeFullName "Keira Manley"^^xsd:string .
+
+:PersonAccount_101 a :PersonAccount ;
+    :personAccountID "101"^^xsd:string ;
+    :fullName "Heinz Schuster"^^xsd:string ;
+    :email "101@test.com"^^xsd:string ;
+    :billingCountry "Deutschland"^^xsd:string .
+
+:PersonAccount_102 a :PersonAccount ;
+    :personAccountID "102"^^xsd:string ;
+    :fullName "Tom Miller"^^xsd:string ;
+    :email "102@test.com"^^xsd:string ;
+    :billingCountry "Schweiz"^^xsd:string .
+
+### Tickets
+:Ticket_1000 a :Ticket ;
+    :ticketID "1000"^^xsd:string ;
+    :barcodeIsScanned "true"^^xsd:boolean ;
+    :fairName "ART SHOW YEAR 2"^^xsd:string ;
+    :ticketType "Premium-Ticket"^^xsd:string ;
+    :boughtBy :Contact_10 .
+
+:Ticket_1001 a :Ticket ;
+    :ticketID "1001"^^xsd:string ;
+    :barcodeIsScanned "true"^^xsd:boolean ;
+    :fairName "ART SHOW YEAR 3"^^xsd:string ;
+    :ticketType "Premium-Ticket"^^xsd:string ;
+    :boughtBy :Contact_10 .
+
+:Ticket_1002 a :Ticket ;
+    :ticketID "1002"^^xsd:string ;
+    :barcodeIsScanned "true"^^xsd:boolean ;
+    :fairName "ART SHOW YEAR 3"^^xsd:string ;
+    :ticketType "Premium-Ticket"^^xsd:string ;
+    :boughtBy :PersonAccount_100 .
+
+:Ticket_1003 a :Ticket ;
+    :ticketID "1003"^^xsd:string ;
+    :barcodeIsScanned "true"^^xsd:boolean ;
+    :fairName "ART SHOW YEAR 3"^^xsd:string ;
+    :ticketType "Day-Ticket"^^xsd:string ;
+    :boughtBy :PersonAccount_101 .
+
+:Ticket_1004 a :Ticket ;
+    :ticketID "1004"^^xsd:string ;
+    :barcodeIsScanned "false"^^xsd:boolean ;
+    :fairName "ART SHOW YEAR 3"^^xsd:string ;
+    :ticketType "Day-Ticket"^^xsd:string ;
+    :boughtBy :PersonAccount_102 .
+
+### Guest Designations
+:GuestDesignation_10000 a :GuestDesignation ;
+    :guestDesignationID "10000"^^xsd:string ;
+    :designatingAccount :Account_1 ;
+    :fairName "ART SHOW YEAR 3"^^xsd:string ;
+    :designatedPerson :PersonAccount_100 .
+
+:GuestDesignation_10001 a :GuestDesignation ;
+    :guestDesignationID "10001"^^xsd:string ;
+    :designatingAccount :Account_2 ;
+    :fairName "ART SHOW YEAR 3"^^xsd:string ;
+    :designatedPerson :PersonAccount_100 .
+
+### Guest Tracking
+:GuestTracking_100000 a :GuestTracking ;
+    :guestTrackingID "100000"^^xsd:string ;
+    :numberOfConfirmedGuestsBeforeTheShow "3"^^xsd:integer ;
+    :guestPerson :PersonAccount_100 ;
+    :guestVIPDesignation :GuestDesignation_10000 .
+
+### Artworks
+:Artwork_1000000 a :Artwork ;
+    :artworkID "1000000"^^xsd:string ;
+    :title "The Great Painting"^^xsd:string ;
+    :artistFullName "Jill Kennedy"^^xsd:string ;
+    :artworkMedium :ArtworkMedium_10000000 .
+
+:Artwork_1000001 a :Artwork ;
+    :artworkID "1000001"^^xsd:string ;
+    :title "Golden Statue"^^xsd:string ;
+    :artistFullName "Matt Cliff"^^xsd:string ;
+    :artworkMedium :ArtworkMedium_10000001 .
+
+### Artwork Medium
+:ArtworkMedium_10000000 a :ArtworkMedium ;
+    :artMediumID "10000000"^^xsd:string ;
+    :artMediumTitle "Painting"^^xsd:string .
+
+:ArtworkMedium_10000001 a :ArtworkMedium ;
+    :artMediumID "10000001"^^xsd:string ;
+    :artMediumTitle "Sculpture"^^xsd:string .
+
+:ArtworkMedium_10000002 a :ArtworkMedium ;
+    :artMediumID "10000002"^^xsd:string ;
+    :artMediumTitle "Photography"^^xsd:string .
+
+### Artwork Sales
+:ArtworkSale_100000000 a :ArtworkSale ;
+    :artworkSaleID "100000000"^^xsd:string ;
+    :soldArtwork :Artwork_1000000 ;
+    :priceInUSD "1000000"^^xsd:decimal ;
+    :sellingAccount :Account_1 ;
+    :soldAtShow "ART SHOW YEAR 3"^^xsd:string .
+
+:ArtworkSale_100000001 a :ArtworkSale ;
+    :artworkSaleID "100000001"^^xsd:string ;
+    :soldArtwork :Artwork_1000001 ;
+    :priceInUSD "10000000"^^xsd:decimal ;
+    :sellingAccount :Account_2 ;
+    :soldAtShow "ART SHOW YEAR 3"^^xsd:string .

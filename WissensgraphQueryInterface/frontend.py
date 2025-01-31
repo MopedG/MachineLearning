@@ -1,9 +1,7 @@
 import streamlit as st
 
-
 st.title("Abfrage der Kunstshow-Ontologie")
 st.subheader("Wissensgraph Query Interface")
-
 
 q = [
     {
@@ -50,10 +48,6 @@ if selection:
             columns[i].text(part)
 
 
-
-
-
-
 queryAufbau = "WELCHE X HAT Y "
 X = "X: bspw. PersonAccount, Contact, Artwork, Ticket, User, Account, Event"
 Y = "Y: bspw. Name, Title, TicketType, BillingState, EventName, AccountName"
@@ -66,6 +60,3 @@ dict = {
     "query5": "Welche PersonAccounts kommen aus dem BillingState 'USA'?",
     "query6": "Welche Contacts haben eine mail unter '@test.com'?"
 }
-
-
-
