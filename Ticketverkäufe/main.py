@@ -81,6 +81,13 @@ def makeStationary(timeSeriesSelected):
     timeSeriesSelected = timeSeriesSelected.dropna().reset_index(drop=True)
     return timeSeriesSelected
 
+def revertStationary(original_series, stationary_series):
+    # Step 1: Reverse Differencing
+    recovered_log = original_series['Sum Tickets sold'].iloc[0] + stationary_series['Sum Tickets sold'].cumsum()
+    # Step 2: Reverse Log Transform
+    recovered_series = np.exp(recovered_log)
+    return recovered_series
+
 def plot_acf_pacf(stationarySeries, year):
     plt.figure(figsize=(12, 6))
     plot_acf(stationarySeries['Sum Tickets sold'], lags=20, ax=plt.subplot(121))
