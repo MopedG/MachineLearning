@@ -1,6 +1,7 @@
 import numpy as np
 import streamlit as st
 import main
+import lstm
 
 
 def plotTimeSeries(timeSeriesSelected, selectedYear):
@@ -70,6 +71,8 @@ st.write(f"Das SARIMA-Modell wurde erfolgreich erstellt. Die Modellparameter sin
 st.pyplot(main.plotTimeSeriesWithSARIMA(rawTimeSeriesSelected, results))
 
 st.subheader("Vorhersage der Ticketverkäufe mit LSTM")
-
-# Plot in Streamlit anzeigen
-#st.pyplot(lstm.predict_ticket_sales())
+st.write("Input für das LSTM: Logarithmierte Ticketverkäufe der Art Show Year 2 und 3")
+st.write("Art Show Year 1 wurde nicht verwendet, da es sich zu sehr von den anderen Jahren unterscheidet.")
+st.pyplot(lstm.show_train_set())
+st.subheader("Vorhersage der Ticketverkäufe für Jahr 4")
+st.pyplot(lstm.make_prediction_year4())
