@@ -106,13 +106,13 @@ onto, reasoned_graph = load_ontology()
 
 
 def query_llm(query: str, subgraph_ttl: str):
-    # TODO: OLLAMA Integrieren
+    # TODO: Grounding verbessern
     sample_prompt = (
         "You are a knowledge assistant answering questions.\n\n"
         f"Here is some relevant knowledge graph data:\n\n{subgraph_ttl}\n\n"
         f"Now answer this question: {query}"
     )
-    generated_text =  ollama.generate(model="llama3.1" ,prompt=sample_prompt, options={"temperature": 0})
+    generated_text =  ollama.generate(model="llama3.1:8b" ,prompt=sample_prompt, options={"temperature": 0})
     return generated_text
 
 
@@ -186,22 +186,11 @@ def retrieve_subgraph_and_answer(g: rdflib.Graph, query: str, is_hardcoded_graph
 
     else:
         # Option 2: Use SPARQL query to retrieve the subgraph
-
-        #"How many visitors attende Art Show in year 3"
-        test_query = """
-        PREFIX schema: <http://example.org/schema#>
-        SELECT (COUNT(?visitor) AS ?visitorCount)
-        WHERE {
-            ?ticket schema:fairName "ART SHOW YEAR 3" ;
-            schema:barcodeIsScanned true ;
-            schema:boughtBy ?visitor .
-            ?visitor a schema:Visitor .
-        }
-        """
-
         query = """
         TASK 1: YOUR SPARQL QUERY GOES HERE
         """
+
+        query = "How many Visitors attended Art Show in year 3"# Kann raus später, nur zum testen
         # TODO: SPARQL QUERY reinschreiben
         results = g.query(query)
 
