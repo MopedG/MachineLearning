@@ -12,17 +12,9 @@ import tensorflow as tf
 import random
 
 def show_train_set():
-    EPOCHS = 45
-    LOOK_BACK_VALUES = 5
-    FEATURES = 1
-    DROPOUT = 0.2
-
-    np.random.seed(42)  # Seed für Numpy, damit die Ergebnisse reproduzierbar sind
-    tf.random.set_seed(42)  # Seed für TensorFlow, damit die Ergebnisse reproduzierbar sind
-    random.seed(42)
-
     script_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(script_dir, 'TicketsalesCleaner.csv')
+    
     df = pd.read_csv(csv_path, index_col='Relative show day', parse_dates=False)
     df.index.freq = 'D'
     df.drop(['Event Name', 'SaleWeekDay', 'TicketSalesRevenue', 'Show Started'], axis=1, inplace=True)
@@ -46,10 +38,10 @@ def make_prediction_year4():
     global df
     # Hyperparameter
     # Hier könnte man einen Hyperparameter Tuner verwenden, um die besten Werte zu finden.
-    EPOCHS = 45
-    LOOK_BACK_VALUES = 5
+    EPOCHS = 50
+    LOOK_BACK_VALUES = 20
     FEATURES = 1
-    DROPOUT = 0.2
+    DROPOUT = 0.4
 
     np.random.seed(42)  # Seed für Numpy, damit die Ergebnisse reproduzierbar sind
     tf.random.set_seed(42)  # Seed für TensorFlow, damit die Ergebnisse reproduzierbar sind
