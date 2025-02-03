@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns="http://example.org/schema#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+>
+  <rdf:Description rdf:about="http://example.org/schema#barcodeIsScanned">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:label xml:lang="en">Barcode Scanned</rdfs:label>
+    <rdfs:domain rdf:resource="http://example.org/schema#Ticket"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#PersonAccount_101">
+    <rdf:type rdf:resource="http://example.org/schema#PersonAccount"/>
+    <rdfs:label xml:lang="en">Heinz Schuster</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#hasBoughtTicket">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:label xml:lang="en">has bought ticket</rdfs:label>
+    <owl:inverseOf rdf:resource="http://example.org/schema#boughtBy"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b5">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://example.org/schema#barcodeIsScanned"/>
+    <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Ticket_1003">
+    <rdf:type rdf:resource="http://example.org/schema#Ticket"/>
+    <barcodeIsScanned rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</barcodeIsScanned>
+    <fairName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ART SHOW YEAR 3</fairName>
+    <boughtBy rdf:resource="http://example.org/schema#PersonAccount_101"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Account">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b6">
+    <rdf:first rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b1"/>
+    <rdf:rest rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b7"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b4">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://example.org/schema#hasBoughtTicket"/>
+    <owl:someValuesFrom rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b5"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b7">
+    <rdf:first rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b4"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b3">
+    <rdf:first rdf:resource="http://example.org/schema#PersonAccount"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Ticket_1001">
+    <rdf:type rdf:resource="http://example.org/schema#Ticket"/>
+    <barcodeIsScanned rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</barcodeIsScanned>
+    <fairName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ART SHOW YEAR 3</fairName>
+    <boughtBy rdf:resource="http://example.org/schema#Contact_10"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#DefinedVisitor">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:intersectionOf rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b6"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/ontology">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Ontology"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#PersonAccount">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Contact_10">
+    <rdf:type rdf:resource="http://example.org/schema#Contact"/>
+    <rdfs:label xml:lang="en">Henry Smith</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#boughtBy">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:label xml:lang="en">bought by</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Ticket_1002">
+    <rdf:type rdf:resource="http://example.org/schema#Ticket"/>
+    <barcodeIsScanned rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</barcodeIsScanned>
+    <fairName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ART SHOW YEAR 3</fairName>
+    <boughtBy rdf:resource="http://example.org/schema#PersonAccount_100"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#fairName">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:label xml:lang="en">Fair Name</rdfs:label>
+    <rdfs:domain rdf:resource="http://example.org/schema#Ticket"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Account_1">
+    <rdf:type rdf:resource="http://example.org/schema#Account"/>
+    <rdfs:label xml:lang="en">Art Gallery Inc.</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b2">
+    <rdf:first rdf:resource="http://example.org/schema#Contact"/>
+    <rdf:rest rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b3"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#PersonAccount_100">
+    <rdf:type rdf:resource="http://example.org/schema#PersonAccount"/>
+    <rdfs:label xml:lang="en">Barack Obama</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Visitor">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:equivalentClass rdf:resource="http://example.org/schema#DefinedVisitor"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:unionOf rdf:nodeID="n0b0cbabb854b45359403eb06acfb8180b2"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Ticket">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/schema#Contact">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+</rdf:RDF>

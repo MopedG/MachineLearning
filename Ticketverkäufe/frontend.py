@@ -1,5 +1,7 @@
 import numpy as np
 import streamlit as st
+from matplotlib import pyplot as plt
+import time
 import main
 import lstm
 
