@@ -28,9 +28,9 @@ x, y, z = st.columns(3)
 
 nodes_x, nodes_y, nodes_z = main.get_template_node_sets()
 
-selection_x = x.selectbox(label="x", options=list(nodes_x))
-selection_y = y.selectbox(label="y", options=list(nodes_y))
-selection_z = z.selectbox(label="z", options=list(nodes_z))
+selection_x = x.selectbox(label="x", label_visibility="hidden", options=list(nodes_x))
+selection_y = y.selectbox(label="y", label_visibility="hidden", options=list(nodes_y))
+selection_z = z.selectbox(label="z", label_visibility="hidden", options=list(nodes_z))
 
 query_template = main.get_query_template(selection_x, selection_y, selection_z)
 
@@ -65,13 +65,13 @@ else:
             *Diese Kombination erlaubt mehrere Abfragemöglichkeiten.*  
             Zum Beispiel:  
             {query_examples_string}  
-            **Lass das eine Eingabefeld leer, um den Wert des anderen abzufragen.**
+            **Lasse das eine Eingabefeld leer, um den Wert des anderen abzufragen.**
             """
         )
     else:
         st.info(
             f"""
-            Beispielabfrage:
+            Beispielabfrage:  
             `{query_template["queries"][0]["example"]}`
             """
         )
@@ -84,13 +84,16 @@ else:
             st.error(error_text)
         else:
             user_input, query = main.choose_query(query_template, user_input_x, user_input_z)
-            query_result_string = '  \n'.join(map(lambda res: f"`{res}`",main.query_ontology(query_template, query, user_input)))
+            query_result_string = '  \n'.join(map(lambda res: f"`{res}`", main.query_ontology(query_template, query, user_input)))
+            subgraph_img = main.subgraph(query_template)
 
             st.success(
             f"""
             **Ergebnis der Abfrage**  
-            {query_result_string}    
+            {query_result_string if len(query_result_string) != 0 else "*Kein Ergebnis*"}    
             **Konjunktive Normalform**  
             `{main.build_cnf(query_template, query["input"], user_input)}`
             """
             )
+            st.markdown("#### Subgraph")
+            st.image(subgraph_img)
