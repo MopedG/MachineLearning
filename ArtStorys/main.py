@@ -7,7 +7,7 @@ from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 from nltk import corpus
 from nltk.parse.util import taggedsents_to_conll
 from nltk.tokenize import sent_tokenize, word_tokenize
-from bertopic import BERTopic
+
 import nltk
 import numpy as np
 import pandas as pd

@@ -51,9 +51,6 @@ def plot_tsne(vectors, documents, visited_stories, recommendations):
     plt.figure(figsize=(12, 8))
     for i, doc in enumerate(documents):
 
-        '''
-        plt.scatter(vectors_2d[i, 0], vectors_2d[i, 1], label=label if i < 10 else None, alpha=0.7)
-        '''
         labels_added = {"Besucht": False, "Empfohlen": False, "Andere": False}
 
         x, y = vectors_2d[i]

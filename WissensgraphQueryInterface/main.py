@@ -54,6 +54,8 @@ def subgraph(query_template):
     z_condition = query_template["subgraph"]["zCondition"] if "zCondition" in query_template["subgraph"] else ""
     condition = query_template["subgraph"]["condition"] if "condition" in query_template["subgraph"] else ""
 
+    # x condition -> meaning this condition exists on the x node
+
     subgraph_query = f"""
     SELECT ?xField ?zField WHERE {{
         ?x a :{query_template["template"]["x"]["node"]} ;
