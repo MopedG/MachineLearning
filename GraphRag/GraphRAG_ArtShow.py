@@ -180,12 +180,12 @@ def retrieve_subgraph_and_answer(g: rdflib.Graph, query: str, is_hardcoded_graph
         return "", 0
 
     else:
-        query = "How many visitors attended ART SHOW YEAR 3?"
-        query2 = "List all visitors of ART SHOW YEAR 3?"
-        query3 = "Which accounts are sponsor of the Fair?"
+        #query = "How many visitors attended ART SHOW YEAR 3?"
+        #query2 = "List all visitors of ART SHOW YEAR 3?"
+        #query3 = "Which accounts are sponsor of the Fair?"
 
         # Option 2: Use SPARQL query to retrieve the subgraph
-        sparql_query = user_query_to_sparql(query2, g)
+        sparql_query = user_query_to_sparql(query, g)
         print(f"----------------------------\nSPARQL Query:\n{sparql_query}\n----------------------------")
 
         results = g.query(sparql_query)
@@ -202,18 +202,18 @@ def retrieve_subgraph_and_answer(g: rdflib.Graph, query: str, is_hardcoded_graph
 
         # Serialize the subgraph as Turtle format for better readability
         subgraph_ttl = subgraph.serialize(format="turtle")
-        final_answer = query_llm(query2, subgraph_ttl)
+        final_answer = query_llm(query, subgraph_ttl)
 
         return subgraph_ttl, final_answer
 
 def query_llm(query: str, subgraph_ttl: str):
     sample_prompt = (
         "You are a knowledge assistant answering questions.\n\n"
-        # Originell war hier ein Fehler, bspws. Wenn man die "How many visitors in art show 3" Frage gestellt hat, 
+        # Ursprünglich war hier ein Fehler, bspws. Wenn man die "How many visitors in art show 3" Frage gestellt hat, 
         # #wurden zwar die User Selected aber ART SHOW YEAR 3 wurde originell nicht in dem Subgraph erwähnt. Darüber hat sich dann die LLM beschwert.
-        # Durch SPezifikation, dass der Subgraph die ANTWORT auf die User-query ist, wird das Problem gelöst.
+        # Durch Spezifikation, dass der Subgraph die ANTWORT auf die User-query ist, wird das Problem gelöst.
         f"Here is the relevant knowledge graph data, that was selected for you and is correct in relation to the User-question. It is the ANSWER to the User-Question:\n\n{subgraph_ttl}\n\n"
-        f"Now answer this User-question, based on the given knowledge graph data: {query}"
+        f"Now answer this User-question short and precisely in a full sentence, based on the given knowledge graph data: {query}"
         f"If no helpful data is given, then give information about the give knowledge graph data (e.g. number of triples, classes, etc.)"
     )
 
@@ -222,7 +222,7 @@ def query_llm(query: str, subgraph_ttl: str):
     response = model.generate_content(sample_prompt)
     return response.text
 
-def user_query_to_sparql(query: str, reasoned_graph: rdflib.graph, max_triples=70): # TODO: Mal mit max_triples rumspielen
+def user_query_to_sparql(query: str, reasoned_graph: rdflib.graph, max_triples=70):
     triples = list(reasoned_graph)[:max_triples]  # Begrenze auf max_triples Tripel
     formatted_triples = "\n".join(f"<{s}> <{p}> <{o}> ." for s, p, o in triples)
     prompt = (
@@ -282,7 +282,7 @@ elif st.session_state.simulate_button:  # Simulate button click in debugging mod
     user_query = sample_query_count
 
 # ✅ Use reasoned RDFLib graph
-subgraph_ttl, final_ans = retrieve_subgraph_and_answer(reasoned_graph, user_query, is_hardcoded_graph_query) # TODO: Final answer von llm noch anpassen, dass nur der string ausgegeben wird
+subgraph_ttl, final_ans = retrieve_subgraph_and_answer(reasoned_graph, user_query, is_hardcoded_graph_query)
 
 # Show subgraph
 st.markdown("## Step 2: Visualize relevant subgraph")
