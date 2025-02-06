@@ -97,3 +97,33 @@ else:
             )
             st.markdown("#### Subgraph")
             st.image(subgraph_img)
+    ontology_file = "art_show_ontology.ttl"
+    graph = main.load_rdf_graph(ontology_file)
+    model = main.GraphSAGE(in_channels=10, out_channels=2, hidden_channels=16) # 10 input features, 2 output classes, 16 hidden units
+    model.eval()
+    st.divider()
+    st.subheader("VIP-Status Vorhersage für Personen und Kontakte")
+    selected = st.text_input("Geben Sie den Namen eines Kontakts oder einer Person ein, für die der VIP-Status vorhergesagt werden soll:")
+    st.info(
+        f"""
+        *Verfügbar:*  \n 
+        Kontakte: Henry Smith, Sarah Benz \n 
+        Personen: Barack Obama, Heinz Schuster, Tom Miller
+        """
+    )
+    if st.button("VIP Status vorhersagen"):
+        if selected:
+            node_features = main.get_node_features(graph, selected).unsqueeze(0)
+            num_nodes = node_features.size(0)
+            edge_index = main.get_edges(num_nodes)
+
+            with main.torch.no_grad():
+                prediction = model(node_features, edge_index)
+                vip_prob = main.torch.exp(prediction)[0, 1].item()
+            st.write(f"Vorhersage-Wahrscheinlichkeit für VIP-Status: {vip_prob:.2f}")
+            st.write("(Schwellenwert für VIP-Status: > 0.5)")
+
+            if vip_prob > 0.5:
+                st.success("Dieser Kontakt wird als VIP eingestuft!")
+            else:
+                st.warning("Dieser Kontakt wird nicht als VIP eingestuft.")

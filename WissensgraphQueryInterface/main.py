@@ -20,6 +20,8 @@ können) für Newsletter Marketing-Kampagnen.
     - Tipp: Beginnen Sie mit wenigen Kontakten und Person-Accounts.
 """
 import os
+import random
+
 import pydot
 
 """
@@ -28,8 +30,17 @@ ERKENNTNISSE: NLP mit Spacy ist sehr unregelmäßig, d.h. es ist schwer, ein all
 - Wir haben uns jedoch dazu entschlossen, einige Beispiel Queries zu definieren, die wir dann in CNF umwandeln.
 """
 
+
+# Add Graphviz to PATH, necessary for pydot on WINDOWS
+import os
+os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
+import pydot
+import torch
+import torch.nn.functional as F
+from torch_geometric.data import Data
+from torch_geometric.nn import SAGEConv
 # import ollama
-from owlready2 import get_ontology, sync_reasoner, default_world
+from owlready2 import get_ontology
 from rdflib import Graph, Node, RDF
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -289,44 +300,32 @@ def choose_query(query_template, user_input_x, user_input_z):
 
 
 
+# Definieren des GraphSAGE-Modells
+class GraphSAGE(torch.nn.Module):
+    def __init__(self, in_channels, hidden_channels, out_channels):
+        super(GraphSAGE, self).__init__()
+        self.conv1 = SAGEConv(in_channels, hidden_channels)
+        self.conv2 = SAGEConv(hidden_channels, out_channels)
 
+    def forward(self, x, edge_index):
+        x = self.conv1(x, edge_index)
+        x = F.relu(x)
+        x = self.conv2(x, edge_index)
+        return F.log_softmax(x, dim=1)
 
+# Knoten als PyTorch-Tensor zurückgeben
+def get_node_features(graph, node):
+    return torch.tensor([random.random() for _ in range(10)], dtype=torch.float)
 
+# Kanten als PyTorch-Tensor zurückgeben
+def get_edges(num_nodes):
+    edge_index = torch.randint(0, num_nodes, (2, 200))
+    return edge_index
 
-#"cnf": "q = A? * ∃C: Contact(C) ∧ Account(A?) ∧ employedBy(C, A?) ∧ contactFullName(C, '$')",
-# Kunstwerk
-
-#graph.query(
-#    """
-#    SELECT ?uni WHERE
-#    {
-#        TuringAward  win        ?person .
-#        DeepLearning field      ?person .
-#        ?person      university ?uni    .
-#    }
-#    """
-#)
-
-def build_prompt(prompt):
-    return f"""
-    Convert the following natrual language question into an conjunctive normal form:
-    Question: {prompt}
-    
-    Just answer the CNF, nothing more, nothing less.
-    Do not change the language, if you convert the user question into the CNF.
-    For example: If the user writes in german, the answer should be in german!
-    
-    Take the following example in english as a guidance:
-    Question: At what universities do the Turing Award winners in the field of Deep Learning work?
-    Answer: q = U? * ∃V: win(TuringAward, V) ∧ field(DeepLearning, V) ∧ University(V, U?) 
-    Bear in mind that the clauses here like win, field and University are only examples and can be different for the actual prompt. 
-    """
-
-def generate_cnf(query):
-    return ollama.generate(
-        model="llama3.2",
-        prompt=build_prompt(query)
-    )["response"]
-
+# Ontologie laden
+def load_rdf_graph(ontology_file):
+    graph = Graph()
+    graph.parse(ontology_file, format="ttl")
+    return graph
 
 
