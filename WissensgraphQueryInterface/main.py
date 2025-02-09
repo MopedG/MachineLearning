@@ -313,19 +313,236 @@ class GraphSAGE(torch.nn.Module):
         x = self.conv2(x, edge_index)
         return F.log_softmax(x, dim=1)
 
+# Trainingsdaten aus der Ontologie extrahieren
+def extract_training_data(graph):
+    query = """
+    SELECT ?name ?vipStatus WHERE {
+        {
+            ?personAccount a :PersonAccount ;
+                           :fullName ?name ;
+                           :VIPStatus ?vipStatus .
+        }
+        UNION
+        {
+            ?contact a :Contact ;
+                     :contactFullName ?name ;
+                     :VIPStatus ?vipStatus .
+        }
+    }
+    """
+    result = graph.query(query)
+    data = []
+    for row in result:
+        name = str(row.name)
+        vip_status = 1 if str(row.vipStatus) in ["VIP", "First Choice VIP"] else 0
+        data.append((name, vip_status))
+    return data
+
+# Trainingsdaten für GraphSAGE vorbereiten
+def prepare_training_data(known_data, graph):
+    # Extract features for each node: based on relationship employedBy and VIPRepresentativeFullName
+    x = []
+    for name, vip_status in known_data:
+        features = [1 if vip_status == 1 else 0] * 10
+        x.append(features)
+    x = torch.tensor(x, dtype=torch.float)
+
+    # Define edges based on relationships in the ontology
+    edge_index = []
+    for name, vip_status in known_data:
+        # Add edges for Contacts based on employedBy relationship
+        query = f"""
+        SELECT ?relatedName WHERE {{
+            ?contact a :Contact ;
+                     :contactFullName "{name}" ;
+                     :employedBy ?account .
+            ?relatedContact a :Contact ;
+                            :employedBy ?account ;
+                            :contactFullName ?relatedName .
+        }}
+        """
+        result = graph.query(query)
+        for row in result:
+            related_name = str(row.relatedName)
+            if related_name in [n for n, _ in known_data]:
+                edge_index.append([known_data.index((name, vip_status)), known_data.index((related_name, 1 if related_name == "VIP" else 0))])
+
+        # Add edges for PersonAccounts based on VIPRepresentativeFullName relationship
+        query = f"""
+        SELECT ?relatedName WHERE {{
+            ?personAccount a :PersonAccount ;
+                           :fullName "{name}" ;
+                           :VIPRepresentativeFullName ?vipRep .
+            ?relatedPersonAccount a :PersonAccount ;
+                                   :VIPRepresentativeFullName ?vipRep ;
+                                   :fullName ?relatedName .
+        }}
+        """
+        result = graph.query(query)
+        for row in result:
+            related_name = str(row.relatedName)
+            if related_name in [n for n, _ in known_data]:
+                edge_index.append([known_data.index((name, vip_status)), known_data.index((related_name, 1 if related_name == "VIP" else 0))])
+
+    # Convert edge_index to a two-dimensional tensor
+    if edge_index:
+        edge_index = torch.tensor(edge_index, dtype=torch.long).t().contiguous()
+    else:
+        edge_index = torch.empty((2, 0), dtype=torch.long)
+
+    # Labels (VIP status)
+    y = torch.tensor([status for _, status in known_data], dtype=torch.long)
+
+    # Training mask
+    train_mask = torch.ones(len(known_data), dtype=torch.bool)
+
+    data = Data(x=x, edge_index=edge_index, y=y, train_mask=train_mask)
+    return data
+
+# Modell trainieren
+def train_model(data, model, optimizer, loss_fn, epochs=200):
+    model.train()
+    for epoch in range(epochs):
+        optimizer.zero_grad()
+        out = model(data.x, data.edge_index)
+        loss = loss_fn(out[data.train_mask], data.y[data.train_mask])
+        loss.backward()
+        optimizer.step()
+
 # Knoten als PyTorch-Tensor zurückgeben
-def get_node_features(graph, node):
-    return torch.tensor([random.random() for _ in range(10)], dtype=torch.float)
+def get_node_features(graph, name):
+    query = f"""
+    SELECT ?vipStatus WHERE {{
+        {{
+            ?personAccount a :PersonAccount ;
+                           :fullName "{name}" ;
+                           :VIPStatus ?vipStatus .
+        }}
+        UNION
+        {{
+            ?contact a :Contact ;
+                     :contactFullName "{name}" ;
+                     :VIPStatus ?vipStatus .
+        }}
+    }}
+    """
+    result = graph.query(query)
+    vip_status = 0
+    for row in result:
+        vip_status = 1 if str(row.vipStatus) in ["VIP", "First Choice VIP"] else 0
+    features = [vip_status] * 10
+    return torch.tensor(features, dtype=torch.float)
 
 # Kanten als PyTorch-Tensor zurückgeben
-def get_edges(num_nodes):
-    edge_index = torch.randint(0, num_nodes, (2, 200))
+def get_edges(graph, known_data):
+    edge_index = []
+    for name, vip_status in known_data:
+        # Add edges for Contacts based on employedBy relationship
+        query = f"""
+        SELECT ?relatedName WHERE {{
+            ?contact a :Contact ;
+                     :contactFullName "{name}" ;
+                     :employedBy ?account .
+            ?relatedContact a :Contact ;
+                            :employedBy ?account ;
+                            :contactFullName ?relatedName .
+        }}
+        """
+        result = graph.query(query)
+        for row in result:
+            related_name = str(row.relatedName)
+            if related_name in [n for n, _ in known_data]:
+                edge_index.append([known_data.index((name, vip_status)), known_data.index((related_name, 1 if related_name == "VIP" else 0))])
+
+        # Add edges for PersonAccounts based on VIPRepresentativeFullName relationship
+        query = f"""
+        SELECT ?relatedName WHERE {{
+            ?personAccount a :PersonAccount ;
+                           :fullName "{name}" ;
+                           :VIPRepresentativeFullName ?vipRep .
+            ?relatedPersonAccount a :PersonAccount ;
+                                   :VIPRepresentativeFullName ?vipRep ;
+                                   :fullName ?relatedName .
+        }}
+        """
+        result = graph.query(query)
+        for row in result:
+            related_name = str(row.relatedName)
+            if related_name in [n for n, _ in known_data]:
+                edge_index.append([known_data.index((name, vip_status)), known_data.index((related_name, 1 if related_name == "VIP" else 0))])
+
+    # Convert edge_index to a two-dimensional tensor
+    if edge_index:
+        edge_index = torch.tensor(edge_index, dtype=torch.long).t().contiguous()
+    else:
+        edge_index = torch.empty((2, 0), dtype=torch.long)
+
     return edge_index
 
+# VIP-Status vorhersagen
+def predict_vip_status(model, graph, name):
+    model.eval()
+    node_features = get_node_features(graph, name).unsqueeze(0)
+    known_data = extract_training_data(graph)
+    edge_index = get_edges(graph, known_data)
+
+    with torch.no_grad():
+        prediction = model(node_features, edge_index)
+        vip_prob = torch.argmax(prediction[0]).item()
+
+    return vip_prob
+
+# Vorhersagen validieren
+def validate_predictions(graph, model, known_data):
+    correct = 0
+    total = len(known_data)
+    for name, true_status in known_data:
+        predicted_status = predict_vip_status(model, graph, name)
+        if predicted_status == true_status:
+            correct += 1
+    accuracy = correct / total
+    return accuracy
+
 # Ontologie laden
-def load_rdf_graph(ontology_file):
+def load_rdf_graph(ontology_file = ontology_file):
     graph = Graph()
     graph.parse(ontology_file, format="ttl")
     return graph
 
+# Alle Person-Accounts und Contacts aus der Ontologie extrahieren
+def get_info_from_ontology(graph):
+    query = """
+    SELECT ?name WHERE {
+        {
+            ?personAccount a :PersonAccount ;
+                           :fullName ?name .
+        }
+        UNION
+        {
+            ?contact a :Contact ;
+                     :contactFullName ?name .
+        }
+    }
+    """
+    result = graph.query(query)
+    return [str(row.name) for row in result]
 
+
+# TODO: Graphsage trainiert model implizit, allerdings kann hier noch dazu die Cross entropy genutzt werden
+
+# Grundidee: möglichst große klassifikation präzise (im Bezug auf Kreuzentropie) zu sagen ob der Node ein VIP ist oder nicht.
+
+# AUFGABE b) Wie kann graphen erweitern für Zielgruppen orientierte Marketing campaigns?
+# Ansatz "Clustering", wie kann ich die gemeinsamkeiten sammeln um die zusammen zu bewerten?
+# Ansatz: Man könnte alle gemeinsamkeiten betrachten, weg von GraphSAGE, man hat die Knoten und evtl. einen fiktiven link "interesse", das verbindet
+# die Knoten, die gemeinsamkeiten haben
+# Empfehlung: schauen wieviele Nodes traversieren muss um links zu bilden zwischen den Nodes.
+# Von einer Node alle relationen betrachten! Also: Knoten Obama, wie ist es bei traversal auf ticketkauf? Gibt es vielleicht eine weitere Node
+# (Contact oder Person) die an der selben Kunstshow teilgenommen hat? Das ist eine Zielgruppe!
+# Idee: unterschiedliche Kunstshow arten und Jahre!
+# Einzelne Knoten mit bestimmter Tiefe (Layer) traversen und gucken ob dann bei dem Zielknoten eine Verbindung zu Nodes besteht
+# Kein GraphSAGE notwendig, da wir nur die Embedings betrachten, sondern oberflächlich den Graphen anschauen und traversieren von Knoten zu knoten und
+# schauen welche Ähnliche Eigenschaften aufweisen
+# TODO: In Person Kontakte und Personen (Accounts) sind die Knoten, die müssen mit aktivierungsfunktion
+# (rectified linear unit) durchführen und irgendwie trainieren mit regulation,
+# danach kriegen wir representation im vektorraum (Von Wörter bzw. Token wie beim ersten mal zu Vektoren)

@@ -1,6 +1,9 @@
+import os
+
 import streamlit as st
 
 import main
+
 
 def input_validation(user_input_x, user_input_z):
     if user_input_x is None:
@@ -97,32 +100,34 @@ else:
             )
             st.markdown("#### Subgraph")
             st.image(subgraph_img)
-    ontology_file = "art_show_ontology.ttl"
-    graph = main.load_rdf_graph(ontology_file)
-    model = main.GraphSAGE(in_channels=10, out_channels=2, hidden_channels=16) # 10 input features, 2 output classes, 16 hidden units
-    model.eval()
+    graph = main.load_rdf_graph()
+    person_list = main.get_info_from_ontology(graph)
     st.divider()
     st.subheader("VIP-Status Vorhersage für Personen und Kontakte")
-    selected = st.text_input("Geben Sie den Namen eines Kontakts oder einer Person ein, für die der VIP-Status vorhergesagt werden soll:")
+    selected = st.selectbox("Wählen Sie eine Person oder einen Kontakt aus, für den der VIP-Status vorhergesagt werden soll:", options=person_list)
+    # TODO: fetch these objects dynamically based on field VIP status and rdf scheme, use dropdown instead of textfield
     st.info(
         f"""
         *Verfügbar:*  \n 
-        Kontakte: Henry Smith, Sarah Benz \n 
+        Kontakte: Henry Smith, Sarah Benz \n
         Personen: Barack Obama, Heinz Schuster, Tom Miller
         """
     )
     if st.button("VIP Status vorhersagen"):
         if selected:
-            node_features = main.get_node_features(graph, selected).unsqueeze(0)
-            num_nodes = node_features.size(0)
-            edge_index = main.get_edges(num_nodes)
-
-            with main.torch.no_grad():
-                prediction = model(node_features, edge_index)
-                vip_prob = main.torch.exp(prediction)[0, 1].item()
+            model = main.GraphSAGE(in_channels=10, out_channels=2,
+                                   hidden_channels=16)  # 10 input features, 2 output classes, 16 hidden units
+            optimizer = main.torch.optim.Adam(model.parameters(), lr=0.01)
+            loss_fn = main.torch.nn.CrossEntropyLoss()
+            data = main.extract_training_data(graph)
+            train_data = main.prepare_training_data(data, graph)
+            # Train model using training data and optimizer
+            main.train_model(train_data, model, optimizer, loss_fn)
+            # Predict VIP status
+            vip_prob = main.predict_vip_status(model, graph,selected)
             st.write(f"Vorhersage-Wahrscheinlichkeit für VIP-Status: {vip_prob:.2f}")
-            st.write("(Schwellenwert für VIP-Status: > 0.5)")
 
+            st.write("(Schwellenwert für VIP-Status: > 0.5)")
             if vip_prob > 0.5:
                 st.success("Dieser Kontakt wird als VIP eingestuft!")
             else:
