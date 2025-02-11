@@ -180,40 +180,47 @@ def retrieve_subgraph_and_answer(g: rdflib.Graph, query: str, is_hardcoded_graph
         return "", 0
 
     else:
-        #query = "How many visitors attended ART SHOW YEAR 3?"
-        #query2 = "List all visitors of ART SHOW YEAR 3?"
-        #query3 = "Which accounts are sponsor of the Fair?"
 
         # Option 2: Use SPARQL query to retrieve the subgraph
+
+        # Generiert eine Sparql Query mit Hilfe eines LLMs
         sparql_query = user_query_to_sparql(query, g)
+
         print(f"----------------------------\nSPARQL Query:\n{sparql_query}\n----------------------------")
 
+        # Sucht im Graphen mit der generierten Query nach Übereinstimmungen
         results = g.query(sparql_query)
-        # Convert results into a subgraph
 
+       # Debug: Wurden daten gefunden?
         if results:
             print("Results found")
         else:
             print("No results found")
 
+        # Fügt die Ergebnisse zu einen Subggraph
         subgraph = rdflib.Graph()
         for row in results:
             subgraph.add(row)
 
-        # Serialize the subgraph as Turtle format for better readability
+        # Serialisiert den Subgraphen im Turtle Format
         subgraph_ttl = subgraph.serialize(format="turtle")
+
+        # Generiert eine Antwort basierend auf den serialisierten Subgraphen, TODO:
         final_answer = query_llm(query, subgraph_ttl)
 
         return subgraph_ttl, final_answer
 
 def query_llm(query: str, subgraph_ttl: str):
     sample_prompt = (
+        # Main Grounding des LLMs
         "You are a knowledge assistant answering questions.\n\n"
         # Ursprünglich war hier ein Fehler, bspws. Wenn man die "How many visitors in art show 3" Frage gestellt hat, 
         # #wurden zwar die User Selected aber ART SHOW YEAR 3 wurde originell nicht in dem Subgraph erwähnt. Darüber hat sich dann die LLM beschwert.
         # Durch Spezifikation, dass der Subgraph die ANTWORT auf die User-query ist, wird das Problem gelöst.
         f"Here is the relevant knowledge graph data, that was selected for you and is correct in relation to the User-question. It is the ANSWER to the User-Question:\n\n{subgraph_ttl}\n\n"
+        # Aufforderung die Anfrage des Nutzers mit den INformationen aus den Testdaten zu beantworten
         f"Now answer this User-question short and precisely in a full sentence, based on the given knowledge graph data: {query}"
+        # TODO:
         f"If no helpful data is given, then give information about the give knowledge graph data (e.g. number of triples, classes, etc.)"
     )
 
