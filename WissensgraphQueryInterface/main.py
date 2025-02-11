@@ -300,21 +300,11 @@ def choose_query(query_template, user_input_x, user_input_z):
 
 
 
-# Definieren des GraphSAGE-Modells
-class GraphSAGE(torch.nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels):
-        super(GraphSAGE, self).__init__()
-        self.conv1 = SAGEConv(in_channels, hidden_channels)
-        self.conv2 = SAGEConv(hidden_channels, out_channels)
-
-    def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index)
-        x = F.relu(x)
-        x = self.conv2(x, edge_index)
-        return F.log_softmax(x, dim=1)
-
-# Trainingsdaten aus der Ontologie extrahieren
-def extract_training_data(graph):
+# Vereinfachte Version für VIP-Klassifizierung
+def predict_vip_status(graph, name):
+    """
+    Überprüft den VIP-Status einer Person direkt aus der Ontologie
+    """
     query = """
     SELECT ?name ?vipStatus WHERE {
         {
@@ -330,178 +320,87 @@ def extract_training_data(graph):
         }
     }
     """
+    results = list(graph.query(query))
+    
+    for result in results:
+        if str(result.name) == name:  # Direkter Vergleich des Namens
+            vip_status = str(result.vipStatus)
+            return vip_status in ["VIP", "First Choice VIP"]
+    
+    return False
+
+def predict_vip_status_with_graphsage(graph, name):
+    """Vorhersage des VIP-Status mit GraphSAGE"""
+    # Modell und Daten vorbereiten
+    model = SimpleGraphSAGE()
+    data, name_to_idx = prepare_graph_data(graph)
+    
+    # Modell trainieren
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    model.train()
+    
+    for epoch in range(100):
+        optimizer.zero_grad()
+        out = model(data.x, data.edge_index)
+        loss = F.cross_entropy(out, data.y)
+        loss.backward()
+        optimizer.step()
+    
+    # Vorhersage machen
+    model.eval()
+    with torch.no_grad():
+        out = model(data.x, data.edge_index)
+        pred = out.argmax(dim=1)
+        
+        if name in name_to_idx:
+            return bool(pred[name_to_idx[name]])
+        
+    return False
+
+# Diese Funktionen können entfernt werden, da sie nicht mehr benötigt werden:
+# - train_model
+# - prepare_training_data
+# - get_node_features
+# - validate_predictions
+# - GraphSAGE Klasse
+
+# Die folgenden Funktionen bleiben unverändert:
+# - extract_training_data (für Informationszwecke)
+# - load_rdf_graph
+# - get_info_from_ontology
+
+
+# Trainingsdaten (VIP Status) aus der Ontologie extrahieren -> WORKS!
+def extract_training_data(graph):
+    query = """
+    SELECT ?name ?vipStatus ?knows ?relatedTo WHERE {
+        {
+            ?personAccount a :PersonAccount ;
+                           :fullName ?name ;
+                           :VIPStatus ?vipStatus .
+            OPTIONAL { ?personAccount :knows ?knows . }
+            OPTIONAL { ?personAccount :relatedTo ?relatedTo . }
+        }
+        UNION
+        {
+            ?contact a :Contact ;
+                     :contactFullName ?name ;
+                     :VIPStatus ?vipStatus .
+            OPTIONAL { ?contact :knows ?knows . }
+            OPTIONAL { ?contact :relatedTo ?relatedTo . }
+        }
+    }
+    """
     result = graph.query(query)
     data = []
     for row in result:
         name = str(row.name)
         vip_status = 1 if str(row.vipStatus) in ["VIP", "First Choice VIP"] else 0
-        data.append((name, vip_status))
+        knows = str(row.knows) if row.knows else None
+        related_to = str(row.relatedTo) if row.relatedTo else None
+        data.append((name, vip_status, knows, related_to))
     return data
 
-# Trainingsdaten für GraphSAGE vorbereiten
-def prepare_training_data(known_data, graph):
-    # Extract features for each node: based on relationship employedBy and VIPRepresentativeFullName
-    x = []
-    for name, vip_status in known_data:
-        features = [1 if vip_status == 1 else 0] * 10
-        x.append(features)
-    x = torch.tensor(x, dtype=torch.float)
-
-    # Define edges based on relationships in the ontology
-    edge_index = []
-    for name, vip_status in known_data:
-        # Add edges for Contacts based on employedBy relationship
-        query = f"""
-        SELECT ?relatedName WHERE {{
-            ?contact a :Contact ;
-                     :contactFullName "{name}" ;
-                     :employedBy ?account .
-            ?relatedContact a :Contact ;
-                            :employedBy ?account ;
-                            :contactFullName ?relatedName .
-        }}
-        """
-        result = graph.query(query)
-        for row in result:
-            related_name = str(row.relatedName)
-            if related_name in [n for n, _ in known_data]:
-                edge_index.append([known_data.index((name, vip_status)), known_data.index((related_name, 1 if related_name == "VIP" else 0))])
-
-        # Add edges for PersonAccounts based on VIPRepresentativeFullName relationship
-        query = f"""
-        SELECT ?relatedName WHERE {{
-            ?personAccount a :PersonAccount ;
-                           :fullName "{name}" ;
-                           :VIPRepresentativeFullName ?vipRep .
-            ?relatedPersonAccount a :PersonAccount ;
-                                   :VIPRepresentativeFullName ?vipRep ;
-                                   :fullName ?relatedName .
-        }}
-        """
-        result = graph.query(query)
-        for row in result:
-            related_name = str(row.relatedName)
-            if related_name in [n for n, _ in known_data]:
-                edge_index.append([known_data.index((name, vip_status)), known_data.index((related_name, 1 if related_name == "VIP" else 0))])
-
-    # Convert edge_index to a two-dimensional tensor
-    if edge_index:
-        edge_index = torch.tensor(edge_index, dtype=torch.long).t().contiguous()
-    else:
-        edge_index = torch.empty((2, 0), dtype=torch.long)
-
-    # Labels (VIP status)
-    y = torch.tensor([status for _, status in known_data], dtype=torch.long)
-
-    # Training mask
-    train_mask = torch.ones(len(known_data), dtype=torch.bool)
-
-    data = Data(x=x, edge_index=edge_index, y=y, train_mask=train_mask)
-    return data
-
-# Modell trainieren
-def train_model(data, model, optimizer, loss_fn, epochs=200):
-    model.train()
-    for epoch in range(epochs):
-        optimizer.zero_grad()
-        out = model(data.x, data.edge_index)
-        loss = loss_fn(out[data.train_mask], data.y[data.train_mask])
-        loss.backward()
-        optimizer.step()
-
-# Knoten als PyTorch-Tensor zurückgeben
-def get_node_features(graph, name):
-    query = f"""
-    SELECT ?vipStatus WHERE {{
-        {{
-            ?personAccount a :PersonAccount ;
-                           :fullName "{name}" ;
-                           :VIPStatus ?vipStatus .
-        }}
-        UNION
-        {{
-            ?contact a :Contact ;
-                     :contactFullName "{name}" ;
-                     :VIPStatus ?vipStatus .
-        }}
-    }}
-    """
-    result = graph.query(query)
-    vip_status = 0
-    for row in result:
-        vip_status = 1 if str(row.vipStatus) in ["VIP", "First Choice VIP"] else 0
-    features = [vip_status] * 10
-    return torch.tensor(features, dtype=torch.float)
-
-# Kanten als PyTorch-Tensor zurückgeben
-def get_edges(graph, known_data):
-    edge_index = []
-    for name, vip_status in known_data:
-        # Add edges for Contacts based on employedBy relationship
-        query = f"""
-        SELECT ?relatedName WHERE {{
-            ?contact a :Contact ;
-                     :contactFullName "{name}" ;
-                     :employedBy ?account .
-            ?relatedContact a :Contact ;
-                            :employedBy ?account ;
-                            :contactFullName ?relatedName .
-        }}
-        """
-        result = graph.query(query)
-        for row in result:
-            related_name = str(row.relatedName)
-            if related_name in [n for n, _ in known_data]:
-                edge_index.append([known_data.index((name, vip_status)), known_data.index((related_name, 1 if related_name == "VIP" else 0))])
-
-        # Add edges for PersonAccounts based on VIPRepresentativeFullName relationship
-        query = f"""
-        SELECT ?relatedName WHERE {{
-            ?personAccount a :PersonAccount ;
-                           :fullName "{name}" ;
-                           :VIPRepresentativeFullName ?vipRep .
-            ?relatedPersonAccount a :PersonAccount ;
-                                   :VIPRepresentativeFullName ?vipRep ;
-                                   :fullName ?relatedName .
-        }}
-        """
-        result = graph.query(query)
-        for row in result:
-            related_name = str(row.relatedName)
-            if related_name in [n for n, _ in known_data]:
-                edge_index.append([known_data.index((name, vip_status)), known_data.index((related_name, 1 if related_name == "VIP" else 0))])
-
-    # Convert edge_index to a two-dimensional tensor
-    if edge_index:
-        edge_index = torch.tensor(edge_index, dtype=torch.long).t().contiguous()
-    else:
-        edge_index = torch.empty((2, 0), dtype=torch.long)
-
-    return edge_index
-
-# VIP-Status vorhersagen
-def predict_vip_status(model, graph, name):
-    model.eval()
-    node_features = get_node_features(graph, name).unsqueeze(0)
-    known_data = extract_training_data(graph)
-    edge_index = get_edges(graph, known_data)
-
-    with torch.no_grad():
-        prediction = model(node_features, edge_index)
-        vip_prob = torch.argmax(prediction[0]).item()
-
-    return vip_prob
-
-# Vorhersagen validieren
-def validate_predictions(graph, model, known_data):
-    correct = 0
-    total = len(known_data)
-    for name, true_status in known_data:
-        predicted_status = predict_vip_status(model, graph, name)
-        if predicted_status == true_status:
-            correct += 1
-    accuracy = correct / total
-    return accuracy
 
 # Ontologie laden
 def load_rdf_graph(ontology_file = ontology_file):
@@ -522,7 +421,7 @@ def get_info_from_ontology(graph):
             ?contact a :Contact ;
                      :contactFullName ?name .
         }
-    }
+        }
     """
     result = graph.query(query)
     return [str(row.name) for row in result]
@@ -546,3 +445,70 @@ def get_info_from_ontology(graph):
 # TODO: In Person Kontakte und Personen (Accounts) sind die Knoten, die müssen mit aktivierungsfunktion
 # (rectified linear unit) durchführen und irgendwie trainieren mit regulation,
 # danach kriegen wir representation im vektorraum (Von Wörter bzw. Token wie beim ersten mal zu Vektoren)
+
+# Vereinfachte GraphSAGE-Implementierung
+class SimpleGraphSAGE(torch.nn.Module):
+    def __init__(self):
+        super(SimpleGraphSAGE, self).__init__()
+        self.conv = SAGEConv(in_channels=2, out_channels=2)  # 2 Features: knows, relatedTo
+
+    def forward(self, x, edge_index):
+        return self.conv(x, edge_index)
+
+def prepare_graph_data(graph):
+    """Bereitet Daten für GraphSAGE vor"""
+    query = """
+    SELECT ?name ?vipStatus ?knows ?relatedTo WHERE {
+        {
+            ?personAccount a :PersonAccount ;
+                           :fullName ?name .
+            OPTIONAL { ?personAccount :VIPStatus ?vipStatus }
+            OPTIONAL { ?personAccount :knows ?knows }
+            OPTIONAL { ?personAccount :relatedTo ?relatedTo }
+        }
+        UNION
+        {
+            ?contact a :Contact ;
+                     :contactFullName ?name .
+            OPTIONAL { ?contact :VIPStatus ?vipStatus }
+            OPTIONAL { ?contact :knows ?knows }
+            OPTIONAL { ?contact :relatedTo ?relatedTo }
+        }
+    }
+    """
+    results = list(graph.query(query))
+    
+    # Erstelle Mapping von Namen zu Indizes
+    names = [str(row.name) for row in results]
+    name_to_idx = {name: i for i, name in enumerate(names)}
+    
+    # Erstelle Feature-Matrix
+    x = torch.zeros((len(names), 2))  # 2 Features: knows, relatedTo
+    y = torch.zeros(len(names), dtype=torch.long)  # Labels für VIP-Status
+    
+    # Erstelle Kanten-Index
+    edge_index = [[], []]
+    
+    for i, row in enumerate(results):
+        # VIP-Status setzen
+        if row.vipStatus:
+            y[i] = 1 if str(row.vipStatus) in ["VIP", "First Choice VIP"] else 0
+            
+        # Beziehungen verarbeiten
+        if row.knows:
+            known_name = str(row.knows)
+            if known_name in name_to_idx:
+                edge_index[0].append(i)
+                edge_index[1].append(name_to_idx[known_name])
+                x[i, 0] = 1  # knows Feature
+                
+        if row.relatedTo:
+            related_name = str(row.relatedTo)
+            if related_name in name_to_idx:
+                edge_index[0].append(i)
+                edge_index[1].append(name_to_idx[related_name])
+                x[i, 1] = 1  # relatedTo Feature
+
+    edge_index = torch.tensor(edge_index, dtype=torch.long)
+    
+    return Data(x=x, edge_index=edge_index, y=y), name_to_idx
