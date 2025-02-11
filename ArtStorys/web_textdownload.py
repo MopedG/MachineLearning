@@ -5,7 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Liste der URLs
+# Liste der URLs mit Art Stories die heruntergeladen werden sollen.
 urls = [
     "https://www.artbasel.com/stories/suzanne-valadon-centre-pompidou-19th-century-women-artist",
     "https://www.artbasel.com/stories/seven-trailblazing-galleries-debuting-at-art-basel-hong-kong-in-2025",

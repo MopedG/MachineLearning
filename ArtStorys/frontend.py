@@ -5,6 +5,7 @@ from sklearn.manifold import TSNE
 
 import main
 
+
 def map_at_k_input_validation(k, user_ranking):
     if k.strip() == "":
         return "K darf nicht leer sein."
@@ -75,7 +76,7 @@ def plot_tsne(vectors, documents, visited_stories, recommendations):
     # plt.colorbar()
     st.pyplot(plt)
 
-# Streamlit Layout
+# Streamlit Beginn
 st.title("Ranking von Art Stories")
 st.subheader("Finden Sie die ähnlichsten Geschichten zu Ihrer Anfrage")
 

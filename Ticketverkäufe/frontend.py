@@ -48,7 +48,7 @@ st.pyplot(week_plot)
 
 # Jeder Montag im Jahr
 st.subheader("Einfluss der Marketingkampagnen")
-saleWeekDaysInput = st.text_input("Gib die Wochentage ein (getrennt durch Komma, z.B. 'Mo, Tu, Fr'):")
+saleWeekDaysInput = st.text_input("Gib die Wochentage auf Englisch ein (getrennt durch Komma, z.B. 'Mo, Tu, Fr'):")
 if saleWeekDaysInput != "":
     monday_plot = main.plotEachWeekday(stationaryTimeSeriesSelected, saleWeekDaysInput, selectedYear)
     st.pyplot(monday_plot)
@@ -69,12 +69,18 @@ st.write("Die PACF zeigt, dass die Zeitreihe eine Autoregressive Ordnung von **2
 # SARIMA Test
 st.subheader("SARIMA Modellierung")
 results = main.doSarima(rawTimeSeriesSelected)
-st.write(f"Das SARIMA-Modell wurde erfolgreich erstellt. Die Modellparameter sind: (2, 1, 1), (1, 1, 1, 7).")
+st.write(f"Das SARIMA-Modell wurde erfolgreich erstellt. Die Modellparameter sind: (p=2, d=0, q=1), (1, 1, 1, 7). [d=0, da bereits differenziert]")
 st.pyplot(main.plotTimeSeriesWithSARIMA(rawTimeSeriesSelected, results))
 
 st.subheader("Vorhersage der Ticketverkäufe mit LSTM")
 st.write("Input für das LSTM: Logarithmierte Ticketverkäufe der Art Show Year 2 und 3")
 st.write("Art Show Year 1 wurde nicht verwendet, da es sich zu sehr von den anderen Jahren unterscheidet.")
 st.pyplot(lstm.show_train_set())
-st.subheader("Vorhersage der Ticketverkäufe für Jahr 4")
-st.pyplot(lstm.make_prediction_year4())
+st.subheader("Vorhersage der Ticketverkäufe für das Jahr 4 (dauert ein bisschen)")
+
+# Button hinzufügen
+if st.button("Jetzt beginnen"):
+    st.write("1. Modell wird trainiert (50 Epochen, 20 Look Back Werte, 1 Feature, 0.4 Dropout)")
+    st.write("2. Vorhersage wird erstellt")
+    st.pyplot(lstm.make_prediction_year4())
+    st.write("**Der anfängliche Abschwung kommt von dem gelernten Muster durch das Aneinanderhängen der Art Shows 2 und 3. Diesen Verlauf versucht es abzubilden.**")

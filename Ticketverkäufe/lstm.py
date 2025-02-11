@@ -13,6 +13,7 @@ import random
 
 def show_train_set():
     script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Wir verändern einen Datensatz in dem das Erste Jahr entfernt wurde.
     csv_path = os.path.join(script_dir, 'TicketsalesCleaner.csv')
     
     df = pd.read_csv(csv_path, index_col='Relative show day', parse_dates=False)
@@ -48,7 +49,7 @@ def make_prediction_year4():
     random.seed(42)
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(script_dir, 'TicketsalesCleaner.csv')
+    csv_path = os.path.join(script_dir, 'TicketsalesCleaner.csv') # TicketSalesCleaner ist
     df = pd.read_csv(csv_path, index_col='Relative show day', parse_dates=False)
 
     df.index.freq = 'D'

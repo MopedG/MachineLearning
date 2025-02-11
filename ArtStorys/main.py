@@ -1,23 +1,16 @@
 import os
-from itertools import count
-
-from gensim.models import Word2Vec
-import gensim
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
-from nltk import corpus
-from nltk.parse.util import taggedsents_to_conll
-from nltk.tokenize import sent_tokenize, word_tokenize
-
+from nltk.tokenize import word_tokenize
 import nltk
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.manifold import TSNE ## NEW
-import matplotlib.pyplot as plt ## NEW
+
 
 is_word2vec = True
 
+# Trainiert das Model auf alle Dokumente für 50 Epochen und gibt das trainierte Model zurück
 def train_doc2vec_model(documents):
     formatted_documents = [doc["content"].lower().replace("-", " ") for doc in documents]
     tagged_document_data = [TaggedDocument(words=word_tokenize(doc), tags=[str(i)]) for i, doc in enumerate(formatted_documents)]
@@ -28,32 +21,39 @@ def train_doc2vec_model(documents):
 
     return model
 
+
 def doc_2_vec(query: str):
-    nltk.download('punkt_tab')
+    nltk.download('punkt_tab')  # Nötiges NLTK-Modul für Tokenisierung herunterladen (muss nur einmal ausgeführt werden)
     documents = filesToStrings()
     formatted_query = query.replace('-', ' ')
     formatted_documents = list(map(lambda site_text: site_text['content'].lower().replace('-', ' '), documents))
 
+    # Dokumente in tokenisierte Wörter umwandeln und mit einer ID versehen
     tagged_data = [
         TaggedDocument(
-            words=word_tokenize(document), # case for covering dashes inbetween words (e.g. notre-dame)
+            words=word_tokenize(document),
             tags=[str(i)]
         )
-            for i, document in enumerate(formatted_documents)
+        for i, document in enumerate(formatted_documents)
     ]
 
+    # Doc2Vec-Modell initialisieren und trainieren
     model = Doc2Vec(tagged_data, min_count=2, vector_size=100, epochs=50)
     model.build_vocab(tagged_data)
     model.train(tagged_data, total_examples=model.corpus_count, epochs=model.epochs)
 
+    # Vektor für die Suchanfrage berechnen
     user_input_vector = model.infer_vector(word_tokenize(formatted_query))
+
+    # Vektoren für die Dokumente berechnen
     document_vectors = [
-        model.infer_vector(
-            word_tokenize(document)
-        )
-            for document in formatted_documents
+        model.infer_vector(word_tokenize(document))
+        for document in formatted_documents
     ]
+
+    # Ähnlichkeiten zwischen der Anfrage und den Dokumenten berechnen
     similarities = model.wv.cosine_similarities(user_input_vector, document_vectors)
+
     ranking = []
     for i in range(len(documents)):
         ranking.append(
@@ -62,6 +62,8 @@ def doc_2_vec(query: str):
                 'similarity': similarities[i]
             }
         )
+
+    # Ergebnisse nach Ähnlichkeit sortieren
     ranking.sort(key=lambda x: x['similarity'], reverse=True)
 
     return pd.DataFrame({
@@ -69,6 +71,7 @@ def doc_2_vec(query: str):
         'similarity': (rank['similarity'] for rank in ranking)
     })
 
+# holt die Dokumente und gibt sie als eine Liste von Strings zurück
 def filesToStrings():
     current_directory = os.path.dirname(os.path.abspath(__file__))
     textfiles_folder = os.path.join(current_directory, 'Textfiles')
@@ -87,63 +90,29 @@ def filesToStrings():
                     )
     return site_texts
 
+# Führt die gesamte Logik für die Ranking-Funktion aus
 def rank_art_stories_python_function(query, isWord2Vec):
-    return similarity_score_query_to_article_with_idf(query) if isWord2Vec else doc_2_vec(query)
+    return word_2_vec(query) if isWord2Vec else doc_2_vec(query)
 
-
-# Dieser Ansatz trainiert ein Word2Vec Model auf dem gesamten Korpus und repräsentiert jeden Artikel als Vektor (Durchschnitt der Wortvektoren).
-# Daraufhin wird die query als Vektor eingebettet und mit den Artikel-Vektoren verglichen.
-def similarity_score_query_to_article(query):
-    print("Hallo?")
+# Durchsucht die Texte basierend auf der Suchanfrage und gibt die Ergebnisse zurück
+def word_2_vec(query):
+    # Lädt die gespeicherten Dokumente als Strings
     documents = filesToStrings()
-    query_tokens = word_tokenize(query.lower())
 
-    all_sentences = []
-    for document in documents:
-        all_sentences.extend([word_tokenize(sent.lower()) for sent in sent_tokenize(document["content"])])
-
-    model = gensim.models.Word2Vec(all_sentences, min_count=1, vector_size=100, window=5)
-
-    document_vectors = []
-    for document in documents:
-        tokens = word_tokenize(document["content"].lower())
-        vectors = [model.wv[word] for word in tokens if word in model.wv]
-        if vectors:
-            document_vector = np.mean(vectors, axis=0)
-        else:
-            document_vector = np.zeros(model.vector_size)
-        document_vectors.append((document["filename"], document_vector))
-
-    query_vectors = [model.wv[token] for token in query_tokens if token in model.wv]
-    if query_vectors:
-        query_vector = np.mean(query_vectors, axis=0)
-    else:
-        query_vector = np.zeros(model.vector_size)
-
-    # Compare the query vector to the article embeddings using cosine similarity
-    df_rankings = pd.DataFrame(columns=['Document', 'Similarity'])
-    for site, doc_vector in document_vectors:
-        similarity = cosine_similarity([query_vector], [doc_vector])[0][0]
-        df_rankings = df_rankings.append({'Document': site, 'Similarity': similarity}, ignore_index=True)
-
-    df_rankings = df_rankings.sort_values(by='Similarity', ascending=False)
-
-    for index, row in df_rankings.iterrows():
-        print(f"Document: {row['Document']}, Similarity: {row['Similarity']}")
-
-    return df_rankings
-
-
-def similarity_score_query_to_article_with_idf(query):
-    documents = filesToStrings()
+    # Speichert den Inhalt der Dokumente in einer Liste.
     corpus = [doc["content"] for doc in documents]
 
+    # Der corpus wird verwendet um eine tfidf Matrix zu erstellen
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(corpus)
+
+    # Wandelt die Suchanfrage ebenfalls in einen TF-IDF-Vektor um
     query_vector = vectorizer.transform([query])
 
+    # Berechnet die Ähnlichkeiten zwischen den Vektor der Suchanfrage und der Matrix des Corpus', mittels Cosine Similarity
     similarity_scores = cosine_similarity(query_vector, tfidf_matrix).flatten()
 
+    # Erstellt ein DataFrame mit den Ergebnissen und sortiert sie nach der Ähnlichkeit
     df_rankings = pd.DataFrame(columns=['Document', 'Similarity'])
     for i, score in enumerate(similarity_scores):
         temp_df = pd.DataFrame({'Document': [documents[i]["filename"]], 'Similarity': [score]})
