@@ -7,6 +7,7 @@ import ollama
 from google import genai
 import google.generativeai as genai
 
+# TODO: Eigener Key muss bei Google API erstellt werden
 os.environ["GEMINI_API_KEY"] = "AIzaSyBx1iiyVOCSJWYr5OvurVB8brlBjjBx-CI"
 
 # ✅ Ensure required packages are installed
@@ -183,7 +184,7 @@ def retrieve_subgraph_and_answer(g: rdflib.Graph, query: str, is_hardcoded_graph
 
         # Option 2: Use SPARQL query to retrieve the subgraph
 
-        # Generiert eine Sparql Query mit Hilfe eines LLMs
+        # Generiert eine Sparql Query aus menschlicher Sprache mit Hilfe eines LLMs (Gemini)
         sparql_query = user_query_to_sparql(query, g)
 
         print(f"----------------------------\nSPARQL Query:\n{sparql_query}\n----------------------------")
@@ -191,7 +192,7 @@ def retrieve_subgraph_and_answer(g: rdflib.Graph, query: str, is_hardcoded_graph
         # Sucht im Graphen mit der generierten Query nach Übereinstimmungen
         results = g.query(sparql_query)
 
-       # Debug: Wurden daten gefunden?
+       # Debug: Wurden Daten gefunden?
         if results:
             print("Results found")
         else:
@@ -202,36 +203,41 @@ def retrieve_subgraph_and_answer(g: rdflib.Graph, query: str, is_hardcoded_graph
         for row in results:
             subgraph.add(row)
 
-        # Serialisiert den Subgraphen im Turtle Format
+        # Serialisiert den Sub-Graphen im Turtle Format
         subgraph_ttl = subgraph.serialize(format="turtle")
 
-        # Generiert eine Antwort basierend auf den serialisierten Subgraphen, TODO:
+        # Generiert eine Antwort basierend auf den serialisierten Subgraphen und der User-Query
         final_answer = query_llm(query, subgraph_ttl)
 
         return subgraph_ttl, final_answer
 
 def query_llm(query: str, subgraph_ttl: str):
+    # Prompt zur Erstellung einer Antwort auf die User Anfrage in natürlicher Sprache
     sample_prompt = (
         # Main Grounding des LLMs
         "You are a knowledge assistant answering questions.\n\n"
         # Ursprünglich war hier ein Fehler, bspws. Wenn man die "How many visitors in art show 3" Frage gestellt hat, 
-        # #wurden zwar die User Selected aber ART SHOW YEAR 3 wurde originell nicht in dem Subgraph erwähnt. Darüber hat sich dann die LLM beschwert.
+        # wurden zwar die User selected aber ART SHOW YEAR 3 wurde originell nicht in dem Subgraph erwähnt. Darüber hat sich dann die LLM beschwert.
         # Durch Spezifikation, dass der Subgraph die ANTWORT auf die User-query ist, wird das Problem gelöst.
         f"Here is the relevant knowledge graph data, that was selected for you and is correct in relation to the User-question. It is the ANSWER to the User-Question:\n\n{subgraph_ttl}\n\n"
-        # Aufforderung die Anfrage des Nutzers mit den INformationen aus den Testdaten zu beantworten
+        # Aufforderung die Anfrage des Nutzers mit den Informationen aus den Testdaten zu beantworten
         f"Now answer this User-question short and precisely in a full sentence, based on the given knowledge graph data: {query}"
-        # TODO:
         f"If no helpful data is given, then give information about the give knowledge graph data (e.g. number of triples, classes, etc.)"
     )
 
+    # Konfigurierung und Abfrage von Gemini
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
     model = genai.GenerativeModel('gemini-1.5-flash-latest')
     response = model.generate_content(sample_prompt)
     return response.text
 
+# Generiert eine Sparql Query aus menschlicher Sprache mit Hilfe eines LLMs (Gemini)
 def user_query_to_sparql(query: str, reasoned_graph: rdflib.graph, max_triples=70):
+
     triples = list(reasoned_graph)[:max_triples]  # Begrenze auf max_triples Tripel
     formatted_triples = "\n".join(f"<{s}> <{p}> <{o}> ." for s, p, o in triples)
+
+    # Prompt zur Erstellung einer Sparql-query, die die vom Nutzer angefragten Informationen aus dem RDF-Graphen extrahiert
     prompt = (
         "You are an AI module that generates **only valid SPARQL queries** based on a user question and a provided RDF knowledge graph.\n"
         "### Instructions:\n"
@@ -251,6 +257,7 @@ def user_query_to_sparql(query: str, reasoned_graph: rdflib.graph, max_triples=7
         "A SPARQL query that returns **relevant subject, predicate, and object triples** matching the user's query and the provided RDF graph, without additional explanations."
     )
 
+    # Konfigurierung und Abfrage von Gemini
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
     model = genai.GenerativeModel('gemini-1.5-flash-latest')
     response = model.generate_content(prompt)
