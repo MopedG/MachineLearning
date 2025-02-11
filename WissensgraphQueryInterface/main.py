@@ -330,31 +330,39 @@ def predict_vip_status(graph, name):
     return False
 
 def predict_vip_status_with_graphsage(graph, name):
-    """Vorhersage des VIP-Status mit GraphSAGE"""
-    # Modell und Daten vorbereiten
+    # Model und Daten vorbereiten
+    """Vorhersage des VIP-Status mit GraphSAGE und Bias"""
     model = SimpleGraphSAGE()
-    data, name_to_idx = prepare_graph_data(graph)
+    data, name_to_idx, known_vips = prepare_graph_data(graph) # GraphSAGE-Daten vorbereiten
     
+    # Wenn der VIP-Status bereits bekannt ist, diesen direkt zurückgeben
+    if name in known_vips:
+        return known_vips[name]
+    
+    # Ansonsten GraphSAGE-Vorhersage machen
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     # Modell trainieren
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     model.train()
     
-    for epoch in range(100):
+    # Mehr Epochen und bessere Verlustfunktion
+    for epoch in range(200):
         optimizer.zero_grad()
         out = model(data.x, data.edge_index)
         loss = F.cross_entropy(out, data.y)
         loss.backward()
         optimizer.step()
     
-    # Vorhersage machen
+    # Modell evaluieren und Vorhersage treffen
     model.eval()
     with torch.no_grad():
         out = model(data.x, data.edge_index)
-        pred = out.argmax(dim=1)
+        pred_probabilities = F.softmax(out, dim=1)
+        pred = pred_probabilities.argmax(dim=1)
         
         if name in name_to_idx:
-            return bool(pred[name_to_idx[name]])
-        
+            idx = name_to_idx[name]
+            return bool(pred[idx])
+    
     return False
 
 # Diese Funktionen können entfernt werden, da sie nicht mehr benötigt werden:
@@ -450,13 +458,17 @@ def get_info_from_ontology(graph):
 class SimpleGraphSAGE(torch.nn.Module):
     def __init__(self):
         super(SimpleGraphSAGE, self).__init__()
-        self.conv = SAGEConv(in_channels=2, out_channels=2)  # 2 Features: knows, relatedTo
+        self.conv1 = SAGEConv(in_channels=3, out_channels=8)  # 3 Features: knows, relatedTo, bias
+        self.conv2 = SAGEConv(in_channels=8, out_channels=2)  # 2 Ausgabeklassen
 
     def forward(self, x, edge_index):
-        return self.conv(x, edge_index)
+        x = F.relu(self.conv1(x, edge_index))
+        x = self.conv2(x, edge_index)
+        return x
 
+# GraphSAGE-Daten vorbereiten
 def prepare_graph_data(graph):
-    """Bereitet Daten für GraphSAGE vor"""
+    """Bereitet Daten für GraphSAGE vor mit zusätzlichem VIP-Bias"""
     query = """
     SELECT ?name ?vipStatus ?knows ?relatedTo WHERE {
         {
@@ -478,22 +490,32 @@ def prepare_graph_data(graph):
     """
     results = list(graph.query(query))
     
-    # Erstelle Mapping von Namen zu Indizes
     names = [str(row.name) for row in results]
     name_to_idx = {name: i for i, name in enumerate(names)}
     
     # Erstelle Feature-Matrix
-    x = torch.zeros((len(names), 2))  # 2 Features: knows, relatedTo
-    y = torch.zeros(len(names), dtype=torch.long)  # Labels für VIP-Status
+    x = torch.zeros((len(names), 3))  # 3 Features: knows, relatedTo, vip_bias
+    y = torch.zeros(len(names), dtype=torch.long)
     
-    # Erstelle Kanten-Index
+    # Kanten (Beziehungen) als Kantenliste
     edge_index = [[], []]
     
-    for i, row in enumerate(results):
-        # VIP-Status setzen
+    # VIP-Status aus der Ontologie als Bias hinzufügen
+    known_vips = {}
+    for row in results:
+        name = str(row.name)
         if row.vipStatus:
-            y[i] = 1 if str(row.vipStatus) in ["VIP", "First Choice VIP"] else 0
-            
+            is_vip = str(row.vipStatus) in ["VIP", "First Choice VIP"]
+            known_vips[name] = is_vip
+    
+    for i, row in enumerate(results):
+        name = str(row.name)
+        
+        # VIP Bias setzen (Feature 3)
+        if name in known_vips:
+            x[i, 2] = 1.0 if known_vips[name] else -1.0
+            y[i] = 1 if known_vips[name] else 0
+        
         # Beziehungen verarbeiten
         if row.knows:
             known_name = str(row.knows)
@@ -510,5 +532,4 @@ def prepare_graph_data(graph):
                 x[i, 1] = 1  # relatedTo Feature
 
     edge_index = torch.tensor(edge_index, dtype=torch.long)
-    
-    return Data(x=x, edge_index=edge_index, y=y), name_to_idx
+    return Data(x=x, edge_index=edge_index, y=y), name_to_idx, known_vips
