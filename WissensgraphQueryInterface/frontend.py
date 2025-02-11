@@ -117,12 +117,12 @@ else:
             is_vip_graphsage = main.predict_vip_status_with_graphsage(graph, selected)
 
             # Direkte Ontologie-Abfrage
-            '''
-            if is_vip:
-                st.success(f"{selected} ist als VIP eingestuft! (Aus der Ontologie)")
-            else:
-                st.warning(f"{selected} ist nicht als VIP eingestuft. (Aus der Ontologie)")
-            '''
+            
+            #if is_vip:
+            #    st.success(f"{selected} ist als VIP eingestuft! (Aus der Ontologie)")
+            #else:
+            #    st.warning(f"{selected} ist nicht als VIP eingestuft. (Aus der Ontologie)")
+        
             
             # GraphSAGE Vorhersage
             if is_vip_graphsage:
