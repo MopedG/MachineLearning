@@ -1,7 +1,5 @@
 import os
-
 import streamlit as st
-
 import main
 
 
@@ -105,7 +103,6 @@ else:
     st.divider()
     st.subheader("VIP-Status Vorhersage für Personen und Kontakte")
     selected = st.selectbox("Wählen Sie eine Person oder einen Kontakt aus, für den der VIP-Status vorhergesagt werden soll:", options=person_list)
-    # TODO: fetch these objects dynamically based on field VIP status and rdf scheme, use dropdown instead of textfield
     st.info(
         f"""
         *Verfügbar:*  \n 
@@ -115,20 +112,18 @@ else:
     )
     if st.button("VIP Status vorhersagen"):
         if selected:
-            model = main.GraphSAGE(in_channels=10, out_channels=2,
-                                   hidden_channels=16)  # 10 input features, 2 output classes, 16 hidden units
-            optimizer = main.torch.optim.Adam(model.parameters(), lr=0.01)
-            loss_fn = main.torch.nn.CrossEntropyLoss()
-            data = main.extract_training_data(graph)
-            train_data = main.prepare_training_data(data, graph)
-            # Train model using training data and optimizer
-            main.train_model(train_data, model, optimizer, loss_fn)
-            # Predict VIP status
-            vip_prob = main.predict_vip_status(model, graph,selected)
-            st.write(f"Vorhersage-Wahrscheinlichkeit für VIP-Status: {vip_prob:.2f}")
+            graph = main.load_rdf_graph()
+            is_vip = main.predict_vip_status(graph, selected) 
+            is_vip_graphsage = main.predict_vip_status_with_graphsage(graph, selected)
 
-            st.write("(Schwellenwert für VIP-Status: > 0.5)")
-            if vip_prob > 0.5:
-                st.success("Dieser Kontakt wird als VIP eingestuft!")
+            # Direkte Ontologie-Abfrage
+            if is_vip:
+                st.success(f"{selected} ist als VIP eingestuft! (Aus der Ontologie)")
             else:
-                st.warning("Dieser Kontakt wird nicht als VIP eingestuft.")
+                st.warning(f"{selected} ist nicht als VIP eingestuft. (Aus der Ontologie)")
+
+            # GraphSAGE Vorhersage
+            if is_vip_graphsage:
+                st.success(f"{selected} wird von GraphSAGE als VIP eingestuft!")
+            else:
+                st.warning(f"{selected} wird von GraphSAGE nicht als VIP eingestuft.")
