@@ -69,6 +69,7 @@ def subgraph(query_template):
     z_condition = query_template["subgraph"]["zCondition"] if "zCondition" in query_template["subgraph"] else ""
     condition = query_template["subgraph"]["condition"] if "condition" in query_template["subgraph"] else ""
 
+
     # Erstelle SPARQL-Abfrage, die die Knoten des Subgraphen zurück gibt
     subgraph_query = f"""
     SELECT ?xField ?zField WHERE {{
@@ -167,7 +168,6 @@ def build_cnf(query_template, query_input, user_input):
     # Baue KNF
     return f"q = {searched_node_char}? * ∃{exists_node_char}: {node_x}({node_x_abbreviation}{'?' if node_x_abbreviation == searched_node_char else ''}) ∧ {node_z}({node_z_abbreviation}{'?' if node_z_abbreviation == searched_node_char else ''}) ∧ {node_y}({node_x_abbreviation}{'?' if node_x_abbreviation == searched_node_char else ''}, {node_z_abbreviation}{'?' if node_z_abbreviation == searched_node_char else ''}) ∧ {field}({exists_node_char}, '{user_input}')"
 
-
 # Abfragevorlagen dienen als Grundprinzip der App.
 # Jede Vorlage definiert
 # - ein Knoten-Kanten-Knoten Tripel.
@@ -179,6 +179,7 @@ def build_cnf(query_template, query_input, user_input):
 #       gibt, kann der Benutzer im Frontend entscheiden, welche der Abfragen er ausführen möchte,
 #       in dem er das Eingabefeld leer lässt, welches er abfragen möchte.
 #       Falls es nur eine Abfrage für eine Abfragevorlage gibt, wird im Frontend nur ein Eingabefeld angezeigt.
+
 query_templates = [
     {
         "template": {
@@ -390,6 +391,19 @@ def predict_vip_status_with_graphsage(graph, name):
     
     return False
 
+# Diese Funktionen können entfernt werden, da sie nicht mehr benötigt werden:
+# - train_model
+# - prepare_training_data
+# - get_node_features
+# - validate_predictions
+# - GraphSAGE Klasse
+
+# Die folgenden Funktionen bleiben unverändert:
+# - extract_training_data (für Informationszwecke)
+# - load_rdf_graph
+# - get_info_from_ontology
+
+
 # Trainingsdaten (VIP Status) aus der Ontologie extrahieren -> WORKS!
 def extract_training_data(graph):
     query = """
@@ -545,3 +559,120 @@ def prepare_graph_data(graph):
 
     edge_index = torch.tensor(edge_index, dtype=torch.long)
     return Data(x=x, edge_index=edge_index, y=y), name_to_idx, known_vips
+
+def find_similar_contacts(graph, target_name):
+    """
+    Finds similar contacts based on common attributes like:
+    - Same art show attendance
+    - Similar ticket types
+    - Similar VIP status
+    - Common relationships
+    """
+    query = """
+    SELECT DISTINCT ?otherName ?commonShow ?ticketType ?vipStatus WHERE {
+        # Get target person/contact info
+        {
+            { ?target a :PersonAccount ; :fullName ?targetName }
+            UNION
+            { ?target a :Contact ; :contactFullName ?targetName }
+        }
+        
+        # Get their ticket info
+        ?targetTicket :boughtBy ?target ;
+                     :fairName ?commonShow ;
+                     :ticketType ?targetTicketType .
+                     
+        # Find others who attended same show
+        {
+            { ?other a :PersonAccount ; :fullName ?otherName }
+            UNION
+            { ?other a :Contact ; :contactFullName ?otherName }
+        }
+        ?otherTicket :boughtBy ?other ;
+                     :fairName ?commonShow ;
+                     :ticketType ?ticketType .
+                     
+        # Optional VIP status
+        OPTIONAL {
+            { ?other :VIPStatus ?vipStatus }
+            UNION
+            { ?target :VIPStatus ?vipStatus }
+        }
+        
+        # Exclude the target person themselves
+        FILTER(?targetName = "%s")
+        FILTER(?otherName != ?targetName)
+    }
+    """
+    
+    results = graph.query(query % target_name)
+    
+    similar_contacts = {}
+    for row in results:
+        name = str(row.otherName)
+        if name not in similar_contacts:
+            similar_contacts[name] = {
+                'shows': set(),
+                'ticketTypes': set(),
+                'vipStatus': None
+            }
+        similar_contacts[name]['shows'].add(str(row.commonShow))
+        similar_contacts[name]['ticketTypes'].add(str(row.ticketType))
+        if row.vipStatus:
+            similar_contacts[name]['vipStatus'] = str(row.vipStatus)
+    
+    return similar_contacts
+
+def get_marketing_groups(graph):
+    """
+    Groups contacts and person accounts based on common attributes
+    """
+    query = """
+    SELECT DISTINCT ?name ?show ?ticketType ?vipStatus WHERE {
+        {
+            { ?person a :PersonAccount ; :fullName ?name }
+            UNION
+            { ?person a :Contact ; :contactFullName ?name }
+        }
+        OPTIONAL {
+            ?ticket :boughtBy ?person ;
+                    :fairName ?show ;
+                    :ticketType ?ticketType .
+        }
+        OPTIONAL {
+            ?person :VIPStatus ?vipStatus
+        }
+    }
+    """
+    
+    results = graph.query(query)
+    
+    groups = {
+        'vip': set(),
+        'premium': set(),
+        'standard': set(),
+        'shows': {}
+    }
+    
+    for row in results:
+        name = str(row.name)
+        
+        # Group by VIP status
+        if row.vipStatus and str(row.vipStatus) in ["VIP", "First Choice VIP"]:
+            groups['vip'].add(name)
+            
+        # Group by ticket type
+        if row.ticketType:
+            if str(row.ticketType) == "Premium-Ticket":
+                groups['premium'].add(name)
+            else:
+                groups['standard'].add(name)
+                
+        # Group by show attendance
+        if row.show:
+            show = str(row.show)
+            if show not in groups['shows']:
+                groups['shows'][show] = set()
+            groups['shows'][show].add(name)
+    
+    return groups

@@ -129,3 +129,51 @@ else:
                 st.success(f"{selected} wird als VIP eingestuft!")
             else:
                 st.warning(f"{selected} wird nicht als VIP eingestuft.")
+
+    st.divider()
+    st.subheader("Zielgruppenorientierte Marketing-Kampagnen")
+    
+    tab1, tab2 = st.tabs(["Ähnliche Kontakte finden", "Marketing Gruppen"])
+    
+    with tab1:
+        person_list = main.get_info_from_ontology(graph)
+        selected_person = st.selectbox(
+            "Wählen Sie eine Person, um ähnliche Kontakte zu finden:",
+            options=person_list
+        )
+        
+        if st.button("Ähnliche Kontakte suchen"):
+            if selected_person:
+                similar = main.find_similar_contacts(graph, selected_person)
+                if similar:
+                    for name, info in similar.items():
+                        shows = ", ".join(info['shows'])
+                        tickets = ", ".join(info['ticketTypes'])
+                        vip = info['vipStatus'] if info['vipStatus'] else "Kein VIP Status"
+                        
+                        st.markdown(f"""
+                        **{name}**
+                        - Gemeinsame Shows: {shows}
+                        - Ticket-Typen: {tickets}
+                        - VIP Status: {vip}
+                        """)
+                else:
+                    st.info("Keine ähnlichen Kontakte gefunden.")
+                    
+    with tab2:
+        if st.button("Marketing Gruppen anzeigen"):
+            groups = main.get_marketing_groups(graph)
+            
+            st.markdown("### VIP Gruppe")
+            st.write(", ".join(groups['vip']) if groups['vip'] else "Keine VIPs")
+            
+            st.markdown("### Premium Ticket Gruppe")
+            st.write(", ".join(groups['premium']) if groups['premium'] else "Keine Premium-Ticket Inhaber")
+            
+            st.markdown("### Standard Ticket Gruppe")
+            st.write(", ".join(groups['standard']) if groups['standard'] else "Keine Standard-Ticket Inhaber")
+            
+            st.markdown("### Nach Kunstshows")
+            for show, attendees in groups['shows'].items():
+                st.markdown(f"**{show}**")
+                st.write(", ".join(attendees))
