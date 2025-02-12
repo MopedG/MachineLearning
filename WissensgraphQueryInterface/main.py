@@ -46,6 +46,7 @@ from rdflib import Graph, Node, RDF
 current_directory = os.path.dirname(os.path.abspath(__file__))
 ontology_file = os.path.join(current_directory, 'art_show_ontology.ttl')
 
+# Erstelle RDF Graphen aus art_show_ontology.ttl Datei
 graph = Graph()
 graph.parse(ontology_file, format="ttl")
 
@@ -59,14 +60,16 @@ graph.parse(ontology_file, format="ttl")
 # X: Person, Y: TicketFor, Z: bought
 # X: Contact, Y: Account, Z: employedBy
 
-
+"""
+Gibt ein Bild des Subgraphen einer Abfragenvorlage in Bytes zurück
+"""
 def subgraph(query_template):
+    # Hole Bedingungen, die für die übergebene Vorlage definiert wurden
     x_condition = query_template["subgraph"]["xCondition"] if "xCondition" in query_template["subgraph"] else ""
     z_condition = query_template["subgraph"]["zCondition"] if "zCondition" in query_template["subgraph"] else ""
     condition = query_template["subgraph"]["condition"] if "condition" in query_template["subgraph"] else ""
 
-    # x condition -> meaning this condition exists on the x node
-
+    # Erstelle SPARQL-Abfrage, die die Knoten des Subgraphen zurück gibt
     subgraph_query = f"""
     SELECT ?xField ?zField WHERE {{
         ?x a :{query_template["template"]["x"]["node"]} ;
@@ -81,10 +84,13 @@ def subgraph(query_template):
     }}
     """
 
+    # Führe SPARQL-Abfrage aus
     subgraph_result = graph.query(subgraph_query)
 
+    # Erstelle Pydot bzw. Graphviz Graphen zur Generierung der Abbildung
     pydot_graph = pydot.Dot(graph_type="graph")
 
+    # Fülle Pydot bzw. Graphviz Graphen mit Knoten und Kanten basierend auf den SPARQL-Abfrage Ergebnissen.
     edges = []
     x_nodes = {}
     z_nodes = {}
@@ -107,9 +113,13 @@ def subgraph(query_template):
     for x, z in edges:
         pydot_graph.add_edge(pydot.Edge(src=x_nodes[x], dst=z_nodes[z], label=query_template["template"]["y"]["node"]))
 
+    # Erstelle und Rückgabe der Abbildung des Subgraphen im 'GIF' Format als Bytes
     return pydot_graph.create(format="gif")
 
-
+"""
+Gibt die Resultate einer SPARQL-Abfrage zurück, die basierend auf der übergebenen
+Vorlage, Abfragenvorlage und Benutzereingabe ausgeführt wird
+"""
 def query_ontology(query_template, query, user_input):
     query_result = graph.query(
         query["queryTemplate"].replace("$", user_input)
@@ -127,10 +137,12 @@ def query_ontology(query_template, query, user_input):
 def build_cnf(query_template, query_input, user_input):
     template = query_template["template"]
 
+    # Hole Knotenbezeichnungen
     node_x = template["x"]["node"]
     node_y = template["y"]["node"]
     node_z = template["z"]["node"]
 
+    # Bestimme Abkürzungen der Kontenbezeichnung
     node_x_abbreviation = ""
     node_z_abbreviation = ""
     while node_x_abbreviation == node_z_abbreviation:
@@ -144,6 +156,7 @@ def build_cnf(query_template, query_input, user_input):
 
     field = template[query_input]["field"]
 
+    # Bestimme die Knoten, die gesucht und gegeben sind
     if query_input == "x":
         exists_node_char = node_x_abbreviation
         searched_node_char = node_z_abbreviation
@@ -151,9 +164,21 @@ def build_cnf(query_template, query_input, user_input):
         exists_node_char = node_z_abbreviation
         searched_node_char = node_x_abbreviation
 
+    # Baue KNF
     return f"q = {searched_node_char}? * ∃{exists_node_char}: {node_x}({node_x_abbreviation}{'?' if node_x_abbreviation == searched_node_char else ''}) ∧ {node_z}({node_z_abbreviation}{'?' if node_z_abbreviation == searched_node_char else ''}) ∧ {node_y}({node_x_abbreviation}{'?' if node_x_abbreviation == searched_node_char else ''}, {node_z_abbreviation}{'?' if node_z_abbreviation == searched_node_char else ''}) ∧ {field}({exists_node_char}, '{user_input}')"
 
 
+# Abfragevorlagen dienen als Grundprinzip der App.
+# Jede Vorlage definiert
+# - ein Knoten-Kanten-Knoten Tripel.
+# - Bedingungen, um den Subgraphen zu erstellen
+# - Abfragen, die ausgeführt werden können
+#       (z.B. Contact employedBy <Account?>, wobei der Benutzer einen Contact (contactFullName) eingibt und das System
+#       den zugehörigen Account (accountName) sucht.
+#       Pro Abfragevorlage können mehrere Abfragen definiert werden. Falls es mehrere Abfragen für eine Abfragevorlage
+#       gibt, kann der Benutzer im Frontend entscheiden, welche der Abfragen er ausführen möchte,
+#       in dem er das Eingabefeld leer lässt, welches er abfragen möchte.
+#       Falls es nur eine Abfrage für eine Abfragevorlage gibt, wird im Frontend nur ein Eingabefeld angezeigt.
 query_templates = [
     {
         "template": {

@@ -54,6 +54,7 @@ def doc_2_vec(query: str):
     # Ähnlichkeiten zwischen der Anfrage und den Dokumenten berechnen
     similarities = model.wv.cosine_similarities(user_input_vector, document_vectors)
 
+    # Erstelle Ranking
     ranking = []
     for i in range(len(documents)):
         ranking.append(
