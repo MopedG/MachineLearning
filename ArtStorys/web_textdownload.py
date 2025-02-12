@@ -37,40 +37,45 @@ urls = [
     "https://www.artbasel.com/stories/world-weather-network"
 ]
 
-# Initialize Selenium WebDriver
+"""
+Funktionen zum Herunterladen von Textinhalten von Webseiten
+"""
+# Selenium- und Chrome-Webdriver-Initialisierung
 def init_driver():
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service)
     driver.maximize_window()
     return driver
 
-# Function to extract details from a webpage
+"""
+Funktion zum Extrahieren von Details aus einer Webseite mit Selenium
+"""
 def extract_details_with_selenium(driver, url):
     try:
-        # Load the webpage
         driver.get(url)
-        time.sleep(10)  # Wait for the page to load fully
+        time.sleep(10)  # Abwarten, bis die Seite vollständig geladen ist
 
-        # Parse the page source with BeautifulSoup
+        # Parsen der Seitenquelle mit BeautifulSoup
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        # Locate the content div
+        # Content-Div finden (class 'content' im div von Art Basel) 
         content_div = soup.find('div', class_='content')
         if not content_div:
             print(f"Keine classe 'content' im div gefunden für {url}")
             return None
 
-        # Extract main heading (h1)
+        # Hauptüberschrift extrahieren (h1)
         header = content_div.find("h1").get_text(strip=True) if content_div.find("h1") else "Keine Überschrift für den Artikel gefunden!"
 
-        # Extract subheader (p with class 'subheading')
+        # Unterüberschrift extrahieren (p mit class 'subheading')
         subheader = content_div.find("p", class_="subheading").get_text(strip=True) if content_div.find("p", class_="subheading") else "Keine Unterüberschrift für den Artikel gefunden!"
 
-        # Extract other paragraphs excluding subheader
+        # Andere Absätze als Unterüberschrift extrahieren
         subheader_paragraphs = [
             p.get_text(strip=True) for p in content_div.find_all("p")
         ]
 
+        # Alle Absätze extrahieren, die nicht die Unterüberschrift sind
         paragraphs = [
             p.get_text(strip=True) for p in soup.find_all("p") if p not in subheader_paragraphs or p != subheader
         ]
@@ -81,7 +86,9 @@ def extract_details_with_selenium(driver, url):
         print(f"Fehler bei Verarbeitung von {url}: {e}")
         return None
 
-# Save extracted content to a text file
+"""
+Speichern von gescrapten Inhalten in eine Textdatei
+"""
 def save_to_file(url, header, subheader, subheader_paragraphs, paragraphs):
     try:
         # Generate a safe filename from the URL
@@ -103,20 +110,23 @@ def save_to_file(url, header, subheader, subheader_paragraphs, paragraphs):
     except Exception as e:
         print(f"Kein HTML-Inhalt gefunden für {url} gefunden: Fehler {e}")
 
-# Main script
 def main():
+    # Initialisierung des Webdrivers
     driver = init_driver()
 
+    # Verarbeiten der URLs
     for url in urls:
         print(f"Verarbeite: {url}")
         result = extract_details_with_selenium(driver, url)
 
+        # Speichern der Ergebnisse in einer Textdatei
         if result:
             header, subheader, subheader_paragraphs, paragraphs = result
             save_to_file(url, header, subheader, subheader_paragraphs, paragraphs)
         else:
             print(f"Keine Inhalte gefunden für {url}")
 
+    # Schließen des Webdrivers
     driver.quit()
 
 if __name__ == "__main__":

@@ -10,7 +10,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 is_word2vec = True
 
-# Trainiert das Model auf alle Dokumente für 50 Epochen und gibt das trainierte Model zurück
+"""
+Trainiert das Doc2Vec-Modell auf den gegebenen Dokumenten mit 50 Epochen und gibt das trainierte Modell zurück
+"""
 def train_doc2vec_model(documents):
     formatted_documents = [doc["content"].lower().replace("-", " ") for doc in documents]
     tagged_document_data = [TaggedDocument(words=word_tokenize(doc), tags=[str(i)]) for i, doc in enumerate(formatted_documents)]
@@ -21,7 +23,9 @@ def train_doc2vec_model(documents):
 
     return model
 
-
+"""
+Berechnet die Ähnlichkeiten zwischen der Suchanfrage und den Dokumenten und gibt die Ergebnisse zurück
+"""
 def doc_2_vec(query: str):
     nltk.download('punkt_tab')  # Nötiges NLTK-Modul für Tokenisierung herunterladen (muss nur einmal ausgeführt werden)
     documents = filesToStrings()
@@ -72,7 +76,9 @@ def doc_2_vec(query: str):
         'similarity': (rank['similarity'] for rank in ranking)
     })
 
-# holt die Dokumente und gibt sie als eine Liste von Strings zurück
+"""
+Holt die Dokumente und gibt sie als eine Liste von Strings zurück
+"""
 def filesToStrings():
     current_directory = os.path.dirname(os.path.abspath(__file__))
     textfiles_folder = os.path.join(current_directory, 'Textfiles')
@@ -91,11 +97,15 @@ def filesToStrings():
                     )
     return site_texts
 
-# Führt die gesamte Logik für die Ranking-Funktion aus
+"""
+Führt die gesamte Logik für die Ranking-Funktion aus
+"""
 def rank_art_stories_python_function(query, isWord2Vec):
     return word_2_vec(query) if isWord2Vec else doc_2_vec(query)
 
-# Durchsucht die Texte basierend auf der Suchanfrage und gibt die Ergebnisse zurück
+"""
+Durchsucht die Texte basierend auf der Suchanfrage und gibt die Ergebnisse zurück
+"""
 def word_2_vec(query):
     # Lädt die gespeicherten Dokumente als Strings
     documents = filesToStrings()
@@ -127,6 +137,7 @@ def word_2_vec(query):
 
 
 """
+Berechnet den Mean Average Precision (MAP) at k für die gegebenen Werte
 user_ranking: e.g. [1, 0, None, 3, 2]
 """
 def map_at_k(k, user_ranking):
@@ -137,56 +148,52 @@ def map_at_k(k, user_ranking):
     return map_at_k_sum / k
 
 
+
 """
+Empfehlungsfunktion, die die Top-3-Kunstgeschichten basierend auf den besuchten Kunstgeschichten empfiehlt
 visited_stories: indices for visited stories, e.g. [1, 2, 5]
+rückgabe: DataFrame mit den Top-3-Empfehlungen für die nächsten Dokumente
 """
 def recommend_art_stories_python_function(visited_stories):
-    ## Recommends the top-3 art stories based on the visited
-    ## @param visited_stories: List of visited art stories
-    ## @return: DataFrame with top-3 recommendations for next documents
     documents = filesToStrings()
     corpus = [doc["content"] for doc in documents]
     doc2vec_model = train_doc2vec_model(documents)
 
-    # Calculate document vectors
+    # Berechnet die Vektoren für die Dokumente
     document_vectors = [doc2vec_model.infer_vector(word_tokenize(doc["content"])) for doc in documents]
     visited_vectors = [document_vectors[i] for i in visited_stories]
 
-    # Calculate average vector for visited stories
+    # Berechnet den Durchschnittsvektor für die besuchten Geschichten
     avg_vector = np.mean(visited_vectors, axis=0)
 
-    # Calculate cosine similarity between average vector and all document vectors
+    # Berechnet die Kosinusähnlichkeit zwischen dem Durchschnittsvektor und allen Dokumentenvektoren
     similarities = cosine_similarity([avg_vector], document_vectors).flatten()
 
-    # Sort documents by similarity
+    # Sortiert die Dokumente nach Ähnlichkeit
     recommendations = [
         {"artstory": documents[i]["filename"], "similarity": similarities[i]}
         for i in range(len(documents)) if i not in visited_stories
     ]
     recommendations = sorted(recommendations, key=lambda x: x["similarity"], reverse=True)[:3]
 
-    # Prepare data for clustering
+    # Vorbereitung der Daten für die Visualisierung
     labels = {
         doc["filename"]: {"filename": doc["filename"], "is_visited": i in visited_stories, "is_recommended": False}
         for i, doc in enumerate(documents)
     }
-    # Mark recommended documents
+    # Markiere empfohlene Dokumente
     for rec in recommendations:
         if rec["artstory"] in labels:
             labels[rec["artstory"]]["is_recommended"] = True
 
+    # Erstelle DataFrame für die Empfehlungen
     recommendation_df = pd.DataFrame(recommendations)
     print(recommendation_df)
-
-    '''
-    # Optional: t-SNE-Visualisierung
-    plot_tsne(document_vectors, [doc["filename"] for doc in documents])
-    '''
-
     return {"recommendations": recommendation_df, "document_vectors": document_vectors, "documents": documents}
+
 if __name__ == "__main__":
     ## TEST FOR DEBUGGING IN BACKEND
     query = "cathedral fire france excavation notre-dame reconstruction"
     print("query: ", query)
-    #rank_art_stories_python_function(query, isWord2Vec=False)
+    # Test ranking function
     recommended = recommend_art_stories_python_function(visited_stories=[3, 2, 4])

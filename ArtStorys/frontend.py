@@ -5,12 +5,14 @@ from sklearn.manifold import TSNE
 
 import main
 
+# Mapping von Art Storys zu Ranking-Indizes
 def map_artstory_to_ranking_index(artstory_as_string, ranking):
     for i, item in enumerate(ranking["Document"]):
         if item == artstory_as_string:
             return i
     return None
 
+# Map@K Eingabevalidierung
 def map_at_k_input_validation(k, user_ranking):
     if k.strip() == "":
         return "K darf nicht leer sein."
@@ -36,26 +38,26 @@ def map_at_k_input_validation(k, user_ranking):
 
     return None
 
+# Plottet eine t-SNE Visualisierung der Ranking-Daten
+# vectors: Liste von Vektoren, die visualisiert werden sollen
+# labels: Liste von Dokumentenlabels, die den Vektoren entsprechen
 def plot_tsne(vectors, documents, visited_stories, recommendations):
-    """
-    Plots a t-SNE visualization of the ranking data.
-    :param vectors: List of vectors to visualize.
-    :param labels: List of document labels corresponding to the vectors.
-    """
     if len(vectors) < 2:
         st.warning("Nicht genug Datenpunkte für die t-SNE Visualisierung.")
         return
-    # Extract recommended filenames
+    # Vorgeschlagene Dateinamen extrahieren
     recommended_filenames = recommendations["artstory"].tolist()
     vectors = np.array(vectors)
+    # t-SNE Konfiguration
     tsne = TSNE(n_components=2, random_state=24, perplexity=min(5, len(vectors-1)))
     vectors_2d = tsne.fit_transform(vectors)
 
+    # Plot
     plt.clf()
     plt.figure(figsize=(12, 8))
     for i, doc in enumerate(documents):
         labels_added = {"Besucht": False, "Empfohlen": False, "Andere": False}
-
+        # Farben für besuchte, empfohlene und andere Dokumente
         x, y = vectors_2d[i]
         if i in visited_stories:
             plt.scatter(x, y, c="blue", label="Besucht" if not labels_added["Besucht"] else None, s=80,
@@ -65,17 +67,16 @@ def plot_tsne(vectors, documents, visited_stories, recommendations):
             plt.scatter(x, y, c="red", label="Empfohlen" if not labels_added["Empfohlen"] else None, s=100,
                         edgecolors="black")
             labels_added["Empfohlen"] = True
-
+        # Sonstige Dokumente in grau
         else:
             plt.scatter(x, y, c="gray", label="Andere" if not labels_added["Andere"] else None, alpha=0.5)
             labels_added["Andere"] = True
 
-    # Add titles and labels
+    # Hinzufügen von Beschriftungen und Labels
     plt.title("t-SNE Visualisierung der Art Story Cluster", fontsize=16)
     plt.xlabel("X-Achse", fontsize=12)
     plt.ylabel("Y-Achse", fontsize=12)
     plt.legend(bbox_to_anchor=(1,1.2), title='Besucht', loc= "upper left")
-    # plt.colorbar()
     st.pyplot(plt)
 
 # Streamlit Beginn
@@ -121,7 +122,7 @@ if query:
 
 # Ausgabe der Rankings als Tabelle
 ranking = st.session_state.get('ranking', None)
-
+# Ranking anzeigen
 if ranking is not None and not ranking.empty:
     st.write("Ranking der Ähnlichkeiten pro Token:")
     st.table(ranking)
@@ -143,8 +144,6 @@ if ranking is not None and not ranking.empty:
         documents = result['documents']
         if not recommendations.empty:
             st.write(recommendations)
-            #st.dataframe(recommendations)
-
             st.subheader("t-SNE Visualisierung der Empfehlungen und Cluster:")
             plot_tsne(document_vectors, documents, visited_stories, recommendations)
         else:
@@ -156,6 +155,7 @@ if ranking is not None and not ranking.empty:
     else:
         st.warning("Bitte wählen Sie besuchte Geschichten aus.")
 
+# Berechnung von MAP@K
 if ranking is not None:
     st.markdown("#### Berechne MAP@K")
     st.info("""
@@ -168,16 +168,17 @@ if ranking is not None:
     user_ranking = {}
     col1, col2 = st.columns([1, 10])
 
+    # Eigenschaften für Eingabefelder des Rankings
     options = [""]
     for item in ranking["Document"]:
         options.append(item)
-
     for i in range(len(ranking)):
         col1.text_input(label=str(i), label_visibility="hidden", key=str(i) + "indicator", disabled=True, value=str(i))
         user_ranking[i] = col2.selectbox(label=str(i), label_visibility="hidden", key=i, options=options)
 
     k = st.text_input(label="K", placeholder="K", value=str(len(ranking)))
 
+    # Berechnung von MAP@K durchführen
     if st.button('Berechne MAP@K'):
         user_ranking_as_indices = [map_artstory_to_ranking_index(x, ranking) for x in user_ranking.values()]
         err_msg = map_at_k_input_validation(k, user_ranking_as_indices)
@@ -190,6 +191,7 @@ if ranking is not None:
 else:
     st.warning("Keine Ähnlichkeiten gefunden.")
 
+# Aktualisieren der besuchten Geschichten
 def update_visited_stories(story_index):
     if 'visited_stories' not in st.session_state:
         st.session_state['visited_stories'] = []
