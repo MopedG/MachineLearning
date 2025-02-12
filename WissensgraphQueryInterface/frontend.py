@@ -121,8 +121,6 @@ else:
                 st.image(subgraph_img)
 
     # VIP-Status Vorhersage
-
-
     graph = main.load_rdf_graph()
     person_list = main.get_info_from_ontology(graph)
     st.divider()
