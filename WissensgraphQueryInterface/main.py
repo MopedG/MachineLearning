@@ -365,13 +365,6 @@ def predict_vip_status_with_graphsage(graph, name):
     
     return False
 
-# Diese Funktionen können entfernt werden, da sie nicht mehr benötigt werden:
-# - train_model
-# - prepare_training_data
-# - get_node_features
-# - validate_predictions
-# - GraphSAGE Klasse
-
 # Die folgenden Funktionen bleiben unverändert:
 # - extract_training_data (für Informationszwecke)
 # - load_rdf_graph
