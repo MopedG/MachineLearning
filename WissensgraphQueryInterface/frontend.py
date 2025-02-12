@@ -2,7 +2,9 @@ import os
 import streamlit as st
 import main
 
-
+"""
+Validierung der Benutzereingabe
+"""
 def input_validation(user_input_x, user_input_z):
     if user_input_x is None:
         if user_input_z.strip() == "":
@@ -27,14 +29,17 @@ st.subheader("Wissensgraph Query Interface")
 
 x, y, z = st.columns(3)
 
+# Alle möglichen Werte für die Benutzereingabe abrufen
 nodes_x, nodes_y, nodes_z = main.get_template_node_sets()
 
 selection_x = x.selectbox(label="x", label_visibility="hidden", options=list(nodes_x))
 selection_y = y.selectbox(label="y", label_visibility="hidden", options=list(nodes_y))
 selection_z = z.selectbox(label="z", label_visibility="hidden", options=list(nodes_z))
 
+# Query Template auswählen basierend auf den Benutzereingaben
 query_template = main.get_query_template(selection_x, selection_y, selection_z)
 
+# Abfrage-Template anzeigen
 if query_template is None:
     st.error("Invalide Kombination")
 else:
@@ -77,6 +82,7 @@ else:
             """
         )
 
+    # Abfrage ausführen
     pressed = st.button("Abfragen")
     if pressed:
         error_text = input_validation(user_input_x, user_input_z)
@@ -98,6 +104,8 @@ else:
             )
             st.markdown("#### Subgraph")
             st.image(subgraph_img)
+
+    # VIP-Status Vorhersage
     graph = main.load_rdf_graph()
     person_list = main.get_info_from_ontology(graph)
     st.divider()
@@ -113,28 +121,20 @@ else:
     if st.button("VIP Status vorhersagen"):
         if selected:
             graph = main.load_rdf_graph()
-            #is_vip = main.predict_vip_status(graph, selected)  # debug only
-            is_vip_graphsage = main.predict_vip_status_with_graphsage(graph, selected)
-
-            # Direkte Ontologie-Abfrage
-            
-            #if is_vip:
-            #    st.success(f"{selected} ist als VIP eingestuft! (Aus der Ontologie)")
-            #else:
-            #    st.warning(f"{selected} ist nicht als VIP eingestuft. (Aus der Ontologie)")
-        
-            
             # GraphSAGE Vorhersage
-            if is_vip_graphsage:
+            is_vip = main.predict_vip_status_with_graphsage(graph, selected)
+            if is_vip:
                 st.success(f"{selected} wird als VIP eingestuft!")
             else:
                 st.warning(f"{selected} wird nicht als VIP eingestuft.")
 
+    # Zielgruppenorientierte Marketing-Kampagnen
     st.divider()
     st.subheader("Zielgruppenorientierte Marketing-Kampagnen")
     
     tab1, tab2 = st.tabs(["Ähnliche Kontakte finden", "Marketing Gruppen"])
     
+    # Ähnliche Kontakte finden
     with tab1:
         person_list = main.get_info_from_ontology(graph)
         selected_person = st.selectbox(
@@ -159,7 +159,8 @@ else:
                         """)
                 else:
                     st.info("Keine ähnlichen Kontakte gefunden.")
-                    
+
+    # Marketing Gruppen          
     with tab2:
         if st.button("Marketing Gruppen anzeigen"):
             groups = main.get_marketing_groups(graph)

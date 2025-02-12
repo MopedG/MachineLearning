@@ -1,24 +1,3 @@
-"""
-Prüfungsaufgabe 3
-Programmieren Sie ein Wissensgraph Query Interface für ein Graph Neural Network der auf Moodle bereitgestellten
-Kunstshow-Ontologie als Streamlit-App für die Abfrage durch einen Kunstshow-Experten.
-
-a) App-Aufbau
-    1 User Query: Anfrage (=Prompt) in natürlicher Sprache.
-    2 CNF Expression: Ausgabe in konjunktiver Normalform.
-    3 Highlighted Subgraph: Visueller Fokus auf die relevanten Knoten und Kanten.
-    4 SPARQL Query: Abfrage des RDF-Graphen.
-    5 Missing Node Classification: vorhergesagte fehlende binäre Knotenklasse VIPStatus ja/nein.
-    6 Query Response: Ergebnis der Abfrage.
-    - Tipp: Beginnen Sie mit wenigen Kontakten und Person-Accounts.
-b) Erweitern Sie die Streamlit-App um den Anwendungsfall der zielgruppenorientierten Ansprache
-von ähnlichen Kontakten und Person-Accounts (=Personen, die keiner Firma zugeordnet werden
-können) für Newsletter Marketing-Kampagnen.
-    - Beispiel-Anfrage: "Welche Kontakte können beim Versand meiner
-      Newsletter Marketing-Kampagne zu einer Zielgruppe zusammengefasst
-      werden?"
-    - Tipp: Beginnen Sie mit wenigen Kontakten und Person-Accounts.
-"""
 import os
 import random
 
@@ -134,7 +113,9 @@ def query_ontology(query_template, query, user_input):
 
     return result
 
-
+"""
+Baue KNF basierend auf Benutzereingabe und Abfragenvorlage
+"""
 def build_cnf(query_template, query_input, user_input):
     template = query_template["template"]
 
@@ -286,6 +267,9 @@ query_templates = [
 ]
 
 
+"""
+Gibt die Knotenbezeichnungen der Abfragevorlagen zurück
+"""
 def get_template_node_sets():
     x = {query_template["template"]["x"]["node"] for query_template in query_templates}
     y = {query_template["template"]["y"]["node"] for query_template in query_templates}
@@ -293,6 +277,9 @@ def get_template_node_sets():
 
     return x, y, z
 
+"""
+Query-Vorlage basierend auf Knotenbezeichnungen zurückgeben
+"""
 def get_query_template(x, y, z):
     for query_template in query_templates:
         template = query_template["template"]
@@ -317,6 +304,9 @@ def _get_query(query_template, query_input):
         if query["input"] == query_input:
             return query
 
+"""
+Auswahl der Abfrage basierend auf Benutzereingabe
+"""
 def choose_query(query_template, user_input_x, user_input_z):
     if user_input_x is None or user_input_x.strip() == "":
         return user_input_z, _get_query(query_template, "z")
@@ -325,43 +315,15 @@ def choose_query(query_template, user_input_x, user_input_z):
         return user_input_x, _get_query(query_template, "x")
 
 
-
-# Vereinfachte Version für VIP-Klassifizierung
-def predict_vip_status(graph, name):
-    """
-    Überprüft den VIP-Status einer Person direkt aus der Ontologie
-    """
-    query = """
-    SELECT ?name ?vipStatus WHERE {
-        {
-            ?personAccount a :PersonAccount ;
-                           :fullName ?name ;
-                           :VIPStatus ?vipStatus .
-        }
-        UNION
-        {
-            ?contact a :Contact ;
-                     :contactFullName ?name ;
-                     :VIPStatus ?vipStatus .
-        }
-    }
-    """
-    results = list(graph.query(query))
-    
-    for result in results:
-        if str(result.name) == name:  # Direkter Vergleich des Namens
-            vip_status = str(result.vipStatus)
-            return vip_status in ["VIP", "First Choice VIP"]
-    
-    return False
-
+"""
+Vorhersage des VIP-Status einer Person aus der Ontologie mit GraphSAGE und VIP-Bias
+"""
 def predict_vip_status_with_graphsage(graph, name):
     # Model und Daten vorbereiten
-    """Vorhersage des VIP-Status mit GraphSAGE und Bias"""
     model = SimpleGraphSAGE()
     data, name_to_idx, known_vips = prepare_graph_data(graph) # GraphSAGE-Daten vorbereiten
     
-    # Wenn der VIP-Status bereits bekannt ist, diesen direkt zurückgeben
+    # Wenn der VIP-Status (Bias) bereits bekannt ist, diesen direkt zurückgeben
     if name in known_vips:
         return known_vips[name]
     
@@ -370,7 +332,7 @@ def predict_vip_status_with_graphsage(graph, name):
     # Modell trainieren
     model.train()
     
-    # Mehr Epochen und bessere Verlustfunktion
+    # 200 Epochen trainieren und Cross-Entropy-Loss Funktion verwenden
     for epoch in range(200):
         optimizer.zero_grad()
         out = model(data.x, data.edge_index)
@@ -391,20 +353,9 @@ def predict_vip_status_with_graphsage(graph, name):
     
     return False
 
-# Diese Funktionen können entfernt werden, da sie nicht mehr benötigt werden:
-# - train_model
-# - prepare_training_data
-# - get_node_features
-# - validate_predictions
-# - GraphSAGE Klasse
-
-# Die folgenden Funktionen bleiben unverändert:
-# - extract_training_data (für Informationszwecke)
-# - load_rdf_graph
-# - get_info_from_ontology
-
-
-# Trainingsdaten (VIP Status) aus der Ontologie extrahieren -> WORKS!
+"""
+Trainingsdaten (VIP Status) aus der Ontologie extrahieren
+"""
 def extract_training_data(graph):
     query = """
     SELECT ?name ?vipStatus ?knows ?relatedTo WHERE {
@@ -436,13 +387,17 @@ def extract_training_data(graph):
     return data
 
 
-# Ontologie laden
+"""
+Ontologie laden und RDF-Graph zurückgeben
+"""
 def load_rdf_graph(ontology_file = ontology_file):
     graph = Graph()
     graph.parse(ontology_file, format="ttl")
     return graph
 
-# Alle Person-Accounts und Contacts aus der Ontologie extrahieren
+"""
+Alle Person-Accounts und Kontakte aus der Ontologie extrahieren
+"""
 def get_info_from_ontology(graph):
     query = """
     SELECT ?name WHERE {
@@ -460,26 +415,9 @@ def get_info_from_ontology(graph):
     result = graph.query(query)
     return [str(row.name) for row in result]
 
-
-# TODO: Graphsage trainiert model implizit, allerdings kann hier noch dazu die Cross entropy genutzt werden
-
-# Grundidee: möglichst große klassifikation präzise (im Bezug auf Kreuzentropie) zu sagen ob der Node ein VIP ist oder nicht.
-
-# AUFGABE b) Wie kann graphen erweitern für Zielgruppen orientierte Marketing campaigns?
-# Ansatz "Clustering", wie kann ich die gemeinsamkeiten sammeln um die zusammen zu bewerten?
-# Ansatz: Man könnte alle gemeinsamkeiten betrachten, weg von GraphSAGE, man hat die Knoten und evtl. einen fiktiven link "interesse", das verbindet
-# die Knoten, die gemeinsamkeiten haben
-# Empfehlung: schauen wieviele Nodes traversieren muss um links zu bilden zwischen den Nodes.
-# Von einer Node alle relationen betrachten! Also: Knoten Obama, wie ist es bei traversal auf ticketkauf? Gibt es vielleicht eine weitere Node
-# (Contact oder Person) die an der selben Kunstshow teilgenommen hat? Das ist eine Zielgruppe!
-# Idee: unterschiedliche Kunstshow arten und Jahre!
-# Einzelne Knoten mit bestimmter Tiefe (Layer) traversen und gucken ob dann bei dem Zielknoten eine Verbindung zu Nodes besteht
-# Kein GraphSAGE notwendig, da wir nur die Embedings betrachten, sondern oberflächlich den Graphen anschauen und traversieren von Knoten zu knoten und
-# schauen welche Ähnliche Eigenschaften aufweisen
-# TODO: In Person Kontakte und Personen (Accounts) sind die Knoten, die müssen mit aktivierungsfunktion
-# (rectified linear unit) durchführen und irgendwie trainieren mit regulation,
-# danach kriegen wir representation im vektorraum (Von Wörter bzw. Token wie beim ersten mal zu Vektoren)
-
+"""
+Initialisierung des GraphSAGE-Modells
+"""
 # Vereinfachte GraphSAGE-Implementierung
 class SimpleGraphSAGE(torch.nn.Module):
     def __init__(self):
@@ -487,14 +425,17 @@ class SimpleGraphSAGE(torch.nn.Module):
         self.conv1 = SAGEConv(in_channels=3, out_channels=8)  # 3 Features: knows, relatedTo, bias
         self.conv2 = SAGEConv(in_channels=8, out_channels=2)  # 2 Ausgabeklassen
 
+    # Forward-Pass
     def forward(self, x, edge_index):
         x = F.relu(self.conv1(x, edge_index))
         x = self.conv2(x, edge_index)
         return x
 
-# GraphSAGE-Daten vorbereiten
+"""
+Bereitet Daten für GraphSAGE vor mit zusätzlichem VIP-Bias
+"""
 def prepare_graph_data(graph):
-    """Bereitet Daten für GraphSAGE vor mit zusätzlichem VIP-Bias"""
+    # GraphSAGE-Daten vorbereiten
     query = """
     SELECT ?name ?vipStatus ?knows ?relatedTo WHERE {
         {
@@ -516,6 +457,7 @@ def prepare_graph_data(graph):
     """
     results = list(graph.query(query))
     
+    # Namen zu Index Mapping
     names = [str(row.name) for row in results]
     name_to_idx = {name: i for i, name in enumerate(names)}
     
@@ -549,7 +491,7 @@ def prepare_graph_data(graph):
                 edge_index[0].append(i)
                 edge_index[1].append(name_to_idx[known_name])
                 x[i, 0] = 1  # knows Feature
-                
+        
         if row.relatedTo:
             related_name = str(row.relatedTo)
             if related_name in name_to_idx:
@@ -557,17 +499,18 @@ def prepare_graph_data(graph):
                 edge_index[1].append(name_to_idx[related_name])
                 x[i, 1] = 1  # relatedTo Feature
 
+    # Kantenliste in Tensor umwandeln
     edge_index = torch.tensor(edge_index, dtype=torch.long)
     return Data(x=x, edge_index=edge_index, y=y), name_to_idx, known_vips
 
+"""
+Findet ähnliche Kontakte basierend auf gemeinsamen Eigenschaften wie:
+- Gleiche Kunstshow-Teilnahme
+- Ähnliche Ticket-Typen
+- Ähnlicher VIP-Status
+- Gemeinsame Beziehungen
+"""
 def find_similar_contacts(graph, target_name):
-    """
-    Finds similar contacts based on common attributes like:
-    - Same art show attendance
-    - Similar ticket types
-    - Similar VIP status
-    - Common relationships
-    """
     query = """
     SELECT DISTINCT ?otherName ?commonShow ?ticketType ?vipStatus WHERE {
         # Get target person/contact info
@@ -607,6 +550,7 @@ def find_similar_contacts(graph, target_name):
     
     results = graph.query(query % target_name)
     
+    # Gruppierung der ähnlichen Kontakte
     similar_contacts = {}
     for row in results:
         name = str(row.otherName)
@@ -623,10 +567,10 @@ def find_similar_contacts(graph, target_name):
     
     return similar_contacts
 
+"""
+Gruppiert Kontakte und Person-Accounts basierend auf gemeinsamen Eigenschaften
+"""
 def get_marketing_groups(graph):
-    """
-    Groups contacts and person accounts based on common attributes
-    """
     query = """
     SELECT DISTINCT ?name ?show ?ticketType ?vipStatus WHERE {
         {
@@ -654,21 +598,22 @@ def get_marketing_groups(graph):
         'shows': {}
     }
     
+    # Gruppierung basierend auf gemeinsamen Eigenschaften
     for row in results:
         name = str(row.name)
         
-        # Group by VIP status
+        # Gruppierung nach VIP-Status
         if row.vipStatus and str(row.vipStatus) in ["VIP", "First Choice VIP"]:
             groups['vip'].add(name)
             
-        # Group by ticket type
+        # Gruppierung nach Ticket-Typ
         if row.ticketType:
             if str(row.ticketType) == "Premium-Ticket":
                 groups['premium'].add(name)
             else:
                 groups['standard'].add(name)
                 
-        # Group by show attendance
+        # Gruppierung nach Kunstshow-Teilnahme
         if row.show:
             show = str(row.show)
             if show not in groups['shows']:

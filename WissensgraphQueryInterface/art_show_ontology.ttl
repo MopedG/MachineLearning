@@ -67,6 +67,7 @@
 :sellingAccount a rdf:Property .
 :soldAtShow a rdf:Property .
 
+### Relationships between Contacts and PersonAccounts
 :knows a rdf:Property .
 :relatedTo a rdf:Property .
 
@@ -239,7 +240,7 @@
     :sellingAccount :Account_2 ;
     :soldAtShow "ART SHOW YEAR 3"^^xsd:string .
 
-### Relationships between Contacts and PersonAccounts
+### Relationships between Contacts and PersonAccounts: Examples
 :Contact_10 :knows :PersonAccount_100 .
 :Contact_11 :relatedTo :PersonAccount_101 .
 :Contact_10 :relatedTo :PersonAccount_102 .
