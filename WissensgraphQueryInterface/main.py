@@ -365,12 +365,6 @@ def predict_vip_status_with_graphsage(graph, name):
     
     return False
 
-# Die folgenden Funktionen bleiben unverändert:
-# - extract_training_data (für Informationszwecke)
-# - load_rdf_graph
-# - get_info_from_ontology
-
-
 # Trainingsdaten (VIP Status) aus der Ontologie extrahieren -> WORKS!
 def extract_training_data(graph):
     query = """
