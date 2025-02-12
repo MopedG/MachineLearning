@@ -269,6 +269,138 @@ query_templates = [
                 """
             }
         ]
+    },
+    {
+        "template": {
+            "x": { "node": "Ticket", "field": "fairName" },
+            "y": { "node": "boughtBy" },
+            "z": { "node": "PersonAccount", "field": "fullName" }
+        },
+        "subgraph": {
+            "xCondition": ":boughtBy ?z"
+        },
+        "queries": [
+            {
+                "input": "x",
+                "output": "z",
+                "example": "'ART SHOW YEAR 3' boughtBy ?",
+                "queryTemplate": """
+                SELECT ?fullName WHERE
+                {            
+                    ?personAccount a :PersonAccount ;
+                             :fullName ?fullName .
+                    ?ticket a :Ticket ;
+                             :fairName ?fairName ;
+                             :boughtBy ?personAccount .            
+                    FILTER(?fairName = "$")
+                }
+                """
+            },
+            {
+                "input": "z",
+                "output": "x",
+                "example": "? boughtBy 'Barack Obama'",
+                "queryTemplate": """
+                SELECT ?fairName WHERE
+                {            
+                    ?personAccount a :PersonAccount ;
+                             :fullName ?fullName .
+                    ?ticket a :Ticket ;
+                             :fairName ?fairName ;
+                             :boughtBy ?personAccount .            
+                    FILTER(?fullName = "$")
+                }
+                """
+            }
+        ]
+    },
+    {
+        "template": {
+            "x": { "node": "Artwork", "field": "title" },
+            "y": { "node": "artworkMedium" },
+            "z": { "node": "ArtworkMedium", "field": "artMediumTitle" }
+        },
+        "subgraph": {
+            "xCondition": ":artworkMedium ?z"
+        },
+        "queries": [
+            {
+                "input": "x",
+                "output": "z",
+                "example": "'Golden Statue' artworkMedium ?",
+                "queryTemplate": """
+                SELECT ?artMediumTitle WHERE
+                {            
+                    ?artworkMedium a :ArtworkMedium ;
+                             :artMediumTitle ?artMediumTitle .
+                    ?artwork a :Artwork ;
+                             :title ?title ;
+                             :artworkMedium ?artworkMedium .            
+                    FILTER(?title = "$")
+                }
+                """
+            },
+            {
+                "input": "z",
+                "output": "x",
+                "example": "? artworkMedium 'Painting'",
+                "queryTemplate": """
+                SELECT ?title WHERE
+                {            
+                    ?artworkMedium a :ArtworkMedium ;
+                             :artMediumTitle ?artMediumTitle .
+                    ?artwork a :Artwork ;
+                             :title ?title ;
+                             :artworkMedium ?artworkMedium .            
+                    FILTER(?artMediumTitle = "$")
+                }
+                """
+            }
+        ]
+    },
+    {
+        "template": {
+            "x": { "node": "ArtworkSale", "field": "soldAtShow" },
+            "y": { "node": "sellingAccount" },
+            "z": { "node": "Account", "field": "accountName" }
+        },
+        "subgraph": {
+            "xCondition": ":sellingAccount ?z"
+        },
+        "queries": [
+            {
+                "input": "x",
+                "output": "z",
+                "example": "'ART SHOW YEAR 3' sellingAccount ?",
+                "queryTemplate": """
+                SELECT ?accountName WHERE
+                {            
+                    ?account a :Account ;
+                             :accountName ?accountName .
+                    ?artworkSale a :ArtworkSale ;
+                             :soldAtShow ?soldAtShow ;
+                             :sellingAccount ?account .            
+                    FILTER(?soldAtShow = "$")
+                }
+                """
+            },
+            {
+                "input": "z",
+                "output": "x",
+                "example": "? sellingAccount 'Kunstmuseum AG'",
+                "queryTemplate": """
+                SELECT ?soldAtShow WHERE
+                {            
+                    ?account a :Account ;
+                             :accountName ?accountName .
+                    ?artworkSale a :ArtworkSale ;
+                             :soldAtShow ?soldAtShow ;
+                             :sellingAccount ?account .            
+                    FILTER(?accountName = "$")
+                }
+                """
+            }
+        ]
     }
 ]
 
