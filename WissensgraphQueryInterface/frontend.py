@@ -6,9 +6,7 @@ import os
 import streamlit as st
 import main
 
-"""
-Validierung der Benutzereingabe
-"""
+# Validierung der Benutzereingabe
 def input_validation(user_input_x, user_input_z):
     if user_input_x is None:
         if user_input_z.strip() == "":
