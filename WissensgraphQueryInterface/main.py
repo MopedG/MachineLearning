@@ -1,3 +1,9 @@
+
+# WICHTIGER HINWEIS
+# Damit der Subgraph angezeigt werden kann, ist zwingend die Installation der
+# Software Graphviz (https://graphviz.org/) nötig!
+
+
 """
 Prüfungsaufgabe 3
 Programmieren Sie ein Wissensgraph Query Interface für ein Graph Neural Network der auf Moodle bereitgestellten

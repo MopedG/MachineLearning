@@ -1,7 +1,10 @@
+# WICHTIGER HINWEIS
+# Damit der Subgraph angezeigt werden kann, ist zwingend die Installation der
+# Software Graphviz (https://graphviz.org/) nötig!
+
 import os
 import streamlit as st
 import main
-
 
 def input_validation(user_input_x, user_input_z):
     if user_input_x is None:
@@ -86,7 +89,16 @@ else:
         else:
             user_input, query = main.choose_query(query_template, user_input_x, user_input_z)
             query_result_string = '  \n'.join(map(lambda res: f"`{res}`", main.query_ontology(query_template, query, user_input)))
-            subgraph_img = main.subgraph(query_template)
+            subgraph_img = None
+            try:
+                subgraph_img = main.subgraph(query_template)
+            except:
+                st.error(
+                    """
+                    **Hinweis**  
+                    Der Subgraph konnte nicht angezeigt werden, da die Software Graphviz (https://graphviz.org/) nicht installiert ist.
+                    """
+                )
 
             st.success(
             f"""
@@ -97,7 +109,11 @@ else:
             """
             )
             st.markdown("#### Subgraph")
-            st.image(subgraph_img)
+
+            if subgraph_img:
+                st.image(subgraph_img)
+
+
     graph = main.load_rdf_graph()
     person_list = main.get_info_from_ontology(graph)
     st.divider()
