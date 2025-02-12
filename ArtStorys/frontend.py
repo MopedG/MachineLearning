@@ -5,6 +5,11 @@ from sklearn.manifold import TSNE
 
 import main
 
+def map_artstory_to_ranking_index(artstory_as_string, ranking):
+    for i, item in enumerate(ranking["Document"]):
+        if item == artstory_as_string:
+            return i
+    return None
 
 def map_at_k_input_validation(k, user_ranking):
     if k.strip() == "":
@@ -12,22 +17,20 @@ def map_at_k_input_validation(k, user_ranking):
 
     try:
         parsed_k = int(k)
-        parsed_user_ranking = list(
-            map(lambda x: None if str(x).strip() == "" else int(x), user_ranking)
-        )
     except:
-        return "Einige Angaben sind keine Ganzzahlen."
+        return "K muss eine Ganzzahl sein."
 
     if parsed_k <= 0:
-        return "K muss positiv sein"
+        return "K muss positiv sein."
 
     if parsed_k > len(user_ranking):
         return f"K darf nicht größer als {len(user_ranking)} sein."
 
-    if len(user_ranking) != len(set(user_ranking)):
+    non_none_user_ranking = list(filter(lambda x: x is not None, user_ranking))
+    if len(non_none_user_ranking) != len(set(non_none_user_ranking)):
         return "Dein Ranking darf keine Duplikate enthalten."
 
-    for item in parsed_user_ranking:
+    for item in user_ranking:
         if item is not None and item > parsed_k - 1:
             return f"Ein Ranking darf maximal den Index {parsed_k - 1} besitzen."
 
@@ -51,7 +54,6 @@ def plot_tsne(vectors, documents, visited_stories, recommendations):
     plt.clf()
     plt.figure(figsize=(12, 8))
     for i, doc in enumerate(documents):
-
         labels_added = {"Besucht": False, "Empfohlen": False, "Andere": False}
 
         x, y = vectors_2d[i]
@@ -156,21 +158,34 @@ if ranking is not None and not ranking.empty:
 
 if ranking is not None:
     st.markdown("#### Berechne MAP@K")
+    st.info("""
+    Gib' hier das Ranking ein, was **du** für richtig hälst. Der MAP@K-Wert sagt aus, wie gut das
+    berechnete Ranking mit deinem übereinstimmt.  
+    0 = Keine Übereinstimmung  
+    1 = Voll Übereinstimmung
+    """)
+
     user_ranking = {}
     col1, col2 = st.columns([1, 10])
+
+    options = [""]
+    for item in ranking["Document"]:
+        options.append(item)
+
     for i in range(len(ranking)):
         col1.text_input(label=str(i), label_visibility="hidden", key=str(i) + "indicator", disabled=True, value=str(i))
-        user_ranking[i] = col2.text_input(label=str(i), label_visibility="hidden", key=i)
+        user_ranking[i] = col2.selectbox(label=str(i), label_visibility="hidden", key=i, options=options)
 
     k = st.text_input(label="K", placeholder="K", value=str(len(ranking)))
 
     if st.button('Berechne MAP@K'):
-        err_msg = map_at_k_input_validation(k, user_ranking.values())
+        user_ranking_as_indices = [map_artstory_to_ranking_index(x, ranking) for x in user_ranking.values()]
+        err_msg = map_at_k_input_validation(k, user_ranking_as_indices)
 
         if err_msg:
             st.error(err_msg)
         else:
-            map_at_k = main.map_at_k(int(k), list(map(lambda x: None if x.strip() == "" else int(x), user_ranking.values())))
+            map_at_k = main.map_at_k(int(k), user_ranking_as_indices)
             st.markdown(f"MAP@K (K={k}): `{map_at_k}`")
 else:
     st.warning("Keine Ähnlichkeiten gefunden.")
