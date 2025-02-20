@@ -10,8 +10,6 @@ import ollama
 load_dotenv(os.path.join(".", ".env"))
 GEMINI_API_KEY = os.getenv("GENAI_API_KEY")
 
-ollama_client = ollama.Client()
-
 gemini_client = None
 if GEMINI_API_KEY:
   try:
@@ -19,9 +17,7 @@ if GEMINI_API_KEY:
   except Exception as e:
     print(f"Gemini couldn't be initialized. {e}")
 
-
-
-benchmark_prompt = "Important: Provide a JSON object at the end of your answer containing the final answer as a number along with your normal text answer. Use this JSON schema: { 'answer': <The correct answer as a number> }"
+# benchmark_prompt = 'Important: Provide a JSON object at the end of your answer containing the final answer as a number along with your normal text answer. Use this JSON schema: { "answer": <The correct answer as a number> }'
 
 query_examples = {
   "tony": "Tony has 5 Apples. His friend Anthony has another 3 Apples. His mother asked him to collect a sum of 10 Apples before returning home. How many Apples are left for Tony to collect?",
@@ -212,17 +208,25 @@ cot_few_shot_examples = [
 def is_gemini_available():
   return gemini_client is not None
 
-def ask_gemini(prompt):
+def ask_gemini(prompt, do_cooldown=False):
     response = gemini_client.models.generate_content(model="gemini-1.5-pro", contents=prompt).text
-    print("🥵 Cooling down Gemini")
-    sleep(15)
-    print("🥶 Gemini cooled down. Continuing...")
+    if do_cooldown:
+        print("🥵 Cooling down Gemini")
+        sleep(15)
+        print("🥶 Gemini cooled down. Continuing...")
     return response
 
-# TODO: Left to implement
 def ask_llama(prompt):
-    response = None
-    return response
+    return ollama.generate(
+        model="llama3.2",
+        prompt=prompt
+    )["response"]
+
+def ask_chatbot(prompt, ai_model, do_cooldown=False):
+    if ai_model == "Gemini 1.5 Pro":
+        return ask_gemini(prompt, do_cooldown)
+    elif ai_model == "llama3.2":
+        return ask_llama(prompt)
 
 def create_cot_zero_shot_prompt(user_prompt, benchmark=False):
     return f"""
@@ -230,8 +234,6 @@ def create_cot_zero_shot_prompt(user_prompt, benchmark=False):
     You are asked to answer the following question:
     
     Question: {user_prompt}
-    
-    {benchmark_prompt if benchmark else ""}
     
     Let's think step by step:
     """
@@ -258,27 +260,22 @@ def create_cot_few_shot_prompt(user_prompt, examples, benchmark=False):
     
     Let's think step by step.
     
-    {benchmark_prompt if benchmark else ""}
     """
     return prompt
 
-def create_prompt_without_cot(user_prompt, benchmark=False):
-    return f"""
-    {user_prompt}
-    
-    {benchmark_prompt if benchmark else ""}
-    """
-
 def parse_answer_from_benchmark_response(response):
-    matches = re.findall(r'\{(.*?)}', response)
+    num = ''
+    is_digit_detected = False
 
-    if len(matches) != 1:
-        return None
-
-    result = json.loads(f"{{ {matches[0]} }}")
-
+    for char in reversed(response):
+        if char.isdigit():
+            is_digit_detected = True
+            num = char + num
+        elif num:
+            if is_digit_detected:
+                break
     try:
-        return float(result["answer"])
+        return float(num)
     except:
         return None
 
@@ -297,18 +294,29 @@ def analyse_benchmark_results(benchmark_results):
     }
 
 
-def run_benchmark():
+def run_benchmark(ai_model, max_benchmark_questions=None):
     results = []
 
-    benchmark = benchmark_questions[:3]
+    if max_benchmark_questions is None or max_benchmark_questions >= len(benchmark_questions):
+        benchmark = benchmark_questions
+    else:
+        benchmark = benchmark_questions[:max_benchmark_questions]
 
     for i, benchmark_question in enumerate(benchmark):
         print(f"Running benchmark {i+1}/{len(benchmark)}")
 
-        non_cot_response = ask_gemini(create_prompt_without_cot(benchmark_question["question"], True))
+        non_cot_response = ask_chatbot(
+            benchmark_question["question"],
+            ai_model,
+            True
+        )
         is_non_cot_response_correct = benchmark_question["answer"] == parse_answer_from_benchmark_response(non_cot_response)
 
-        cot_response = ask_gemini(create_cot_few_shot_prompt(benchmark_question["question"], cot_few_shot_examples[:4], True))
+        cot_response = ask_chatbot(
+            create_cot_few_shot_prompt(benchmark_question["question"], cot_few_shot_examples[:4], True),
+            ai_model,
+            True
+        )
         is_cot_response_correct = benchmark_question["answer"] == parse_answer_from_benchmark_response(cot_response)
 
         results.append({
@@ -324,23 +332,24 @@ def run_benchmark():
 
 
 def run_and_print_benchmark():
-    print(json.dumps(run_benchmark(), indent=4))
+    print(json.dumps(run_benchmark("llama3.2"), indent=4))
 
 
-def ask_mathbot(user_prompt, use_cot, cot_mode, generate_additional_non_cot_response):
-    prompt = user_prompt
+def ask_mathbot(config):
+    prompt = config["userPrompt"]
 
-    if use_cot:
-        if cot_mode == "Zero-Shot":
-            prompt = create_cot_zero_shot_prompt(user_prompt)
-        elif cot_mode == "Few-Shot":
-            prompt = create_cot_few_shot_prompt(user_prompt, cot_few_shot_examples[:4])
+    if config["useCot"]:
+        if config["cotMode"] == "Zero-Shot":
+            prompt = create_cot_zero_shot_prompt(config["userPrompt"])
+        elif config["cotMode"] == "Few-Shot":
+            prompt = create_cot_few_shot_prompt(config["userPrompt"], cot_few_shot_examples[:4])
 
-    response = ask_gemini(prompt)
+    response = ask_chatbot(prompt, config["aiModel"])
+
     explicit_non_cot_response = None
 
-    if generate_additional_non_cot_response:
-        explicit_non_cot_response =  ask_gemini(user_prompt)
+    if config["generateAdditionalNonCotResponse"]:
+        explicit_non_cot_response =  ask_chatbot(config["userPrompt"], config["aiModel"])
 
     return {
         "response": response,
@@ -349,4 +358,7 @@ def ask_mathbot(user_prompt, use_cot, cot_mode, generate_additional_non_cot_resp
 
 
 if __name__ == "__main__":
-    run_and_print_benchmark()
+    # run_and_print_benchmark()
+    print(
+        parse_answer_from_benchmark_response("hellos dfhiusdhfiusdf 12 udshfiudf")
+    )
