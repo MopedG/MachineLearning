@@ -21,6 +21,8 @@ if GEMINI_API_KEY:
   except Exception as e:
     print(f"Gemini couldn't be initialized. {e}")
 
+benchmark_prompt = 'Important: Provide a JSON object AT THE VERY END of your answer containing only the final answer as a number. Use this JSON schema: { "answer": <The correct answer as a number> }'
+
 query_examples = {
   "tony": "Tony has 5 Apples. His friend Anthony has another 3 Apples. His mother asked him to collect a sum of 10 Apples before returning home. How many Apples are left for Tony to collect?",
   "gamer": "A gamer has 2 graphics cards in his computer. He buys two more graphics cards, but gifts one to a friend. How many graphics cards does he have?"
@@ -240,7 +242,7 @@ def ask_chatbot(prompt, ai_model, do_cooldown=False):
     elif ai_model == "llama3.2":
         return ask_llama(prompt)
 
-def create_cot_zero_shot_prompt(user_prompt):
+def create_cot_zero_shot_prompt(user_prompt, benchmark=False):
     return f"""
     Imagine your are an advanced AI Assistant that follows Chain of Thought (CoT) reasoning principle.
     You are asked to answer the following question:
@@ -248,9 +250,11 @@ def create_cot_zero_shot_prompt(user_prompt):
     Question: {user_prompt}
     
     Let's think step by step:
+    
+    {benchmark_prompt if benchmark else ""}
     """
 
-def create_cot_few_shot_prompt(user_prompt, examples):
+def create_cot_few_shot_prompt(user_prompt, examples, benchmark=False):
     prompt = """
     You are an advanced AI that follows Chain of Thought (CoT) reasoning.
     
@@ -271,8 +275,17 @@ def create_cot_few_shot_prompt(user_prompt, examples):
     Now, answer this question: {user_prompt}
     
     Let's think step by step.
+    
+    {benchmark_prompt if benchmark else ""}
     """
     return prompt
+
+def create_non_cot_prompt(user_prompt, benchmark=False):
+    return f"""
+    {user_prompt}
+    
+    {benchmark_prompt if benchmark else ""}
+    """
 
 def parse_answer_from_benchmark_response(response):
     num = ''
@@ -328,14 +341,14 @@ def run_benchmark(ai_model, max_benchmark_questions=None):
         print(f"Running benchmark {i+1}/{len(benchmark)}")
 
         non_cot_response = ask_chatbot(
-            benchmark_question["question"],
+            create_non_cot_prompt(benchmark_question["question"], True),
             ai_model,
             True
         )
         is_non_cot_response_correct = benchmark_question["answer"] == parse_answer_from_benchmark_response(non_cot_response)
 
         cot_response = ask_chatbot(
-            create_cot_few_shot_prompt(benchmark_question["question"], cot_few_shot_examples[:4]),
+            create_cot_few_shot_prompt(benchmark_question["question"], cot_few_shot_examples[:4], True),
             ai_model,
             True
         )
