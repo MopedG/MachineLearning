@@ -350,6 +350,9 @@ def run_benchmark(ai_model, max_benchmark_questions=None):
             "isCotAnswerCorrect": is_cot_response_correct
         })
 
+        if ai_model == "Gemini 1.5 Pro":
+            sleep(65) # Cooldown, so minute based quota is not violated on Gemini API
+
     return analyse_benchmark_results(ai_model, results)
 
 
