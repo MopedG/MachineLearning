@@ -1,9 +1,9 @@
 import os
+from datetime import datetime
 from time import sleep
 
 from google import genai
 from dotenv import load_dotenv
-import re
 import json
 import ollama
 
@@ -16,8 +16,6 @@ if GEMINI_API_KEY:
     gemini_client = genai.Client(api_key=GEMINI_API_KEY)
   except Exception as e:
     print(f"Gemini couldn't be initialized. {e}")
-
-# benchmark_prompt = 'Important: Provide a JSON object at the end of your answer containing the final answer as a number along with your normal text answer. Use this JSON schema: { "answer": <The correct answer as a number> }'
 
 query_examples = {
   "tony": "Tony has 5 Apples. His friend Anthony has another 3 Apples. His mother asked him to collect a sum of 10 Apples before returning home. How many Apples are left for Tony to collect?",
@@ -204,9 +202,19 @@ cot_few_shot_examples = [
     }
 ]
 
-
 def is_gemini_available():
-  return gemini_client is not None
+    return gemini_client is not None
+
+def is_llama_available():
+    try:
+        ollama_models = [x.model for x in ollama.list().models]
+        for ollama_model in ollama_models:
+            if ollama_model.startswith("llama3.2"):
+                return True
+    except:
+        return False
+    return False
+
 
 def ask_gemini(prompt, do_cooldown=False):
     response = gemini_client.models.generate_content(model="gemini-1.5-pro", contents=prompt).text
@@ -228,7 +236,7 @@ def ask_chatbot(prompt, ai_model, do_cooldown=False):
     elif ai_model == "llama3.2":
         return ask_llama(prompt)
 
-def create_cot_zero_shot_prompt(user_prompt, benchmark=False):
+def create_cot_zero_shot_prompt(user_prompt):
     return f"""
     Imagine your are an advanced AI Assistant that follows Chain of Thought (CoT) reasoning principle.
     You are asked to answer the following question:
@@ -238,7 +246,7 @@ def create_cot_zero_shot_prompt(user_prompt, benchmark=False):
     Let's think step by step:
     """
 
-def create_cot_few_shot_prompt(user_prompt, examples, benchmark=False):
+def create_cot_few_shot_prompt(user_prompt, examples):
     prompt = """
     You are an advanced AI that follows Chain of Thought (CoT) reasoning.
     
@@ -259,7 +267,6 @@ def create_cot_few_shot_prompt(user_prompt, examples, benchmark=False):
     Now, answer this question: {user_prompt}
     
     Let's think step by step.
-    
     """
     return prompt
 
@@ -279,12 +286,13 @@ def parse_answer_from_benchmark_response(response):
     except:
         return None
 
-def analyse_benchmark_results(benchmark_results):
+def analyse_benchmark_results(ai_model, benchmark_results):
     amount_of_correct_non_cot_answers = sum(result["isNonCotAnswerCorrect"] for result in benchmark_results)
     amount_of_correct_cot_answers = sum(result["isCotAnswerCorrect"] for result in benchmark_results)
     amount_of_benchmarks = len(benchmark_results)
 
     return {
+        "aiModel": ai_model,
         "amountOfCorrectNonCotAnswers": amount_of_correct_non_cot_answers,
         "amountOfCorrectCotAnswers": amount_of_correct_cot_answers,
         "amountOfBenchmarks": amount_of_benchmarks,
@@ -292,6 +300,16 @@ def analyse_benchmark_results(benchmark_results):
         "successRateCotAnswers": amount_of_correct_cot_answers / amount_of_benchmarks,
         "results": benchmark_results
     }
+
+def save_benchmark_analysis(benchmark_analysis):
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    ai_model = benchmark_analysis["aiModel"].lower().replace(" ", "-")
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_dir, "benchmarks", f"{ai_model}-{timestamp}.json")
+
+    with open(file_path, "w") as file:
+        file.write(json.dumps(benchmark_analysis, indent=4))
 
 
 def run_benchmark(ai_model, max_benchmark_questions=None):
@@ -313,7 +331,7 @@ def run_benchmark(ai_model, max_benchmark_questions=None):
         is_non_cot_response_correct = benchmark_question["answer"] == parse_answer_from_benchmark_response(non_cot_response)
 
         cot_response = ask_chatbot(
-            create_cot_few_shot_prompt(benchmark_question["question"], cot_few_shot_examples[:4], True),
+            create_cot_few_shot_prompt(benchmark_question["question"], cot_few_shot_examples[:4]),
             ai_model,
             True
         )
@@ -328,7 +346,7 @@ def run_benchmark(ai_model, max_benchmark_questions=None):
             "isCotAnswerCorrect": is_cot_response_correct
         })
 
-    return analyse_benchmark_results(results)
+    return analyse_benchmark_results(ai_model, results)
 
 
 def run_and_print_benchmark():
@@ -360,5 +378,6 @@ def ask_mathbot(config):
 if __name__ == "__main__":
     # run_and_print_benchmark()
     print(
-        parse_answer_from_benchmark_response("hellos dfhiusdhfiusdf 12 udshfiudf")
+        #parse_answer_from_benchmark_response("hellos dfhiusdhfiusdf 12 udshfiudf")
+        is_llama_available()
     )

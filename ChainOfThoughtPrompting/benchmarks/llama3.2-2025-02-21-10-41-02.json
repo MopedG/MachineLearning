@@ -1,0 +1,18 @@
+{
+    "aiModel": "llama3.2",
+    "amountOfCorrectNonCotAnswers": 1,
+    "amountOfCorrectCotAnswers": 1,
+    "amountOfBenchmarks": 1,
+    "successRateNonCotAnswers": 1.0,
+    "successRateCotAnswers": 1.0,
+    "results": [
+        {
+            "question": "A farmer has 12 cows in his barn. He buys 8 more but sells 5 to a neighboring farmer. How many cows does he have now?",
+            "correctAnswer": 15,
+            "nonCotResponse": "To find out how many cows the farmer has now, we need to follow the sequence of events:\n\n1. The farmer starts with 12 cows.\n2. He buys 8 more: 12 + 8 = 20\n3. Then, he sells 5 to a neighboring farmer: 20 - 5 = 15\n\nSo, the farmer has 15 cows now.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To determine the number of cows the farmer has now, let's follow the steps:\n\n1. The farmer initially has 12 cows in his barn.\n\n2. He buys 8 more cows, so we need to add these to the initial number of cows: 12 + 8 = 20.\n\n3. Then, he sells 5 cows to a neighboring farmer, which means we subtract those from the total: 20 - 5 = 15.\n\nTherefore, after buying and selling cows, the farmer has 15 cows in his barn now.",
+            "isCotAnswerCorrect": true
+        }
+    ]
+}
