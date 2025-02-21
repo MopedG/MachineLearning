@@ -1,0 +1,178 @@
+{
+    "aiModel": "llama3.2",
+    "amountOfCorrectNonCotAnswers": 19,
+    "amountOfCorrectCotAnswers": 14,
+    "amountOfBenchmarks": 21,
+    "successRateNonCotAnswers": 0.9047619047619048,
+    "successRateCotAnswers": 0.6666666666666666,
+    "results": [
+        {
+            "question": "A farmer has 12 cows in his barn. He buys 8 more but sells 5 to a neighboring farmer. How many cows does he have now?",
+            "correctAnswer": 15,
+            "nonCotResponse": "Let's break it down step by step:\n\n1. The farmer starts with 12 cows.\n2. He buys 8 more, so now he has: 12 + 8 = 20 cows\n3. Then, he sells 5 to a neighboring farmer, so now he has: 20 - 5 = 15 cows\n\nSo, the farmer now has 15 cows.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's break down the problem step by step using Chain of Thought (CoT) reasoning.\n\n1. The farmer initially has 12 cows in his barn.\n\n2. He buys 8 more cows, so we add these to the initial amount: 12 + 8 = 20.\n\n3. Then, he sells 5 cows to a neighboring farmer, which means we need to subtract those from the total: 20 - 5 = 15.\n\n4. So, after buying and selling cows, the farmer now has 15 cows in his barn.\n\nAnswer: The farmer has 15 cows now.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "Sarah has 3 apples. She buys a dozen more but eats 2. How many apples does she have left?",
+            "correctAnswer": 13,
+            "nonCotResponse": "Let's break it down step by step:\n\n1. Sarah starts with 3 apples.\n2. She buys a dozen (12) more apples, so now she has: 3 + 12 = 15 apples\n3. However, she eats 2 apples, so subtract those from the total: 15 - 2 = 13 apples\n\nSarah has 13 apples left.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "I'd be happy to help you solve the problem using Chain of Thought (CoT) reasoning.\n\n Question: Sarah has 3 apples. She buys a dozen more, which is equal to 12 apples. Then, she eats 2 apples. How many apples does she have left?\n\nLet's think step by step:\n\n1. Sarah starts with 3 apples.\n2. She buys a dozen more apples, which means she now has 3 + 12 = 15 apples.\n3. However, she eats 2 apples, so we need to subtract those from the total.\n\nTo find out how many apples Sarah has left, let's think step by step:\n\n15 - 2 = 13\n\nTherefore, Sarah has 13 apples left.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A library has 500 books. They receive a donation of 250 books but remove 100 damaged books. How many books are in the library now?",
+            "correctAnswer": 650,
+            "nonCotResponse": "To find out how many books are in the library now, we need to follow these steps:\n\n1. The library starts with 500 books.\n2. A donation of 250 books is received, so we add this to the initial number: 500 + 250 = 750\n3. However, the library removes 100 damaged books from the collection, so we subtract 100 from the total number of books: 750 - 100 = 650\n\nTherefore, the library now has 650 books.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "I'd be happy to help with the question.\n\nLet's think step by step:\n\nThe library starts with 500 books. They receive a donation of 250 books, which increases their total number of books. 500 + 250 = 750.\n\nHowever, they remove 100 damaged books. To find out how many books are left, we need to subtract the number of damaged books from the new total. \n\n750 - 100 = 650\n\nSo, after receiving a donation and removing damaged books, the library now has 650 books.\n\nAnswer: 650",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A factory produces 40 chairs per day. How many chairs does it produce in a week if it operates 6 days a week?",
+            "correctAnswer": 240,
+            "nonCotResponse": "To find the total number of chairs produced in a week, you need to multiply the daily production by the number of operating days.\n\nDaily production: 40 chairs\nOperating days per week: 6 days\n\nTotal production for the week = Daily production \u00d7 Operating days per week\n= 40 chairs/day \u00d7 6 days/week\n= 240 chairs/week",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve the problem, let's break it down step by step:\n\n1. The factory produces 40 chairs per day.\n\n2. Since we want to find out how many chairs are produced in a week, we need to multiply the daily production by the number of days the factory operates in a week, which is 6.\n\n3. So, the total number of chairs produced in a week can be calculated as: \n   40 (chairs/day) * 6 (days/week) = 240\n\nTherefore, the factory produces 240 chairs in a week if it operates 6 days a week.",
+            "isCotAnswerCorrect": false
+        },
+        {
+            "question": "John runs 5 kilometers every morning. If he runs every day for 2 weeks, how many kilometers does he run in total?",
+            "correctAnswer": 70,
+            "nonCotResponse": "To find the total number of kilometers John runs, we need to calculate the total distance covered over the 2-week period.\n\nThere are 7 days in a week, so there are 14 days in 2 weeks (7 x 2 = 14).\n\nSince John runs 5 kilometers every morning, we can multiply the daily distance by the number of days:\n\nTotal distance = Daily distance x Number of days\n= 5 km/day x 14 days\n= 70 km\n\nJohn runs a total of 70 kilometers over the 2-week period.",
+            "isNonCotAnswerCorrect": false,
+            "cotResponse": "To find the total number of kilometers John runs, let's break it down step by step:\n\n1. John runs 5 kilometers every morning.\n2. He runs every day for 2 weeks. Since there are 7 days in a week, 2 weeks would be 2 x 7 = 14 days.\n3. To find the total number of kilometers run, multiply the daily distance (5 kilometers) by the number of days (14).\n\nTotal Kilometers = Daily Distance x Number of Days\n= 5 km/day x 14 days\n= 70 km\n\nAnswer: John runs a total of 70 kilometers in 2 weeks.",
+            "isCotAnswerCorrect": false
+        },
+        {
+            "question": "A train can carry 80 passengers per carriage. If the train has 10 carriages, how many passengers can it carry in total?",
+            "correctAnswer": 800,
+            "nonCotResponse": "To find out how many passengers the train can carry, you need to multiply the number of carriages by the number of passengers each carriage can carry.\n\nNumber of carriages: 10\nNumber of passengers per carriage: 80\n\nTotal passengers = Number of carriages x Number of passengers per carriage\n= 10 x 80\n= 800\n\nSo, the train can carry a total of 800 passengers.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "I'd be happy to help with the question.\n\nThe train has 10 carriages and each carriage can carry 80 passengers. To find out how many passengers the train can carry in total, I'll multiply the number of carriages by the capacity of each carriage.\n\nStep 1: Identify the relevant information\n- Number of carriages = 10\n- Capacity per carriage = 80 passengers\n\nStep 2: Multiply the number of carriages by the capacity per carriage\n10 * 80 = 800\n\nStep 3: Calculate the total number of passengers\nThe train can carry a total of 800 passengers.\n\nAnswer: The train can carry a total of 800 passengers.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A bakery bakes 120 loaves of bread every morning. By noon, they have sold 85 loaves. How many loaves are left?",
+            "correctAnswer": 35,
+            "nonCotResponse": "To find the number of loaves left, we need to subtract the number of loaves sold from the total number of loaves baked.\n\nTotal loaves baked = 120\nNumber of loaves sold = 85\n\nLoaves left = Total loaves baked - Number of loaves sold\n= 120 - 85\n= 35\n\nTherefore, there are 35 loaves of bread left.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve the problem, let's follow the Chain of Thought (CoT) reasoning:\n\n1. The bakery bakes 120 loaves of bread every morning.\n2. By noon, they have sold 85 loaves.\n\nWe need to find out how many loaves are left.\n\nLet's think step by step:\n \n3. To determine the number of loaves left, we first need to know how many loaves were available at noon. We can do this by subtracting the number of loaves sold (85) from the total number of loaves baked (120).\n   120 - 85 = 35\n \n4. Now that we have determined there are 35 loaves left, we don't need to further substract from the number.\n\nAnswer: 35",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A football team scores 3 goals per match. How many goals will they have scored after playing 8 matches?",
+            "correctAnswer": 24,
+            "nonCotResponse": "To find the total number of goals, multiply the number of goals scored per match by the number of matches played.\n\nGoals scored per match: 3\nNumber of matches played: 8\n\nTotal goals = Goals scored per match x Number of matches played\n= 3 x 8\n= 24",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To determine the total number of goals scored by the football team after playing 8 matches, let's break it down step by step:\n\n1. The team scores 3 goals per match.\n\n2. They will play 8 matches. To find the total number of goals, we need to multiply the number of goals they score per match by the number of matches they play: 3 * 8 = 24\n\nTherefore, after playing 8 matches, the football team will have scored 24 goals.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A hotel has 250 rooms, but 40 are under renovation. If 175 rooms are occupied, how many rooms are available for new guests?",
+            "correctAnswer": 35,
+            "nonCotResponse": "To find the number of rooms available for new guests, we need to subtract the number of occupied rooms and the number of rooms under renovation from the total number of rooms.\n\nTotal rooms: 250\nRooms under renovation: 40\nOccupied rooms: 175\n\nAvailable rooms = Total rooms - (rooms under renovation + occupied rooms)\nAvailable rooms = 250 - (40 + 175)\nAvailable rooms = 250 - 215\nAvailable rooms = 35\n\nSo, there are 35 rooms available for new guests.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find the number of rooms available for new guests, let's follow the steps:\n\n1. The hotel has a total of 250 rooms, but 40 are under renovation. So, we subtract the renovated rooms from the total: 250 - 40 = 210.\n\n2. Out of these 210 available rooms, 175 are occupied by existing guests. To find the number of available rooms for new guests, we subtract the occupied rooms from the available ones: 210 - 175 = 35.\n\nTherefore, there are 35 rooms available for new guests.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A school orders 600 pencils. They distribute 15 pencils per classroom, and there are 30 classrooms. How many pencils are left over?",
+            "correctAnswer": 150,
+            "nonCotResponse": "To find out how many pencils are left over, first, we need to determine the total number of pencils that were distributed.\n\nThe school distributed 15 pencils per classroom, and there are 30 classrooms. So, the total number of pencils that were distributed is:\n\n15 pencils/classroom * 30 classrooms = 450 pencils\n\nSince the school ordered 600 pencils, to find out how many pencils are left over, we need to subtract the number of pencils distributed from the total number of pencils.\n\n600 (total pencils) - 450 (distributed pencils) = 150 pencils\n\nSo, there are 150 pencils left over.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve the problem, let's think step by step:\n\n1. The school initially ordered 600 pencils.\n\n2. They distributed 15 pencils to each of the 30 classrooms. To find out how many pencils were given away in total, we multiply the number of pencils per classroom (15) by the number of classrooms (30). \n\n    15 * 30 = 450\n\n3. Now that we know a total of 450 pencils were distributed, to find out how many pencils are left over, we subtract this from the initial amount ordered (600).\n\n    600 - 450 = 150\n\nTherefore, there are 150 pencils left over after distributing 15 pencils per classroom to all 30 classrooms.",
+            "isCotAnswerCorrect": false
+        },
+        {
+            "question": "A software company hires 15 developers in January and 10 more in February. If 5 developers resign in March, how many developers remain?",
+            "correctAnswer": 20,
+            "nonCotResponse": "To find the total number of developers remaining, we need to calculate the number of new hires, subtract the number of resignations, and then add the initial number of developers.\n\nInitial number of developers: 15\nNew hires in February: 10\nTotal number of new hires: 15 + 10 = 25\n\nAfter March: 5 developers resigned\nRemaining developers: 25 - 5 = 20\n\nSo, there are 20 developers remaining.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's break down the problem step by step using Chain of Thought (CoT) reasoning:\n\n1. The software company hires 15 developers in January.\n2. They hire 10 more developers in February.\n3. To find the total number of developers, we need to add the number of developers hired in January and February: 15 + 10 = 25.\n\nSo, at this point, there are 25 developers in the company.\n\n4. We know that 5 developers resign in March.\n5. To find out how many developers remain, we subtract the number of developers who resigned from the total number of developers: 25 - 5 = 20.\n\nTherefore, after the resignations, there are 20 developers remaining.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A water tank holds 1,000 liters of water. A household consumes 150 liters per day. How much water is left after 4 days?",
+            "correctAnswer": 400,
+            "nonCotResponse": "To find out how much water is left in the tank after 4 days, we need to first calculate the total amount of water consumed over that period.\n\nThe household consumes 150 liters per day. Over 4 days, they would consume:\n\n150 liters/day x 4 days = 600 liters\n\nSince the tank originally held 1,000 liters of water, we subtract the amount consumed from the original capacity to find out how much is left:\n\n1,000 liters - 600 liters = 400 liters\n\nSo, after 4 days, there would be 400 liters of water left in the tank.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve the problem, let's break it down step by step.\n\nWe know that the water tank initially contains 1,000 liters of water. Each day, the household consumes 150 liters of water.\n\nLet's calculate the total amount of water consumed after 4 days:\n150 liters/day \u00d7 4 days = 600 liters\n\nNow, we need to subtract the total amount of water consumed from the initial amount in the tank:\n1,000 liters - 600 liters = 400 liters\n\nSo, after 4 days, there are 400 liters of water left in the tank.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A cyclist completes a 20-kilometer race 4 times a week. How many kilometers does he cycle in a month with 5 weeks?",
+            "correctAnswer": 400,
+            "nonCotResponse": "To find the total distance cycled, we need to calculate the weekly distance first.\n\nThe cyclist cycles 4 times a week and completes a 20-kilometer race each time, so:\n\nWeekly distance = 4 * 20 km = 80 km\n\nSince there are 5 weeks in the month, we multiply the weekly distance by 5:\n\nTotal monthly distance = Weekly distance * Number of weeks\n= 80 km/week * 5 weeks\n= 400 km",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve this problem, let's break it down step by step:\n\n1. The cyclist completes a 20-kilometer race 4 times a week. This means that in one week, the cyclist covers 20 km x 4 = 80 km.\n\n2. Since we want to find out how many kilometers the cyclist cycles in a month with 5 weeks, we need to multiply the weekly distance by the number of weeks. \n\n3. 80 km (weekly distance) x 5 (number of weeks in the month) = 400 km\n\nTherefore, the cyclist cycles 400 km in a month with 5 weeks.",
+            "isCotAnswerCorrect": false
+        },
+        {
+            "question": "A bookstore sells 25 books per day. If they have 500 books in stock, how many days will it take to sell out completely?",
+            "correctAnswer": 20.0,
+            "nonCotResponse": "To find the number of days it will take to sell out the books, you can divide the total number of books (500) by the number of books sold per day (25).\n\n500 \u00f7 25 = 20\n\nSo, it will take the bookstore 20 days to sell out completely.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve the problem using Chain of Thought (CoT) reasoning, let's break down the steps:\n\n1. The bookstore sells 25 books per day.\n2. They have a total of 500 books in stock.\n\nWe need to find out how many days it will take to sell out completely.\n\nLet's start by finding the number of books sold after each day:\n\nDay 1: 500 - 25 = 475\nDay 2: 475 - 25 = 450\nDay 3: 450 - 25 = 425\n...\n \n\nTo find a general formula, we can use division. Since the bookstore sells 25 books per day, we can divide the initial number of books (500) by 25 to get an approximate number of days.\n\nLet's think step by step:\n\n500 \u00f7 25 = ?\n\nSince we know that 500 divided by 25 will give us a whole number (the exact number of days), let's perform this calculation:\n\n500 \u00f7 25 = 20\n\nSo, the bookstore has enough books to last for approximately 20 days.\n\nHowever, since there are no fractional days in reality, and I am not able to get any more information from you on how many days should be returned as a non-integer number, we can safely say that it will take exactly 20 days.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A plane has 180 passenger seats, but 25 are unoccupied. How many passengers are on board?",
+            "correctAnswer": 155,
+            "nonCotResponse": "To find the number of passengers on board, we need to subtract the unoccupied seats from the total number of seats.\n\nTotal seats = 180\nUnoccupied seats = 25\n\nNumber of occupied seats = Total seats - Unoccupied seats\n= 180 - 25\n= 155\n\nTherefore, there are 155 passengers on board.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find the number of passengers on board, let's follow the Chain of Thought reasoning:\n\n1. The plane has a total of 180 passenger seats (initial information).\n2. However, some seats are unoccupied, which means they're not being used for passengers (given information).\n3. We need to subtract the unoccupied seats from the total number of seats to find out how many seats are actually being used for passengers (deductive reasoning).\n4. The number of occupied seats is equal to the total number of seats minus the number of unoccupied seats: 180 - 25 = 155.\n\nTherefore, there are 155 passengers on board.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A concert venue has 1,500 seats. If 80% of the tickets are sold, how many seats remain empty?",
+            "correctAnswer": 300.0,
+            "nonCotResponse": "To find the number of seats remaining empty, we need to first calculate the total number of tickets sold.\n\nTotal tickets = 1500\nPercentage of tickets sold = 80%\n\nNumber of tickets sold = Total tickets x Percentage of tickets sold\n= 1500 x 0.8\n= 1200\n\nNow, subtract the number of tickets sold from the total number of seats to find the remaining empty seats:\n\nRemaining seats = Total seats - Tickets sold\n= 1500 - 1200\n= 300\n\nSo, there are 300 seats remaining empty.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "I'd be happy to help with the example using Chain of Thought (CoT) reasoning.\n\n Question: A concert venue has 1,500 seats. If 80% of the tickets are sold, how many seats remain empty?\n\nLet's break it down step by step:\n\n1. We know that the total number of seats in the concert venue is 1,500.\n2. The problem states that 80% of the tickets are sold, which means we need to calculate 80% of 1,500.\n\nTo do this, I'll first convert 80% into a decimal: 80% = 0.8\n\nNext, I'll multiply 0.8 by 1,500:\n\n0.8 x 1,500 = 1,200\n\nSo, 1,200 tickets are sold, leaving the remaining number of seats empty.\n\nTo find out how many seats remain empty, I'll subtract the number of sold tickets (1,200) from the total capacity (1,500):\n\n1,500 - 1,200 = 300\n\nTherefore, 300 seats remain empty.",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A gardener plants 45 flowers in a row. If he makes 8 rows, but removes 9 flowers how many flowers are planted in total?",
+            "correctAnswer": 351,
+            "nonCotResponse": "To find the total number of flowers planted, you need to multiply the number of flowers per row by the number of rows.\n\nNumber of flowers per row: 45\nNumber of rows: 8\n\nTotal flowers = Number of flowers per row x Number of rows\n= 45 x 8\n= 360\n\nSince the gardener removes 9 flowers, you need to subtract those from the total:\n\nTotal flowers - removed flowers = 360 - 9\n= 351\n\nSo, there are 351 flowers planted in total.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's break down the problem step by step using Chain of Thought (CoT) reasoning.\n\nQuestion: A gardener plants 45 flowers in a row. If he makes 8 rows, but removes 9 flowers, how many flowers are planted in total?\n\nStep 1: First, let's calculate the total number of flowers if the gardener made all 8 rows without removing any. This is found by multiplying the number of flowers per row by the total number of rows.\n\nStep 2: Calculate the number of flowers in one row: 45 flowers\nMultiply this number by the total number of rows: 45 * 8 = 360\n\nStep 3: Next, let's subtract the number of removed flowers from the total to find out how many are actually planted. This is found by subtracting the removed flowers from the previous result.\n\nStep 4: Subtract the removed flowers from the total calculated in step 2: 360 - 9 = 351\n\nTherefore, after removing 9 flowers, there are 351 flowers planted in total.\n\nAnswer: 351",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A supermarket sells 35 bottles of juice per day. One bottle of juice costs 3 dollars. How much money will they make in a 12-day period?",
+            "correctAnswer": 1260,
+            "nonCotResponse": "To find the total amount of money made, we need to calculate the daily revenue and then multiply it by the number of days.\n\nDaily revenue = Number of bottles sold per day x Price per bottle\n= 35 bottles/day x $3/bottle\n= $105/day\n\nTotal revenue for 12 days = Daily revenue x Number of days\n= $105/day x 12 days\n= $1260",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find out how much money the supermarket will make in a 12-day period, let's follow the Chain of Thought reasoning step by step:\n\n1. The supermarket sells 35 bottles of juice per day.\n2. One bottle of juice costs $3.\n3. To find the daily revenue, multiply the number of bottles sold per day (35) by the cost of each bottle ($3). \n   Daily revenue = 35 * $3 = $105.\n4. To find the total revenue for a 12-day period, multiply the daily revenue by the number of days (12).\n   Total revenue = $105 * 12 = $1260.\n\nTherefore, the supermarket will make $1260 in a 12-day period.",
+            "isCotAnswerCorrect": false
+        },
+        {
+            "question": "A swimming pool can hold 10,000 liters of water. If 2,500 liters evaporate in a week, how much water remains after 3 weeks?",
+            "correctAnswer": 2500,
+            "nonCotResponse": "To find the amount of water remaining, we need to calculate the total amount of evaporation over the 3-week period and subtract that from the initial capacity of the pool.\n\nIn one week, 2,500 liters evaporate. To find the total amount of evaporation over 3 weeks, multiply the weekly evaporation by 3:\n\n2,500 liters/week x 3 weeks = 7,500 liters\n\nNow, subtract the total amount of evaporation from the initial capacity of the pool:\n\n10,000 liters - 7,500 liters = 2,500 liters\n\nSo, after 3 weeks, there will be 2,500 liters of water remaining in the swimming pool.",
+            "isNonCotAnswerCorrect": false,
+            "cotResponse": "Let's break down the problem step by step using Chain of Thought (CoT) reasoning.\n\nStep 1: Identify the initial amount of water in the pool\nThe swimming pool can hold 10,000 liters of water initially.\n\nStep 2: Calculate the amount of water evaporated in a week\nWe know that 2,500 liters evaporate in one week. We want to find out how much water remains after 3 weeks, so we need to calculate the total amount of water evaporated over this period.\n\nStep 3: Multiply the weekly evaporation by the number of weeks\nTo find the total amount of water evaporated in 3 weeks, we multiply the weekly evaporation (2,500 liters) by the number of weeks (3).\nTotal evaporation = 2,500 x 3 = 7,500 liters\n\nStep 4: Subtract the total evaporation from the initial capacity\nNow, we subtract the total amount of water evaporated in 3 weeks (7,500 liters) from the initial capacity of the pool (10,000 liters).\nRemaining water = 10,000 - 7,500 = 2,500 liters\n\nTherefore, after 3 weeks, there are 2,500 liters of water remaining in the swimming pool.",
+            "isCotAnswerCorrect": false
+        },
+        {
+            "question": "A sports shop sells 3 basketballs for $60. How much will 7 basketballs cost at the same rate?",
+            "correctAnswer": 140.0,
+            "nonCotResponse": "To find the cost of 7 basketballs, we need to first determine the cost of one basketball.\n\nThe cost of 3 basketballs is $60, so we can divide $60 by 3 to get the cost of one basketball:\n\n$60 \u00f7 3 = $20 per basketball\n\nNow that we know the cost of one basketball is $20, we can multiply this price by 7 to find the total cost of 7 basketballs:\n\n$20 x 7 = $140\n\nSo, 7 basketballs will cost $140 at the same rate.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's break down the problem step by step.\n\nFirst, we need to determine the price of one basketball. We know that 3 basketballs cost $60, so we can divide the total cost by the number of basketballs:\n\n$60 \u00f7 3 = $20 per basketball\n\nNow, we want to find out how much 7 basketballs will cost at this rate. To do this, we multiply the price of one basketball by the number of basketballs we're interested in:\n\n$20 per basketball \u00d7 7 basketballs = $140\n\nTherefore, 7 basketballs will cost $140.\n\nAnswer: $140",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "Tony is collecting apples per his mother's request. He already has 5 apples. His friend Anthony has 3 apples. Tony needs to collect 10 apples in total for his mother. However, the apples collected from Anthony do not belong to Tony. How many more apples does Tony need to collect before returning home?",
+            "correctAnswer": 5,
+            "nonCotResponse": "Let's break it down:\n\nTony already has 5 apples and needs a total of 10 apples.\n\nAnthony has 3 apples that are not meant for Tony, so we don't count those towards Tony's collection.\n\nSince the apples from Anthony aren't for Tony, we'll focus on what Tony needs to collect. Since Tony already has 5, he needs:\n\n10 (total needed) - 5 (already collected) = 5 more apples\n\nTony needs to collect 5 more apples before returning home.",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's solve this problem using Chain of Thought (CoT) reasoning.\n\n1. Tony currently has 5 apples.\n2. His friend, Anthony, has 3 apples that belong to him and not to Tony.\n3. The total number of apples Tony needs to collect is 10 apples for his mother.\n\nWe need to find out how many more apples Tony needs to collect in addition to the ones he already has (5).\n\nSince the apples from Anthony are not part of Tony's collection, we should subtract those apples from the total amount needed: 10 - 3 = 7\n\nNow that we know how much more apples Tony needs to collect (7), and considering what he already has (5), we can find out how many more apples he needs to collect:\n\n7 (additional apples needed) - 5 (apples Tony already has) = 2",
+            "isCotAnswerCorrect": false
+        }
+    ]
+}

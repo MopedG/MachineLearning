@@ -7,8 +7,12 @@ from dotenv import load_dotenv
 import json
 import ollama
 
-load_dotenv(os.path.join(".", ".env"))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(base_dir, ".env")
+
+load_dotenv(file_path)
 GEMINI_API_KEY = os.getenv("GENAI_API_KEY")
+
 
 gemini_client = None
 if GEMINI_API_KEY:
