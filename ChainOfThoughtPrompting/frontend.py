@@ -87,7 +87,7 @@ if option == "Freies Prompting":
 
 elif option == "Benchmark":
     limit_benchmark_questions = st.checkbox(label="Limitiere maximale Anzahl an Benchmark-Prompts", value=False)
-    max_benchmark_questions_text = st.number_input(
+    max_benchmark_questions_input = st.number_input(
         label="Maximale Anzahl an Benchmark-Prompts",
         value=5,
         disabled=not limit_benchmark_questions,
@@ -99,7 +99,11 @@ elif option == "Benchmark":
 
     if benchmark_fired:
         with st.spinner("Benchmark wird ausgeführt"):
-            analysis = main.run_benchmark(ai_model, max_benchmark_questions_text)
+            max_benchmark_questions = None
+            if limit_benchmark_questions:
+                max_benchmark_questions = max_benchmark_questions_input
+
+            analysis = main.run_benchmark(ai_model, max_benchmark_questions)
             main.save_benchmark_analysis(analysis)
 
         st.success(
