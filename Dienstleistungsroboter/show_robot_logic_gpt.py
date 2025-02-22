@@ -127,7 +127,7 @@ class ShowEnvironment:
 
 
 class Q_Learning:
-    def __init__(self, service: str, alpha: float = 0.5, gamma: float = 0.5, beta: float = 0.5, demo_target: int = 10):
+    def __init__(self, service: list[str], alpha: float = 0.5, gamma: float = 0.5, beta: float = 0.5, demo_target: int = 10):
         self.service = service # TODO: 2 Services, zwischen denen der Show robot entscheiden kann
         self.show_environment = ShowEnvironment(15, 7, (8, 7))
         self.alpha = alpha  # SARSA learning rate.
@@ -170,49 +170,43 @@ class Q_Learning:
             best_actions = [a for a, v in q_vals.items() if v == max_val]
             return random.choice(best_actions)
 
-
-
-    def expert_policy(self, state) -> str:  # TODO: Funktioniert nicht für einige Ziele (bspw. QR-Code)
+    def expert_policy(self, state, service) -> tuple[str, int]:  # Return action and step count
         """
         A simple expert that guides the Show-Robot toward the best absorbing state
         while avoiding other absorbing states.
         Uses a breadth-first search for a safe (shortest) path.
         """
-        # TODO: Es soll möglich sein 2 Targets anzugeben und die expert policy soll den kürzesten Weg zu einem der beiden Ziele finden.
-        # TODO: Punktzahl für die Ziele mit diskontinuierungsfaktor
-        target = self.show_environment.services[self.service][
-            0]  # Der kürzeste Weg von der Startposition zum angeforderten Service
+        target = self.show_environment.services[service][0]
         if state == target:
-            return None
-        queue = deque([(state, [])])
+            return None, 0
+        queue = deque([(state, [], 0)])  # Add step count to the queue
         visited = set()
         visited.add(state)
+        steps = 0  # Initialize steps
         while queue:
-            s, path = queue.popleft()
+            s, path, steps = queue.popleft()
             if s == target:
-                return path[0] if path else None
+                return (path[0] if path else None), steps
             for a, (dx, dy) in self.show_environment.actions.items():
                 ns = (s[0] + dx, s[1] + dy)
-                # Stay in bounds.
                 if not self.show_environment.is_in_bounds(ns[0], ns[1]):
                     continue
-                # Avoid absorbing states unless it's the target.
-                if ns in self.show_environment.services[self.service] and ns != target:
+                if ns in self.show_environment.services[service] and ns != target:
                     continue
                 if ns not in visited:
                     visited.add(ns)
-                    queue.append((ns, path + [a]))
+                    queue.append((ns, path + [a], steps + 1))
         print("No Path found")
-        return random.choice(list(self.show_environment.actions.keys()))
+        return random.choice(list(self.show_environment.actions.keys())), steps
 
     def save_q_table(self, path: str = "./data/", auto_supervision=False):
         extension = ""
         if auto_supervision:
             extension = "_DAgger"
-        self.q_table.to_csv(path + f"{self.service}" + extension + "_Q_Table.csv")
+        self.q_table.to_csv(path + f"{self.service[0]}" + extension + "_Q_Table.csv")
 
     def load_q_table_from_csv(self, path: str, extension: str) -> None:
-        self.q_table = pd.read_csv(f"{path}/{self.service}" + extension + "_Q_Table.csv", index_col=0)
+        self.q_table = pd.read_csv(f"{path}/{self.service[0]}" + extension + "_Q_Table.csv", index_col=0)
 
     def simulate_step(self, epsilon, auto_supervision=True) -> str | None:
         """
@@ -232,7 +226,7 @@ class Q_Learning:
 
         # --- Normal episode step ---
         # If the current state is absorbing, end the episode.
-        if self.show_environment.is_absorbing(state, self.service):
+        if self.show_environment.is_absorbing(state, self.service[0]):
             self.episode_active = False
             self.episode_count += 1
             # Record the cumulative reward for this episode.
@@ -245,7 +239,10 @@ class Q_Learning:
         self.current_action = action
         # --- Supervisor Demonstration (DAgger) ---
         if auto_supervision:  # Only update with demonstration if supervision is enabled.
-            demo_action = self.expert_policy(state)
+            demo_action_0, demo_action_steps_0 = self.expert_policy(state, self.service[0])
+            demo_action_1, demo_action_steps_1 = self.expert_policy(state, self.service[1])
+            demo_action =  demo_action_0 if self.service[0].Belohnung * gamma^demo_action_steps_0 > self.service[1].Belohnung * gamma^demo_action_steps_1 else demo_action_1
+            #TODO: Hier weiter machen
             if demo_action is not None:
                 if state not in self.demonstration_set:
                     self.demonstration_set.add(state)
@@ -264,7 +261,7 @@ class Q_Learning:
         self.current_episode_reward += reward
 
         # For on-policy SARSA, if next state is not absorbing, select a next action.
-        if not self.show_environment.is_absorbing(next_state, self.service):
+        if not self.show_environment.is_absorbing(next_state, self.service[0]):
             next_action = self.epsilon_greedy_action(next_state, q, epsilon)
             q_next = q.get(next_action, {}).get(f"{next_state}", 0)  # TODO: Müssen schauen was hier passiert
         else:
@@ -287,7 +284,7 @@ class Q_Learning:
         self.step_count += 1
 
         # If the next state is absorbing, then end the episode.
-        if self.show_environment.is_absorbing(next_state, self.service):
+        if self.show_environment.is_absorbing(next_state, self.service[0]):
             self.episode_active = False
             self.episode_count += 1
             self.episode_rewards.append(self.current_episode_reward)
@@ -303,7 +300,7 @@ class Q_Learning:
         state = self.show_environment.start_pos
         optimal_path = []
         visited_states = [state]
-        while not self.show_environment.is_absorbing(state, self.service):
+        while not self.show_environment.is_absorbing(state, self.service[0]):
             row = self.q_table.loc[str(state)]
             if row.max() == row.min():
                 return None
