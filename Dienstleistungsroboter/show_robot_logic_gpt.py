@@ -10,7 +10,7 @@ class ShowEnvironment:
         "Survey feedback": [(14, 6), (14, 2), (14, 3), (14, 4), (14, 5)],
         "Customer profile enrichment": [(4, 1), (2, 1), (3, 1)],
         "Exchange scheduling": [(4, 7), (2, 7), (3, 7)],
-        "gallery enquiry": [(9, 4), (10, 4)],
+        "Gallery enquiry": [(9, 4), (10, 4)],
         "Concierge service": [(5, 6), (5, 5)]
     }
 
@@ -170,7 +170,7 @@ class Q_Learning:
             best_actions = [a for a, v in q_vals.items() if v == max_val]
             return random.choice(best_actions)
 
-    def expert_policy(self, state, service) -> tuple[str, int]:  # Return action and step count
+    def expert_policy(self, state, service) -> tuple[str, float]:  # Return action and step count
         """
         A simple expert that guides the Show-Robot toward the best absorbing state
         while avoiding other absorbing states.
@@ -178,11 +178,11 @@ class Q_Learning:
         """
         target = self.show_environment.services[service][0]
         if state == target:
-            return None, 0
-        queue = deque([(state, [], 0)])  # Add step count to the queue
+            return None, 0.0
+        queue = deque([(state, [], 0.0)])  # Add step count to the queue
         visited = set()
         visited.add(state)
-        steps = 0  # Initialize steps
+        steps = 0.0  # Initialize steps
         while queue:
             s, path, steps = queue.popleft()
             if s == target:
@@ -195,7 +195,7 @@ class Q_Learning:
                     continue
                 if ns not in visited:
                     visited.add(ns)
-                    queue.append((ns, path + [a], steps + 1))
+                    queue.append((ns, path + [a], steps + 1.0))
         print("No Path found")
         return random.choice(list(self.show_environment.actions.keys())), steps
 
@@ -203,10 +203,12 @@ class Q_Learning:
         extension = ""
         if auto_supervision:
             extension = "_DAgger"
-        self.q_table.to_csv(path + f"{self.service[0]}" + extension + "_Q_Table.csv")
+        services_sorted = sorted([self.service[0], self.service[1]])
+        self.q_table.to_csv(path + f"{services_sorted[0]}_{services_sorted[1]}" + extension + "_Q_Table.csv")
 
     def load_q_table_from_csv(self, path: str, extension: str) -> None:
-        self.q_table = pd.read_csv(f"{path}/{self.service[0]}" + extension + "_Q_Table.csv", index_col=0)
+        services_sorted = sorted([self.service[0], self.service[1]])
+        self.q_table = pd.read_csv(f"{path}/{services_sorted[0]}_{services_sorted[1]}" + extension + "_Q_Table.csv", index_col=0)
 
     def simulate_step(self, epsilon, auto_supervision=True) -> str | None:
         """
@@ -239,10 +241,18 @@ class Q_Learning:
         self.current_action = action
         # --- Supervisor Demonstration (DAgger) ---
         if auto_supervision:  # Only update with demonstration if supervision is enabled.
+            # Get The next expert policy action and step count for the 2 possibles services
             demo_action_0, demo_action_steps_0 = self.expert_policy(state, self.service[0])
             demo_action_1, demo_action_steps_1 = self.expert_policy(state, self.service[1])
-            demo_action =  demo_action_0 if self.service[0].Belohnung * gamma^demo_action_steps_0 > self.service[1].Belohnung * gamma^demo_action_steps_1 else demo_action_1
-            #TODO: Hier weiter machen
+
+            # Get the reward for the 2 possible services
+            reward_0 = self.show_environment.reward_matrix.get(self.show_environment.services[self.service[0]][0], 0)
+            reward_1 = self.show_environment.reward_matrix.get(self.show_environment.services[self.service[1]][0], 0)
+
+            # Compare the expert policy action based on how high the point reward will be after executing the action
+            # and all following actions and choose the action with the higher reward
+            demo_action = demo_action_0 if (reward_0 * (self.gamma ** demo_action_steps_0) >
+                                            reward_1 * (self.gamma ** demo_action_steps_1)) else demo_action_1
             if demo_action is not None:
                 if state not in self.demonstration_set:
                     self.demonstration_set.add(state)
@@ -253,7 +263,7 @@ class Q_Learning:
         # --- Environment Interaction ---
         next_state = self.show_environment.step_environment(state, action)
         reward = 0
-        if next_state in self.show_environment.services[self.service]: # TODO: Warum wird hier nicht die Funktion is_absorbing verwendet?
+        if next_state in self.show_environment.services[self.service[0]]: # TODO: Warum wird hier nicht die Funktion is_absorbing verwendet?
             reward = self.show_environment.reward_matrix.get(next_state, 0)  # Only nonzero for absorbing states.
         # if state == next_state: # TODO: Brauchen wir theoretisch nicht mehr, sollte aber besprochen werden
         #    reward = -100  # Wenn er gegen Wände läuft, sollte er bestraft werden
