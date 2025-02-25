@@ -11,7 +11,9 @@ class ShowEnvironment:
         "Customer profile enrichment": [(4, 1), (2, 1), (3, 1)],
         "Exchange scheduling": [(4, 7), (2, 7), (3, 7)],
         "Gallery enquiry": [(9, 4), (10, 4)],
-        "Concierge service": [(5, 6), (5, 5)]
+        "Concierge service": [(5, 6), (5, 5)],
+        "Sales enquiry":   [(9, 1), (10, 1)],
+        "Catering cleanup": [(6, 4), (7, 4)]
     }
 
     block_list = [
@@ -112,9 +114,9 @@ class ShowEnvironment:
 
     #TODO: Chosen Services! Es muss zwei absorbierende Services geben statt nur einem
     @staticmethod
-    def is_absorbing(state: tuple[int, int], chosen_service: str):
-        """Return True if the given state is absorbing (i.e. has a reward)."""
-        return state in ShowEnvironment.services[chosen_service]
+    def is_absorbing(state: tuple[int, int], chosen_services: list[str]) -> bool:
+        """Return True if the given state is absorbing (i.e. has a reward) for any of the chosen services."""
+        return any(state in ShowEnvironment.services[service] for service in chosen_services)
 
     def step_environment(self, state: tuple[int, int], action: str) -> tuple[int, int]:
         """Compute the next state given the current state and action (staying within the 3x3 grid)."""
@@ -127,8 +129,8 @@ class ShowEnvironment:
 
 
 class Q_Learning:
-    def __init__(self, service: list[str], alpha: float = 0.5, gamma: float = 0.5, beta: float = 0.5, demo_target: int = 10):
-        self.service = service # TODO: 2 Services, zwischen denen der Show robot entscheiden kann
+    def __init__(self, services: list[str], alpha: float = 0.5, gamma: float = 0.5, beta: float = 0.5, demo_target: int = 10):
+        self.services = services
         self.show_environment = ShowEnvironment(15, 7, (8, 7))
         self.alpha = alpha  # SARSA learning rate.
         self.gamma = gamma  # Discount factor (updated to 0.5)
@@ -148,7 +150,6 @@ class Q_Learning:
         self.shift_history = []
 
     def init_q_table(self):
-        # tables = {}  # TODO: Kann das weg?
         data = {}
         for x in range(1, self.show_environment.dim_x + 1):
             for y in range(1, self.show_environment.dim_y + 1):
@@ -159,6 +160,7 @@ class Q_Learning:
     def save_to_q_table(self, state: tuple[int, int], action: str,
                         value: int | float) -> None:
         self.q_table.loc[str(state), action] = value
+
 
     def epsilon_greedy_action(self, state, Q, epsilon) -> str:
         """Select an action from the Q-table using an ε-greedy strategy."""
@@ -199,16 +201,6 @@ class Q_Learning:
         print("No Path found")
         return random.choice(list(self.show_environment.actions.keys())), steps
 
-    def save_q_table(self, path: str = "./data/", auto_supervision=False):
-        extension = ""
-        if auto_supervision:
-            extension = "_DAgger"
-        services_sorted = sorted([self.service[0], self.service[1]])
-        self.q_table.to_csv(path + f"{services_sorted[0]}_{services_sorted[1]}" + extension + "_Q_Table.csv")
-
-    def load_q_table_from_csv(self, path: str, extension: str) -> None:
-        services_sorted = sorted([self.service[0], self.service[1]])
-        self.q_table = pd.read_csv(f"{path}/{services_sorted[0]}_{services_sorted[1]}" + extension + "_Q_Table.csv", index_col=0)
 
     def simulate_step(self, epsilon, auto_supervision=True) -> str | None:
         """
@@ -228,7 +220,7 @@ class Q_Learning:
 
         # --- Normal episode step ---
         # If the current state is absorbing, end the episode.
-        if self.show_environment.is_absorbing(state, self.service[0]):
+        if self.show_environment.is_absorbing(state, self.services):
             self.episode_active = False
             self.episode_count += 1
             # Record the cumulative reward for this episode.
@@ -242,12 +234,12 @@ class Q_Learning:
         # --- Supervisor Demonstration (DAgger) ---
         if auto_supervision:  # Only update with demonstration if supervision is enabled.
             # Get The next expert policy action and step count for the 2 possibles services
-            demo_action_0, demo_action_steps_0 = self.expert_policy(state, self.service[0])
-            demo_action_1, demo_action_steps_1 = self.expert_policy(state, self.service[1])
+            demo_action_0, demo_action_steps_0 = self.expert_policy(state, self.services[0])
+            demo_action_1, demo_action_steps_1 = self.expert_policy(state, self.services[1])
 
             # Get the reward for the 2 possible services
-            reward_0 = self.show_environment.reward_matrix.get(self.show_environment.services[self.service[0]][0], 0)
-            reward_1 = self.show_environment.reward_matrix.get(self.show_environment.services[self.service[1]][0], 0)
+            reward_0 = self.show_environment.reward_matrix.get(self.show_environment.services[self.services[0]][0], 0)
+            reward_1 = self.show_environment.reward_matrix.get(self.show_environment.services[self.services[1]][0], 0)
 
             # Compare the expert policy action based on how high the point reward will be after executing the action
             # and all following actions and choose the action with the higher reward
@@ -263,7 +255,7 @@ class Q_Learning:
         # --- Environment Interaction ---
         next_state = self.show_environment.step_environment(state, action)
         reward = 0
-        if next_state in self.show_environment.services[self.service[0]]: # TODO: Warum wird hier nicht die Funktion is_absorbing verwendet?
+        if self.show_environment.is_absorbing(next_state, self.services):
             reward = self.show_environment.reward_matrix.get(next_state, 0)  # Only nonzero for absorbing states.
         # if state == next_state: # TODO: Brauchen wir theoretisch nicht mehr, sollte aber besprochen werden
         #    reward = -100  # Wenn er gegen Wände läuft, sollte er bestraft werden
@@ -271,7 +263,7 @@ class Q_Learning:
         self.current_episode_reward += reward
 
         # For on-policy SARSA, if next state is not absorbing, select a next action.
-        if not self.show_environment.is_absorbing(next_state, self.service[0]):
+        if not self.show_environment.is_absorbing(next_state, self.services):
             next_action = self.epsilon_greedy_action(next_state, q, epsilon)
             q_next = q.get(next_action, {}).get(f"{next_state}", 0)  # TODO: Müssen schauen was hier passiert
         else:
@@ -294,7 +286,7 @@ class Q_Learning:
         self.step_count += 1
 
         # If the next state is absorbing, then end the episode.
-        if self.show_environment.is_absorbing(next_state, self.service[0]):
+        if self.show_environment.is_absorbing(next_state, self.services):
             self.episode_active = False
             self.episode_count += 1
             self.episode_rewards.append(self.current_episode_reward)
@@ -310,7 +302,7 @@ class Q_Learning:
         state = self.show_environment.start_pos
         optimal_path = []
         visited_states = [state]
-        while not self.show_environment.is_absorbing(state, self.service[0]):
+        while not self.show_environment.is_absorbing(state, self.services):
             row = self.q_table.loc[str(state)]
             if row.max() == row.min():
                 return None

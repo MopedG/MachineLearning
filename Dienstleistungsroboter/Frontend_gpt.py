@@ -42,8 +42,16 @@ services = st.multiselect("Wähle zwei Services", [
     "Customer profile enrichment",
     "Exchange scheduling",
     "Gallery enquiry",
-    "Concierge service"
+    "Concierge service",
+    "Sales enquiry",
+    "Catering cleanup"
 ], max_selections=2)
+
+epsilon = st.slider("Wähle Epsilon", min_value=0.0, max_value=1.0, value=0.1, step=0.1)
+gamma = st.slider("Wähle Gamma (discount factor)", min_value=0.0, max_value=1.0, value=0.5, step=0.1)
+beta = st.slider("Wähle Beta (supervised update learning rate", min_value=0.0, max_value=1.0, value=0.5, step=0.1)  
+autosupervision = st.checkbox("Autosupervision", value=True)
+update_rate = st.slider("Aktualisierungsrate des Bildes", min_value=0.0, max_value=1.0, value=0.4, step=0.1)
 
 if len(services) == 2:
     if "running" not in st.session_state:
@@ -63,12 +71,13 @@ if len(services) == 2:
     if st.button("Stop Simulation"):
         st.session_state.running = False
 
+
     if st.session_state.running:
-        ql = backend.Q_Learning(services)
+        ql = backend.Q_Learning(services = services, gamma = gamma, beta = beta)
         st.write("Simulation gestartet.")
 
         while st.session_state.running:
-            ql.simulate_step(epsilon=0.1)
+            ql.simulate_step(epsilon=epsilon, auto_supervision=autosupervision)
 
             target_reached = False
             for service in services:
@@ -92,4 +101,7 @@ if len(services) == 2:
                 st.session_state.steps += 1
 
             draw_environment(ql, plot_placeholder, services, st.session_state.steps)
-            time.sleep(0.4)
+            time.sleep(update_rate)
+
+
+
