@@ -6,17 +6,17 @@ import random
 
 class ShowEnvironment:
     services = {
-        "QR-Code": [(1, 4)],
         "Survey feedback": [(14, 6), (14, 2), (14, 3), (14, 4), (14, 5)],
-        "Customer profile enrichment": [(4, 1), (2, 1), (3, 1)],
+        "Concierge service": [(5, 6), (5, 5)],
+        "Sales enquiry": [(9, 1), (10, 1)],
         "Exchange scheduling": [(4, 7), (2, 7), (3, 7)],
         "Gallery enquiry": [(9, 4), (10, 4)],
-        "Concierge service": [(5, 6), (5, 5)],
-        "Sales enquiry":   [(9, 1), (10, 1)],
-        "Catering cleanup": [(6, 4), (7, 4)]
+        "QR-Code": [(1, 4)],
+        "Catering cleanup": [(6, 4), (7, 4)],
+        "Customer profile enrichment": [(4, 1), (2, 1), (3, 1)]
     }
 
-    block_list = [
+    obstacles = [
         (1, 7),
         (15, 7),
         (1, 6),
@@ -110,9 +110,8 @@ class ShowEnvironment:
         }
 
     def is_in_bounds(self, x: int, y: int) -> bool:
-        return 1 <= x <= self.dim_x and 1 <= y <= self.dim_y and (x, y) not in ShowEnvironment.block_list
+        return 1 <= x <= self.dim_x and 1 <= y <= self.dim_y and (x, y) not in ShowEnvironment.obstacles
 
-    #TODO: Chosen Services! Es muss zwei absorbierende Services geben statt nur einem
     @staticmethod
     def is_absorbing(state: tuple[int, int], chosen_services: list[str]) -> bool:
         """Return True if the given state is absorbing (i.e. has a reward) for any of the chosen services."""
@@ -126,7 +125,6 @@ class ShowEnvironment:
         if not self.is_in_bounds(new_state[0], new_state[1]):
             return state
         return new_state
-
 
 class Q_Learning:
     def __init__(self, services: list[str], alpha: float = 0.5, gamma: float = 0.5, beta: float = 0.5, demo_target: int = 10):
@@ -172,19 +170,20 @@ class Q_Learning:
             best_actions = [a for a, v in q_vals.items() if v == max_val]
             return random.choice(best_actions)
 
-    def expert_policy(self, state, service) -> tuple[str, float]:  # Return action and step count
+    def expert_policy(self, state, service) -> tuple[str, float]:
         """
         A simple expert that guides the Show-Robot toward the best absorbing state
         while avoiding other absorbing states.
         Uses a breadth-first search for a safe (shortest) path.
+        Returns the best action and the number of steps to reach the target state.
         """
         target = self.show_environment.services[service][0]
         if state == target:
             return None, 0.0
-        queue = deque([(state, [], 0.0)])  # Add step count to the queue
+        queue = deque([(state, [], 0.0)])
         visited = set()
         visited.add(state)
-        steps = 0.0  # Initialize steps
+        steps = 0.0
         while queue:
             s, path, steps = queue.popleft()
             if s == target:
@@ -232,7 +231,8 @@ class Q_Learning:
         action = self.epsilon_greedy_action(state, q, epsilon)
         self.current_action = action
         # --- Supervisor Demonstration (DAgger) ---
-        if auto_supervision:  # Only update with demonstration if supervision is enabled.
+        # Only update with demonstration if supervision is enabled.
+        if auto_supervision:
             # Get The next expert policy action and step count for the 2 possibles services
             demo_action_0, demo_action_steps_0 = self.expert_policy(state, self.services[0])
             demo_action_1, demo_action_steps_1 = self.expert_policy(state, self.services[1])
@@ -245,6 +245,7 @@ class Q_Learning:
             # and all following actions and choose the action with the higher reward
             demo_action = demo_action_0 if (reward_0 * (self.gamma ** demo_action_steps_0) >
                                             reward_1 * (self.gamma ** demo_action_steps_1)) else demo_action_1
+            # Update the Q-table with the demonstration target value for the chosen better action.
             if demo_action is not None:
                 if state not in self.demonstration_set:
                     self.demonstration_set.add(state)
