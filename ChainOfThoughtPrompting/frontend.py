@@ -17,7 +17,7 @@ if is_gemini_available:
 # Haupttitel und Modellauswahl
 st.title("Chain-of-Thought Prompting")
 
-# Bereich für die Modellauswahl
+# Konfigurationen für die Modellauswahl
 st.subheader("Modellauswahl")
 ai_model = None
 if len(ai_model_options) != 0:
@@ -49,11 +49,11 @@ cot_mode = st.radio(label="Chain-of-Thought Modus", options=["Few-Shot", "Zero-S
 
 st.divider()
 
-# MatheBot Hauptbereich
+# MatheBot Konfigurationen
 st.header("MatheBot")
 option = st.radio(label="Funktion", options=["Freies Prompting", "Benchmark"])
 
-# Bereich für freies Prompting
+# Auswahl freies Prompting
 if option == "Freies Prompting":
     # Informationstext und Beispiel
     st.info(
@@ -74,7 +74,6 @@ if option == "Freies Prompting":
         disabled=not use_cot
     )
 
-    # Button zur Anfrageverarbeitung
     fired = st.button("Frage stellen", disabled=len(ai_model_options) == 0)
 
     # Verarbeitung der Anfrage
@@ -100,7 +99,7 @@ if option == "Freies Prompting":
                 """
             )
 
-# Bereich für Benchmark-Tests
+# Konfiguration für Benchmark-Tests
 elif option == "Benchmark":
     # Konfiguration der Benchmark-Parameter
     limit_benchmark_questions = st.checkbox(
@@ -115,7 +114,6 @@ elif option == "Benchmark":
         min_value=1
     )
 
-    # Button zum Starten der Benchmark-Tests
     benchmark_fired = st.button("Benchmark starten", disabled=len(ai_model_options) == 0)
 
     # Ausführung und Anzeige der Benchmark-Ergebnisse
