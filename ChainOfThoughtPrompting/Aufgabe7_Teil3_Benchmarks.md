@@ -29,6 +29,10 @@ Die Analyse basiert auf:
 2. Überraschenderweise kein signifikanter Leistungsunterschied zwischen CoT und Standard-Prompting
 3. Gemini 1.5 Pro zeigt leicht bessere Performance als Llama 3.2, jedoch nur marginal
 
+### Mögliche Gründe für gleichbleibende Performance
+- Evtl. waren die Benchmarkfragen zu simpel. Obwohl die für die Benchmarks genutzten Fragen sich an den Fragen aus dem Paper orientiert haben, kann es sein, dass die genutzen Modelle (Gemini 1.5 Pro & Llama3.2), die recht neu sind (im Vergleich zu den im Paper genutzen Modelle, welches 2022 erschienen ist) so gut / stark waren, dass sie selbst ohne Chain-of-Thought Prompting die Aufgaben lösen konnten.
+- Evtl. ist Chain-of-Thought Promping bereits (teilweise oder nur in bestimmten Abfragen) in den genutzen Modellen implementiert.
+
 ## Benchmark Details
 
 Die vollständigen Benchmark-Ergebnisse mit allen Antworten und Bewertungen sind im `benchmarks`-Ordner als JSON-Dateien gespeichert. Jede Datei enthält:
