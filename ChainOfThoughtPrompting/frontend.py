@@ -33,7 +33,7 @@ if not is_gemini_available:
 
 if not is_llama_available:
     st.warning("""
-    `llama3.1` ist nicht verfügbar.  
+    `llama3.2` ist nicht verfügbar.  
     Installiere ollama und führe dann `ollama run llama3.2` aus, um `llama3.2` zu installieren.
     """)
 
