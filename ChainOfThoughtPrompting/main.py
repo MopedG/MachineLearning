@@ -208,9 +208,17 @@ cot_few_shot_examples = [
     }
 ]
 
+"""
+Überprüft, ob der Gemini API-Client verfügbar ist
+Rückgabe: True wenn verfügbar, sonst False
+"""
 def is_gemini_available():
     return gemini_client is not None
 
+"""
+Überprüft, ob das Llama-Modell lokal über Ollama verfügbar ist
+Rückgabe: True wenn verfügbar, sonst False
+"""
 def is_llama_available():
     try:
         ollama_models = [x.model for x in ollama.list().models]
@@ -221,7 +229,11 @@ def is_llama_available():
         return False
     return False
 
-
+"""
+Sendet eine Anfrage an die Gemini API und gibt die Antwort zurück
+prompt: Die Eingabeaufforderung für das Modell
+do_cooldown: Optional, fügt eine Abkühlphase ein
+"""
 def ask_gemini(prompt, do_cooldown=False):
     response = gemini_client.models.generate_content(model="gemini-1.5-pro", contents=prompt).text
     if do_cooldown:
@@ -230,18 +242,33 @@ def ask_gemini(prompt, do_cooldown=False):
         print("🥶 Gemini cooled down. Continuing...")
     return response
 
+"""
+Sendet eine Anfrage an das lokale Llama-Modell und gibt die Antwort zurück
+prompt: Die Eingabeaufforderung für das Modell
+"""
 def ask_llama(prompt):
     return ollama.generate(
         model="llama3.2",
         prompt=prompt
     )["response"]
 
+"""
+Leitet die Anfrage an das ausgewählte KI-Modell weiter
+prompt: Die Eingabeaufforderung für das Modell
+ai_model: Das zu verwendende KI-Modell
+do_cooldown: Optional, fügt eine Abkühlphase ein
+"""
 def ask_chatbot(prompt, ai_model, do_cooldown=False):
     if ai_model == "Gemini 1.5 Pro":
         return ask_gemini(prompt, do_cooldown)
     elif ai_model == "llama3.2":
         return ask_llama(prompt)
 
+"""
+Erstellt einen Zero-Shot Chain-of-Thought Prompt
+user_prompt: Die Benutzereingabe
+benchmark: Optional, fügt Benchmark-spezifische Anweisungen hinzu
+"""
 def create_cot_zero_shot_prompt(user_prompt, benchmark=False):
     return f"""
     Imagine your are an advanced AI Assistant that follows Chain of Thought (CoT) reasoning principle.
@@ -254,6 +281,12 @@ def create_cot_zero_shot_prompt(user_prompt, benchmark=False):
     {benchmark_prompt if benchmark else ""}
     """
 
+"""
+Erstellt einen Few-Shot Chain-of-Thought Prompt mit Beispielen
+user_prompt: Die Benutzereingabe
+examples: Liste von Beispielen für das Few-Shot Learning
+benchmark: Optional, fügt Benchmark-spezifische Anweisungen hinzu
+"""
 def create_cot_few_shot_prompt(user_prompt, examples, benchmark=False):
     prompt = """
     You are an advanced AI that follows Chain of Thought (CoT) reasoning.
@@ -280,6 +313,11 @@ def create_cot_few_shot_prompt(user_prompt, examples, benchmark=False):
     """
     return prompt
 
+"""
+Erstellt einen einfachen Prompt ohne Chain-of-Thought
+user_prompt: Die Benutzereingabe
+benchmark: Optional, fügt Benchmark-spezifische Anweisungen hinzu
+"""
 def create_non_cot_prompt(user_prompt, benchmark=False):
     return f"""
     {user_prompt}
@@ -287,6 +325,11 @@ def create_non_cot_prompt(user_prompt, benchmark=False):
     {benchmark_prompt if benchmark else ""}
     """
 
+"""
+Extrahiert die numerische Antwort aus einer Benchmark-Antwort
+response: Die Antwort des KI-Modells
+Rückgabe: Die extrahierte Zahl oder None wenn keine Zahl gefunden wurde
+"""
 def parse_answer_from_benchmark_response(response):
     num = ''
     is_digit_detected = False
@@ -303,6 +346,12 @@ def parse_answer_from_benchmark_response(response):
     except:
         return None
 
+"""
+Analysiert die Benchmark-Ergebnisse und berechnet Erfolgsmetriken
+ai_model: Das verwendete KI-Modell
+benchmark_results: Die Ergebnisse der Benchmark-Tests
+Rückgabe: Dictionary mit Analyseergebnissen
+"""
 def analyse_benchmark_results(ai_model, benchmark_results):
     amount_of_correct_non_cot_answers = sum(result["isNonCotAnswerCorrect"] for result in benchmark_results)
     amount_of_correct_cot_answers = sum(result["isCotAnswerCorrect"] for result in benchmark_results)
@@ -318,6 +367,10 @@ def analyse_benchmark_results(ai_model, benchmark_results):
         "results": benchmark_results
     }
 
+"""
+Speichert die Benchmark-Analyse als JSON-Datei mit Zeitstempel
+benchmark_analysis: Die zu speichernden Analyseergebnisse
+"""
 def save_benchmark_analysis(benchmark_analysis):
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     ai_model = benchmark_analysis["aiModel"].lower().replace(" ", "-")
@@ -328,7 +381,12 @@ def save_benchmark_analysis(benchmark_analysis):
     with open(file_path, "w") as file:
         file.write(json.dumps(benchmark_analysis, indent=4))
 
-
+"""
+Führt Benchmark-Tests für das ausgewählte KI-Modell durch
+ai_model: Das zu testende KI-Modell
+max_benchmark_questions: Optional, limitiert die Anzahl der Testfragen
+Rückgabe: Analyseergebnisse der Benchmark-Tests
+"""
 def run_benchmark(ai_model, max_benchmark_questions=None):
     results = []
 
@@ -368,11 +426,17 @@ def run_benchmark(ai_model, max_benchmark_questions=None):
 
     return analyse_benchmark_results(ai_model, results)
 
-
+"""
+Hilfsfunktion zum Ausführen und Ausgeben von Benchmark-Ergebnissen für das Llama-Modell
+"""
 def run_and_print_benchmark():
     print(json.dumps(run_benchmark("llama3.2"), indent=4))
 
-
+"""
+Hauptfunktion zur Verarbeitung von Mathematikfragen mit oder ohne Chain-of-Thought
+config: Konfigurationsobjekt mit allen nötigen Parametern
+Rückgabe: Dictionary mit KI-Antwort und optionaler Nicht-CoT-Antwort
+"""
 def ask_mathbot(config):
     prompt = config["userPrompt"]
 

@@ -1,0 +1,178 @@
+{
+    "aiModel": "Gemini 1.5 Pro",
+    "amountOfCorrectNonCotAnswers": 21,
+    "amountOfCorrectCotAnswers": 21,
+    "amountOfBenchmarks": 21,
+    "successRateNonCotAnswers": 1.0,
+    "successRateCotAnswers": 1.0,
+    "results": [
+        {
+            "question": "A farmer has 12 cows in his barn. He buys 8 more but sells 5 to a neighboring farmer. How many cows does he have now?",
+            "correctAnswer": 15,
+            "nonCotResponse": "The farmer starts with 12 cows.\nHe buys 8 more, so he has 12 + 8 = 20 cows.\nThen he sells 5 cows, so he has 20 - 5 = 15 cows.\n\n{ \"answer\": 15 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe farmer starts with 12 cows. He buys 8 more, so he has 12 + 8 = 20 cows. Then he sells 5 cows, so he has 20 - 5 = 15 cows left.\n\n{ \"answer\": 15 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "Sarah has 3 apples. She buys a dozen more but eats 2. How many apples does she have left?",
+            "correctAnswer": 13,
+            "nonCotResponse": "Sarah starts with 3 apples.\nShe buys a dozen more, which is 12 apples.  So she has 3 + 12 = 15 apples.\nShe then eats 2 apples, so she has 15 - 2 = 13 apples left.\n\n{ \"answer\": 13 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step.\nSarah starts with 3 apples. A dozen is 12, so she buys 12 more apples. 3 + 12 = 15. Sarah now has 15 apples. She eats 2 apples. 15 - 2 = 13. Sarah has 13 apples left.\n\n{ \"answer\": 13 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A library has 500 books. They receive a donation of 250 books but remove 100 damaged books. How many books are in the library now?",
+            "correctAnswer": 650,
+            "nonCotResponse": "The library initially has 500 books.\nThey receive a donation of 250 books, so the total becomes 500 + 250 = 750 books.\nThen they remove 100 damaged books, so the final number of books is 750 - 100 = 650 books.\n\n{ \"answer\": 650 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe library starts with 500 books. They receive a donation of 250 books, increasing the total number of books. 500 + 250 = 750. The library now has 750 books. They then remove 100 damaged books, decreasing the total number of books. 750 - 100 = 650. The library now has 650 books.\n\nAnswer: 650\n\n{ \"answer\": 650 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A factory produces 40 chairs per day. How many chairs does it produce in a week if it operates 6 days a week?",
+            "correctAnswer": 240,
+            "nonCotResponse": "The factory produces 40 chairs per day and operates 6 days a week.  Therefore, the number of chairs produced in a week is 40 * 6 = 240 chairs.\n\n{ \"answer\": 240 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe factory produces 40 chairs per day. It operates 6 days a week.  To find the total number of chairs produced in a week, we multiply the number of chairs produced per day by the number of days the factory operates in a week. 40 * 6 = 240.  Therefore, the factory produces 240 chairs in a week.\n\n{ \"answer\": 240 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "John runs 5 kilometers every morning. If he runs every day for 2 weeks, how many kilometers does he run in total?",
+            "correctAnswer": 70,
+            "nonCotResponse": "John runs 5 kilometers each day.  He runs for 2 weeks, which is 2 * 7 = 14 days.\n\nTherefore, he runs a total of 5 kilometers/day * 14 days = 70 kilometers.\n\n{ \"answer\": 70 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nJohn runs 5 kilometers every morning. There are 7 days in a week. He runs for 2 weeks.  So he runs for 2 * 7 = 14 days. Since he runs 5 kilometers each day, the total distance he runs is 5 * 14 = 70 kilometers.\n\n{ \"answer\": 70 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A train can carry 80 passengers per carriage. If the train has 10 carriages, how many passengers can it carry in total?",
+            "correctAnswer": 800,
+            "nonCotResponse": "The train has 10 carriages and each carriage can carry 80 passengers.  Therefore, the total number of passengers the train can carry is 10 * 80 = 800.\n\n{ \"answer\": 800 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nA train can carry 80 passengers per carriage. It has 10 carriages.  To find the total number of passengers the train can carry, we multiply the number of passengers per carriage by the number of carriages. 80 * 10 = 800.  The train can carry 800 passengers in total.\n\n{ \"answer\": 800 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A bakery bakes 120 loaves of bread every morning. By noon, they have sold 85 loaves. How many loaves are left?",
+            "correctAnswer": 35,
+            "nonCotResponse": "The bakery starts with 120 loaves and sells 85. To find the number of loaves remaining, subtract the number sold from the initial amount:\n\n120 - 85 = 35\n\nThere are 35 loaves left.\n\n{ \"answer\": 35 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe bakery starts with 120 loaves of bread.  They sell 85 loaves.  To find out how many are left, we subtract the number sold from the starting amount: 120 - 85 = 35.  There are 35 loaves left.\n\n{ \"answer\": 35 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A football team scores 3 goals per match. How many goals will they have scored after playing 8 matches?",
+            "correctAnswer": 24,
+            "nonCotResponse": "The team scores 3 goals per match. After 8 matches, they will have scored 3 * 8 = 24 goals.\n\n{ \"answer\": 24 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe team scores 3 goals per match. They play 8 matches.  Therefore, the total number of goals scored is 3 goals/match * 8 matches = 24 goals.\n\n{ \"answer\": 24 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A hotel has 250 rooms, but 40 are under renovation. If 175 rooms are occupied, how many rooms are available for new guests?",
+            "correctAnswer": 35,
+            "nonCotResponse": "Here's how to solve the problem:\n\n1. **Rooms not under renovation:** 250 (total rooms) - 40 (rooms under renovation) = 210 rooms\n\n2. **Available rooms:** 210 (rooms not under renovation) - 175 (occupied rooms) = 35 rooms\n\nTherefore, 35 rooms are available for new guests.\n\n{ \"answer\": 35 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe hotel has 250 rooms in total. 40 rooms are under renovation, so they are not available. 250 - 40 = 210.  There are 210 rooms currently available. Of those 210 rooms, 175 are occupied. 210 - 175 = 35. Therefore, there are 35 rooms available for new guests.\n\n{ \"answer\": 35 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A school orders 600 pencils. They distribute 15 pencils per classroom, and there are 30 classrooms. How many pencils are left over?",
+            "correctAnswer": 150,
+            "nonCotResponse": "First, calculate the total number of pencils distributed:\n\n15 pencils/classroom * 30 classrooms = 450 pencils\n\nNext, subtract the distributed pencils from the total number of pencils ordered:\n\n600 pencils - 450 pencils = 150 pencils\n\nTherefore, there are 150 pencils left over.\n\n{ \"answer\": 150 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe school orders 600 pencils. They give out 15 pencils to each of the 30 classrooms.  So, the total number of pencils distributed is 15 * 30 = 450 pencils. The school started with 600 pencils and distributed 450, so the number of pencils left over is 600 - 450 = 150.\n\nAnswer: 150\n\n{ \"answer\": 150 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A software company hires 15 developers in January and 10 more in February. If 5 developers resign in March, how many developers remain?",
+            "correctAnswer": 20,
+            "nonCotResponse": "* **January:** 15 developers\n* **February:** 15 + 10 = 25 developers\n* **March:** 25 - 5 = 20 developers\n\nThere are 20 developers remaining.\n\n```json\n{ \"answer\": 20 }\n```\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe company hires 15 developers in January. Then they hire 10 more in February. So far, the company has 15 + 10 = 25 developers. In March, 5 developers resign. Therefore, the company has 25 - 5 = 20 developers remaining.\n\n{ \"answer\": 20 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A water tank holds 1,000 liters of water. A household consumes 150 liters per day. How much water is left after 4 days?",
+            "correctAnswer": 400,
+            "nonCotResponse": "The household consumes 150 liters/day * 4 days = 600 liters.\n\nStarting with 1000 liters and consuming 600 liters leaves 1000 - 600 = 400 liters.\n\n{ \"answer\": 400 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nA household consumes 150 liters of water per day. Over 4 days, they consume 150 * 4 = 600 liters. The water tank starts with 1000 liters and 600 liters are used. 1000 - 600 = 400 liters. Therefore, there are 400 liters of water remaining.\n\n{ \"answer\": 400 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A cyclist completes a 20-kilometer race 4 times a week. How many kilometers does he cycle in a month with 5 weeks?",
+            "correctAnswer": 400,
+            "nonCotResponse": "The cyclist completes 20 km * 4 times/week = 80 km per week.\n\nIn a 5-week month, the cyclist covers 80 km/week * 5 weeks = 400 km.\n\n{ \"answer\": 400 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe cyclist completes a 20-kilometer race 4 times a week. So, he cycles 20 * 4 = 80 kilometers per week.\nIn a month with 5 weeks, he cycles 80 * 5 = 400 kilometers.\n\n{ \"answer\": 400 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A bookstore sells 25 books per day. If they have 500 books in stock, how many days will it take to sell out completely?",
+            "correctAnswer": 20.0,
+            "nonCotResponse": "The bookstore sells 25 books per day and has 500 books in stock.  To find out how many days it will take to sell out, we divide the total number of books by the number of books sold per day:\n\n500 books / 25 books/day = 20 days\n\nIt will take 20 days for the bookstore to sell out completely.\n\n{ \"answer\": 20 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe bookstore sells 25 books per day and has 500 books in stock. To find out how many days it will take to sell out, we divide the total number of books by the number of books sold per day. 500 / 25 = 20. It will take 20 days for the bookstore to sell out completely.\n\n{ \"answer\": 20 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A plane has 180 passenger seats, but 25 are unoccupied. How many passengers are on board?",
+            "correctAnswer": 155,
+            "nonCotResponse": "The plane has 180 seats and 25 are unoccupied.  Therefore, the number of passengers on board is 180 - 25 = 155.\n\n```json\n{ \"answer\": 155 }\n```\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe plane has 180 passenger seats in total. 25 of those seats are unoccupied.  So, to find the number of passengers on board, we subtract the unoccupied seats from the total number of seats. 180 - 25 = 155. Therefore, there are 155 passengers on board.\n\n{ \"answer\": 155 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A concert venue has 1,500 seats. If 80% of the tickets are sold, how many seats remain empty?",
+            "correctAnswer": 300.0,
+            "nonCotResponse": "First, we find the number of tickets sold:\n\nTickets sold = 80% of 1500 seats\nTickets sold = (80/100) * 1500\nTickets sold = 0.80 * 1500\nTickets sold = 1200\n\nNext, we find the number of empty seats:\n\nEmpty seats = Total seats - Tickets sold\nEmpty seats = 1500 - 1200\nEmpty seats = 300\n\nTherefore, 300 seats remain empty.\n\n{ \"answer\": 300 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe concert venue has 1500 seats. If 80% of the tickets are sold, then 20% of the tickets remain. To calculate the number of empty seats, we need to find 20% of 1500. 20% can be represented as 0.20 or 20/100. Therefore, the number of empty seats is 1500 * 0.20 = 300.\n\nAnswer: 300\n\n{ \"answer\": 300 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A gardener plants 45 flowers in a row. If he makes 8 rows, but removes 9 flowers how many flowers are planted in total?",
+            "correctAnswer": 351,
+            "nonCotResponse": "The gardener plants 45 flowers in each row.  With 8 rows, he would have planted 45 * 8 = 360 flowers.\n\nHe then removes 9 flowers, so the total number of flowers planted is 360 - 9 = 351.\n\n{ \"answer\": 351 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe gardener plants 45 flowers in each row. He makes 8 rows, so he plants 45 * 8 = 360 flowers. Then, he removes 9 flowers, so the total number of flowers planted is 360 - 9 = 351.\n\n{ \"answer\": 351 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A supermarket sells 35 bottles of juice per day. One bottle of juice costs 3 dollars. How much money will they make in a 12-day period?",
+            "correctAnswer": 1260,
+            "nonCotResponse": "Here's how to calculate the supermarket's earnings:\n\n1. **Calculate daily earnings:** 35 bottles/day * $3/bottle = $105/day\n\n2. **Calculate 12-day earnings:** $105/day * 12 days = $1260\n\nTherefore, the supermarket will make $1260 in a 12-day period.\n\n```json\n{ \"answer\": 1260 }\n```\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe supermarket sells 35 bottles of juice per day. Each bottle costs 3 dollars. So, per day, the supermarket makes 35 * 3 = 105 dollars.  Over a 12-day period, they will make 105 * 12 = 1260 dollars.\n\n{ \"answer\": 1260 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A swimming pool can hold 10,000 liters of water. If 2,500 liters evaporate in a week, how much water remains after 3 weeks?",
+            "correctAnswer": 2500,
+            "nonCotResponse": "The pool loses 2,500 liters of water per week.  Over 3 weeks, the total water loss is 2,500 liters/week * 3 weeks = 7,500 liters.\n\nThe pool starts with 10,000 liters and loses 7,500 liters.  The remaining water is 10,000 liters - 7,500 liters = 2,500 liters.\n\n{ \"answer\": 2500 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe pool starts with 10,000 liters.  2,500 liters evaporate each week. Over 3 weeks, the total evaporation is 2,500 liters/week * 3 weeks = 7,500 liters.  The remaining water is 10,000 liters - 7,500 liters = 2,500 liters.\n\n{\"answer\": 2500}\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A sports shop sells 3 basketballs for $60. How much will 7 basketballs cost at the same rate?",
+            "correctAnswer": 140.0,
+            "nonCotResponse": "First, find the cost of one basketball: $60 / 3 basketballs = $20 per basketball.\n\nThen, multiply the cost of one basketball by the number of basketballs you want to buy: $20/basketball * 7 basketballs = $140.\n\nTherefore, 7 basketballs will cost $140.\n\n{ \"answer\": 140 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nThe shop sells 3 basketballs for $60. To find the price of 1 basketball, we divide the total price by the number of basketballs: $60 / 3 = $20. So, each basketball costs $20.  We want to find the cost of 7 basketballs. We multiply the price of 1 basketball by the number of basketballs we want to buy: $20 * 7 = $140. Therefore, 7 basketballs will cost $140.\n\n{ \"answer\": 140 }\n",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "Tony is collecting apples per his mother's request. He already has 5 apples. His friend Anthony has 3 apples. Tony needs to collect 10 apples in total for his mother. However, the apples collected from Anthony do not belong to Tony. How many more apples does Tony need to collect before returning home?",
+            "correctAnswer": 5,
+            "nonCotResponse": "Tony needs 10 apples and already has 5.  He needs 10 - 5 = 5 more apples.  Anthony's apples don't affect how many *Tony* needs to collect.\n\n{ \"answer\": 5 }\n",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "Let's think step by step:\nTony needs 10 apples. He already has 5 apples.  He needs 10 - 5 = 5 more apples.  Even though his friend Anthony has 3 apples, those don't belong to Tony and don't count towards the 10 apples Tony needs.  Therefore, Tony still needs 5 more apples.\n\n{\"answer\": 5}\n",
+            "isCotAnswerCorrect": true
+        }
+    ]
+}

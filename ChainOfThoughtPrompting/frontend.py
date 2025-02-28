@@ -2,29 +2,35 @@ import streamlit as st
 import main
 import pandas as pd
 
+# Überprüfe Verfügbarkeit der KI-Modelle
 is_gemini_available = main.is_gemini_available()
 is_llama_available = main.is_llama_available()
 ai_model_options = []
 
+# Erstelle Liste der verfügbaren KI-Modelle
 if is_llama_available:
     ai_model_options.append("llama3.2")
 
 if is_gemini_available:
     ai_model_options.append("Gemini 1.5 Pro")
 
+# Haupttitel und Modellauswahl
 st.title("Chain-of-Thought Prompting")
 
+# Konfigurationen für die Modellauswahl
 st.subheader("Modellauswahl")
 ai_model = None
 if len(ai_model_options) != 0:
     ai_model = st.radio(label="KI-Modell", options=ai_model_options)
 
+# Fehlermeldungen für nicht verfügbare Modelle
 if len(ai_model_options) == 0:
     st.error("""
     **Es ist kein KI-Modell verfügbar.**  
     Folge den Anweisungen, um fortzufahren.
     """)
 
+# Warnungen für fehlende Modelle
 if not is_gemini_available:
     st.warning("""
     `Gemini 1.5 Pro` ist nicht verfügbar.  
@@ -37,15 +43,19 @@ if not is_llama_available:
     Installiere ollama und führe dann `ollama run llama3.2` aus, um `llama3.2` zu installieren.
     """)
 
+# Chain-of-Thought Modusauswahl
 st.subheader("Einstellungen")
 cot_mode = st.radio(label="Chain-of-Thought Modus", options=["Few-Shot", "Zero-Shot"])
 
 st.divider()
 
+# MatheBot Konfigurationen
 st.header("MatheBot")
 option = st.radio(label="Funktion", options=["Freies Prompting", "Benchmark"])
 
+# Auswahl freies Prompting
 if option == "Freies Prompting":
+    # Informationstext und Beispiel
     st.info(
         """
         Frage den MatheBot eine einfache Matheaufgabe **auf Englisch** in natürlicher Sprache.  
@@ -54,13 +64,19 @@ if option == "Freies Prompting":
         """
     )
 
+    # Eingabebereich für den Benutzer
     user_prompt = st.text_area(label="Prompt")
 
+    # Chain-of-Thought Optionen
     use_cot = st.checkbox(label="Nutze Chain-of-Thought", value=True)
-    generate_additional_non_cot_answer = st.checkbox(label="Generiere zusätzliche Antwort, die kein Chain-of-Thought verwendet", disabled=not use_cot)
+    generate_additional_non_cot_answer = st.checkbox(
+        label="Generiere zusätzliche Antwort, die kein Chain-of-Thought verwendet",
+        disabled=not use_cot
+    )
 
     fired = st.button("Frage stellen", disabled=len(ai_model_options) == 0)
 
+    # Verarbeitung der Anfrage
     if fired:
         with st.spinner("Generiere Antwort(en)"):
             response = main.ask_mathbot(
@@ -83,10 +99,13 @@ if option == "Freies Prompting":
                 """
             )
 
-
-
+# Konfiguration für Benchmark-Tests
 elif option == "Benchmark":
-    limit_benchmark_questions = st.checkbox(label="Limitiere maximale Anzahl an Benchmark-Prompts", value=False)
+    # Konfiguration der Benchmark-Parameter
+    limit_benchmark_questions = st.checkbox(
+        label="Limitiere maximale Anzahl an Benchmark-Prompts",
+        value=False
+    )
     max_benchmark_questions_input = st.number_input(
         label="Maximale Anzahl an Benchmark-Prompts",
         value=5,
@@ -97,6 +116,7 @@ elif option == "Benchmark":
 
     benchmark_fired = st.button("Benchmark starten", disabled=len(ai_model_options) == 0)
 
+    # Ausführung und Anzeige der Benchmark-Ergebnisse
     if benchmark_fired:
         with st.spinner("Benchmark wird ausgeführt"):
             max_benchmark_questions = None

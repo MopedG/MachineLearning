@@ -1,0 +1,34 @@
+{
+    "aiModel": "llama3.2",
+    "amountOfCorrectNonCotAnswers": 3,
+    "amountOfCorrectCotAnswers": 3,
+    "amountOfBenchmarks": 3,
+    "successRateNonCotAnswers": 1.0,
+    "successRateCotAnswers": 1.0,
+    "results": [
+        {
+            "question": "A farmer has 12 cows in his barn. He buys 8 more but sells 5 to a neighboring farmer. How many cows does he have now?",
+            "correctAnswer": 15,
+            "nonCotResponse": "To find out how many cows the farmer has now, let's follow the steps:\n\n1. The farmer starts with 12 cows.\n2. He buys 8 more, so he now has 12 + 8 = 20 cows.\n3. Then, he sells 5 cows to a neighboring farmer.\n\nTo find out how many cows the farmer has left, we subtract the number of cows sold from the total number of cows:\n20 - 5 = 15\n\nSo, the farmer now has 15 cows.\n\nHere is the JSON object with the final answer:\n\n{\"answer\": 15}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find out how many cows the farmer has now, let's think step by step.\n\n1. The farmer starts with 12 cows in his barn.\n2. He buys 8 more cows, which increases his total amount of cows to 12 + 8 = 20.\n3. However, he sells 5 cows to a neighboring farmer. This means the number of cows he has now is 20 - 5 = 15.\n\nSo, the farmer has 15 cows left after buying and selling some.\n\nJSON Answer:\n{ \"answer\": 15 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "Sarah has 3 apples. She buys a dozen more but eats 2. How many apples does she have left?",
+            "correctAnswer": 13,
+            "nonCotResponse": "Let's break down the situation:\n\nSarah starts with 3 apples.\nShe buys a dozen more, which is equal to 12 apples (since a dozen is 12).\nSo now she has 3 + 12 = 15 apples.\n\nHowever, she eats 2 apples.\nTherefore, she is left with 15 - 2 = 13 apples.\n\nThe final answer is: { \"answer\": 13 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve this problem, let's break it down into steps:\n\n1. Sarah starts with 3 apples.\n2. She buys a dozen more apples, which is equivalent to 12 apples. So now she has 3 + 12 = 15 apples.\n3. However, she eats 2 apples. To find out how many apples are left, we need to subtract the number of apples eaten from the total number of apples. 15 - 2 = 13.\n\nTherefore, Sarah has 13 apples left.\n\n{ \"answer\": 13 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A library has 500 books. They receive a donation of 250 books but remove 100 damaged books. How many books are in the library now?",
+            "correctAnswer": 650,
+            "nonCotResponse": "To find the current number of books in the library, we need to follow these steps:\n\n1. Start with the initial number of books: 500\n2. Add the new donation of books: 250 + 500 = 750\n3. Subtract the damaged books that were removed: 750 - 100 = 650\n\nSo, there are now 650 books in the library.\n\nHere is the JSON object containing the final answer:\n\n{ \"answer\": 650 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve the problem, let's break it down step by step:\n\n1. The library initially has 500 books.\n2. They receive a donation of 250 books, which increases the total number of books. 500 + 250 = 750\n3. However, they remove 100 damaged books from the collection. To find the new total, we subtract 100 from the previous total. 750 - 100 = 650\n\nSo, after receiving the donation and removing the damaged books, the library now has 650 books.\n\nJSON Answer:\n{ \"answer\": 650 }",
+            "isCotAnswerCorrect": true
+        }
+    ]
+}

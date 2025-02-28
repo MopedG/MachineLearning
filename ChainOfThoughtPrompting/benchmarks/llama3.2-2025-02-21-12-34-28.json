@@ -1,0 +1,178 @@
+{
+    "aiModel": "llama3.2",
+    "amountOfCorrectNonCotAnswers": 20,
+    "amountOfCorrectCotAnswers": 20,
+    "amountOfBenchmarks": 21,
+    "successRateNonCotAnswers": 0.9523809523809523,
+    "successRateCotAnswers": 0.9523809523809523,
+    "results": [
+        {
+            "question": "A farmer has 12 cows in his barn. He buys 8 more but sells 5 to a neighboring farmer. How many cows does he have now?",
+            "correctAnswer": 15,
+            "nonCotResponse": "Let's break down the steps:\n\n1. The farmer initially has 12 cows.\n2. He buys 8 more, so now he has 12 + 8 = 20 cows.\n3. Then, he sells 5 to a neighboring farmer, leaving him with 20 - 5 = 15 cows.\n\nTherefore, the farmer now has 15 cows.\n\nHere is the JSON object containing the final answer:\n\n```\n{\n  \"answer\": 15\n}\n```",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find out how many cows the farmer has now, we'll follow these steps:\n\n1. The farmer starts with 12 cows.\n2. He buys 8 more cows, which increases his total amount of cows by 8. 12 + 8 = 20\n3. However, he sells 5 cows to a neighboring farmer, so we subtract the number of cows sold from the current total. 20 - 5 = 15\n\nTherefore, the farmer now has 15 cows.\n\n{\n    \"answer\": 15\n}",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "Sarah has 3 apples. She buys a dozen more but eats 2. How many apples does she have left?",
+            "correctAnswer": 13,
+            "nonCotResponse": "To find out how many apples Sarah has left, we need to follow the steps:\n\n1. She starts with 3 apples.\n2. She buys a dozen more, which is equal to 12 apples (since a dozen is 12). So now she has 3 + 12 = 15 apples.\n3. However, she eats 2 of them. So we need to subtract 2 from the total number of apples: 15 - 2 = 13.\n\nTherefore, Sarah has 13 apples left.\n\n{ \"answer\": 13 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find out how many apples Sarah has left, let's think step by step:\n\n1. Sarah starts with 3 apples.\n2. She buys a dozen more apples. Since a dozen is equal to 12, she now has 3 + 12 = 15 apples.\n3. However, she eats 2 apples. To find out how many apples are left, we need to subtract the number of apples she ate from the total number of apples she has.\n\nLet's do the calculation: 15 - 2 = 13\n\nTherefore, Sarah has 13 apples left.\n\n\n{ \"answer\": 13 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A library has 500 books. They receive a donation of 250 books but remove 100 damaged books. How many books are in the library now?",
+            "correctAnswer": 650,
+            "nonCotResponse": "To find out how many books are in the library now, we need to follow these steps:\n\n1. Start with the initial number of books: 500\n2. Add the new donation of books: 500 + 250 = 750\n3. Subtract the damaged books that were removed: 750 - 100 = 650\n\nSo, there are 650 books in the library now.\n\nHere is the JSON object containing the final answer:\n{\n    \"answer\": 650\n}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To determine the current number of books in the library, let's break it down step by step:\n\n1. The library starts with 500 books.\n2. They receive a donation of 250 books, which increases their total amount of books. 500 + 250 = 750\n3. However, they remove 100 damaged books from the collection. To find the current number of books, we need to subtract the number of damaged books from the new total. 750 - 100 = 650\n\nSo, after receiving a donation and removing damaged books, the library now has 650 books.\n\nJSON answer:\n{ \"answer\": 650 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A factory produces 40 chairs per day. How many chairs does it produce in a week if it operates 6 days a week?",
+            "correctAnswer": 240,
+            "nonCotResponse": "To find out how many chairs the factory produces in a week, we need to multiply the number of chairs produced per day by the number of days it operates in a week.\n\nNumber of chairs produced per day = 40\nNumber of operating days in a week = 6\n\nTotal number of chairs produced in a week = Number of chairs produced per day * Number of operating days in a week\n= 40 * 6\n= 240\n\nHere is the JSON object with the final answer:\n\n{\"answer\": 240}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To determine the total number of chairs produced in a week, we need to calculate the daily production and then multiply it by 6 (the number of days the factory operates in a week).\n\nStep 1: Calculate the daily production\nThe factory produces 40 chairs per day.\n\nStep 2: Multiply the daily production by 6\nTo find the total number of chairs produced in a week, we multiply the daily production by 6.\n40 * 6 = 240\n\nTherefore, the factory produces 240 chairs in a week if it operates 6 days a week.\n\nJSON Object:\n{ \"answer\": 240 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "John runs 5 kilometers every morning. If he runs every day for 2 weeks, how many kilometers does he run in total?",
+            "correctAnswer": 70,
+            "nonCotResponse": "To find the total distance John runs, we need to calculate the number of days he runs and multiply it by the distance he covers each day.\n\nThere are 7 days in a week, so for 2 weeks, there are:\n2 x 7 = 14 days\n\nSince John runs 5 kilometers every morning, the total distance he runs is:\n14 x 5 = 70 kilometers\n\nHere's the JSON object containing the final answer:\n\n{\n    \"answer\": 70\n}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find the total distance John runs in 2 weeks, we need to calculate the total number of days he runs.\n\nSince there are 7 days in a week, and John runs every day for 2 weeks, we multiply 7 by 2:\n\n7 * 2 = 14\n\nNow, we know that John runs 5 kilometers every morning. To find the total distance he runs in 14 days, we multiply 5 by 14:\n\n5 * 14 = 70\n\nSo, John runs a total of 70 kilometers in 2 weeks.\n\nJSON answer:\n{ \"answer\": 70 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A train can carry 80 passengers per carriage. If the train has 10 carriages, how many passengers can it carry in total?",
+            "correctAnswer": 800,
+            "nonCotResponse": "To find out how many passengers the train can carry, we need to multiply the number of carriages by the number of passengers each carriage can carry.\n\nNumber of carriages: 10\nNumber of passengers per carriage: 80\n\nTotal number of passengers = Number of carriages * Number of passengers per carriage\n= 10 * 80\n= 800\n\nHere is the final answer in JSON format:\n\n{ \"answer\": 800 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find the total number of passengers that can be carried, we need to multiply the number of passengers per carriage by the number of carriages.\n\nStep 1: Determine the number of passengers per carriage\nThe train has one carriage and it can carry 80 passengers.\n\nStep 2: Determine the total number of carriages\nThe train has a total of 10 carriages.\n\nStep 3: Multiply the number of passengers per carriage by the total number of carriages\nTo find the total capacity, multiply 80 (passengers per carriage) by 10 (total number of carriages). \n\n80 * 10 = 800\n\nTherefore, the train can carry a total of 800 passengers.\n\nHere is the final answer in JSON format:\n{ \"answer\": 800 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A bakery bakes 120 loaves of bread every morning. By noon, they have sold 85 loaves. How many loaves are left?",
+            "correctAnswer": 35,
+            "nonCotResponse": "To find out how many loaves are left, we need to subtract the number of loaves sold from the total number of loaves baked.\n\nTotal loaves baked = 120\nNumber of loaves sold = 85\n\nNumber of loaves left = Total loaves baked - Number of loaves sold\n= 120 - 85\n= 35\n\nHere is the JSON object with the final answer:\n\n {\n   \"answer\": 35\n }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find out how many loaves of bread are left, let's think step by step:\n\n1. The bakery bakes 120 loaves every morning.\n2. By noon, they have sold 85 loaves.\n\nTo find the number of loaves left, we need to subtract the number of loaves sold from the total number baked. \n\nLet's perform the calculation: \n120 (total baked) - 85 (loaves sold) = 35\n\nSo, there are 35 loaves of bread left in the bakery.\n\nJSON Answer:\n{ \"answer\": 35 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A football team scores 3 goals per match. How many goals will they have scored after playing 8 matches?",
+            "correctAnswer": 24,
+            "nonCotResponse": "To find out how many goals the football team will have scored after playing 8 matches, we need to multiply the number of goals they score per match by the number of matches.\n\n3 goals per match * 8 matches = 24 goals\n\nHere is the JSON object with the final answer:\n\n {\n  \"answer\": 24\n}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To determine the total number of goals scored after playing 8 matches, we can follow these steps:\n\n1. The football team scores 3 goals per match.\n2. They will play 8 matches in total.\n3. To find the total number of goals scored, we multiply the number of goals scored per match by the total number of matches.\n\nLet's calculate this step by step:\n\n3 * 8 = 24\n\nThe football team will score a total of 24 goals after playing 8 matches.\n\nJSON answer:\n{ \"answer\": 24 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A hotel has 250 rooms, but 40 are under renovation. If 175 rooms are occupied, how many rooms are available for new guests?",
+            "correctAnswer": 35,
+            "nonCotResponse": "To find the number of available rooms, we need to subtract the occupied rooms and the rooms under renovation from the total number of rooms.\n\nTotal rooms = 250\nOccupied rooms = 175\nRooms under renovation = 40\n\nAvailable rooms = Total rooms - Occupied rooms - Rooms under renovation\nAvailable rooms = 250 - 175 - 40\nAvailable rooms = 35\n\nHere is the JSON object with the final answer:\n\n{ \"answer\": 35 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve the problem, let's follow the steps:\n\n1. First, we need to find out how many rooms are available in the hotel. To do this, we subtract the number of rooms under renovation from the total number of rooms. \n\n250 (total rooms) - 40 (rooms under renovation) = 210\n\nSo, there are 210 rooms that are not being renovated.\n\n2. Now, let's find out how many rooms are occupied by guests.\n\nWe already know this: 175 rooms are occupied.\n\n3. To find the number of available rooms for new guests, we subtract the number of occupied rooms from the total number of non-renewing rooms.\n\n210 (non-renewing rooms) - 175 (occupied rooms) = 35\n\nSo, there are 35 rooms available for new guests.\n\nJSON Answer:\n{ \"answer\": 35 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A school orders 600 pencils. They distribute 15 pencils per classroom, and there are 30 classrooms. How many pencils are left over?",
+            "correctAnswer": 150,
+            "nonCotResponse": "To find out how many pencils are left over, we need to first calculate the total number of pencils distributed.\n\n30 classrooms with 15 pencils per classroom will have:\n30 x 15 = 450 pencils distributed\n\nSince there were originally 600 pencils ordered, and 450 pencils were distributed, we can subtract to find the number of pencils left over:\n\n600 - 450 = 150\n\nSo, there are 150 pencils left over.\n\nHere is the JSON object with the final answer:\n{\n  \"answer\": 150\n}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find out how many pencils are left over, we need to first calculate the total number of pencils distributed to all classrooms.\n\n1. The school has 30 classrooms.\n2. Each classroom receives 15 pencils.\n3. To find the total number of pencils given away, multiply the number of classrooms by the number of pencils per classroom: 30 * 15 = 450\n\nNow that we know how many pencils were distributed (450), let's subtract this from the initial order to determine how many pencils are left over:\n\n600 - 450 = 150\n\nTherefore, there are 150 pencils left over.\n\nHere is the JSON object containing the final answer:\n{\n    \"answer\": 150\n}",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A software company hires 15 developers in January and 10 more in February. If 5 developers resign in March, how many developers remain?",
+            "correctAnswer": 20,
+            "nonCotResponse": "To find out how many developers remain, we need to calculate the total number of developers hired and then subtract the number of developers who resigned.\n\nIn January, 15 developers were hired.\nIn February, 10 more developers were hired, making the total 15 + 10 = 25 developers.\nIn March, 5 developers resigned, leaving 25 - 5 = 20 developers.\n\nSo, there are 20 developers remaining.\n\nHere's the JSON object with the final answer:\n\n{ \"answer\": 20 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve this problem, let's break it down step by step.\n\n1. The software company hires 15 developers in January and 10 more in February. This means the total number of new hires is 15 + 10 = 25.\n2. Initially, the company had no developers (assuming this is the starting point). Now, they have 25 developers.\n3. In March, 5 developers resign. To find out how many developers remain, we need to subtract the number of resignations from the total number of developers.\n\nSo, let's calculate:\n\n25 (total developers) - 5 (developers who resigned) = 20\n\nTherefore, there are 20 developers remaining.\n\nHere is the JSON object with the final answer:\n{ \"answer\": 20 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A water tank holds 1,000 liters of water. A household consumes 150 liters per day. How much water is left after 4 days?",
+            "correctAnswer": 400,
+            "nonCotResponse": "To find out how much water is left in the tank, we need to calculate the total amount of water consumed over 4 days.\n\nThe household consumes 150 liters per day. So, in 4 days, they will consume:\n150 liters/day x 4 days = 600 liters\n\nNow, let's subtract this from the initial capacity of the tank (1,000 liters) to find out how much water is left:\n\n1,000 liters - 600 liters = 400 liters\n\nTherefore, after 4 days, there are 400 liters of water left in the tank.\n\nHere is the JSON object with the final answer:\n{ \"answer\": 400 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve the problem, let's break it down into steps:\n\n1. The water tank holds 1,000 liters of water initially.\n2. The household consumes 150 liters per day.\n3. We need to find out how much water is left after 4 days.\n\nLet's calculate the total amount of water consumed in 4 days:\n150 liters/day x 4 days = 600 liters\n\nNow, subtract the amount of water consumed from the initial capacity of the tank:\n1,000 liters - 600 liters = 400 liters\n\nTherefore, there are 400 liters of water left after 4 days.\n\nJSON Answer:\n{ \"answer\": 400 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A cyclist completes a 20-kilometer race 4 times a week. How many kilometers does he cycle in a month with 5 weeks?",
+            "correctAnswer": 400,
+            "nonCotResponse": "To find out how many kilometers the cyclist cycles in a month, we need to multiply the number of kilometers cycled per week by the number of weeks in the month.\n\nNumber of kilometers cycled per week = 20 km\nNumber of weeks in the month = 5 weeks\n\nTotal kilometers cycled in a month = Number of kilometers cycled per week * Number of weeks in the month\n= 20 km/week * 5 weeks\n= 100 km\n\nHere's the JSON object with the final answer:\n\n{ \"answer\": 100 }",
+            "isNonCotAnswerCorrect": false,
+            "cotResponse": "To solve this problem, let's break it down into steps:\n\n1. First, we need to calculate the total kilometers cycled in one week.\n   The cyclist completes a 20-kilometer race 4 times a week. So, we can multiply 20 km by 4 to get the total distance covered in a week.\n\n2. Now that we know how far the cyclist cycles each week, let's find out the total kilometers cycled over a month.\n   The cyclist completes this routine for a month with 5 weeks. To calculate the total kilometers, we multiply the weekly kilometers by the number of weeks in the month (which is 5). \n\n3. Total kilometers = Weekly kilometers * Number of weeks\n   Total kilometers = 20 km * 4 * 5\n\nNow that we have calculated the steps, let's do the math:\n\nWeekly kilometers = 20 km * 4 = 80 km\nTotal kilometers for the month = 80 km * 5 = 400 km\n\nSo, the cyclist cycles a total of 400 km in a month with 5 weeks.\n\nJSON Answer:\n{ \"answer\": 400 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A bookstore sells 25 books per day. If they have 500 books in stock, how many days will it take to sell out completely?",
+            "correctAnswer": 20.0,
+            "nonCotResponse": "To find out how many days it will take to sell out completely, we need to divide the total number of books in stock by the number of books sold per day.\n\nTotal number of books in stock = 500\nNumber of books sold per day = 25\n\nDays to sell out completely = Total number of books in stock / Number of books sold per day\n= 500 / 25\n= 20\n\nHere is the JSON object with the final answer:\n\n{\n    \"answer\": 20\n}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve this problem, we can use the concept of division. We know that the bookstore sells 25 books per day and they have 500 books in stock. To find out how many days it will take to sell out completely, we need to divide the total number of books by the number of books sold per day.\n\nLet's think step by step:\n\n1. The bookstore has 500 books in stock.\n2. They sell 25 books per day.\n3. To find the number of days it will take to sell out completely, we can divide the total number of books by the number of books sold per day: 500 \u00f7 25 = ?\n\nThis calculation represents the division of two numbers:\n\n500 \u00f7 25 = 20\n\nTherefore, it will take 20 days for the bookstore to sell out completely.\n\nJSON Answer:\n{\n    \"answer\": 20\n}",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A plane has 180 passenger seats, but 25 are unoccupied. How many passengers are on board?",
+            "correctAnswer": 155,
+            "nonCotResponse": "To find the number of passengers on board, we need to subtract the unoccupied seats from the total number of passenger seats.\n\nTotal passenger seats = 180\nUnoccupied seats = 25\n\nNumber of occupied seats (and thus passengers) = Total passenger seats - Unoccupied seats\n= 180 - 25\n= 155\n\nHere is the JSON object with the final answer:\n\n{\"answer\": 155}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find out how many passengers are on board, let's think step by step:\n\n1. The plane has 180 passenger seats.\n2. However, 25 of these seats are unoccupied. To determine the total number of occupied seats, we need to subtract the number of unoccupied seats from the total number of passenger seats. So, 180 - 25 = 155.\n\nTherefore, there are 155 passengers on board.\n\nHere is the JSON object with the final answer:\n\n{ \"answer\": 155 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A concert venue has 1,500 seats. If 80% of the tickets are sold, how many seats remain empty?",
+            "correctAnswer": 300.0,
+            "nonCotResponse": "To find out how many seats remain empty, we need to calculate 80% of the total seats and then subtract that from the total.\n\nFirst, let's calculate 80% of 1500:\n\n80% = 0.8\nTotal seats = 1500\nNumber of sold tickets = Total seats * 0.8\n= 1500 * 0.8\n= 1200\n\nNow, let's subtract the number of sold tickets from the total to find out how many seats remain empty:\n\nSeats remaining empty = Total seats - Number of sold tickets\n= 1500 - 1200\n= 300\n\nHere is the JSON object with the final answer:\n{ \"answer\": 300 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To find out how many seats remain empty, we first need to calculate 80% of 1500 and then subtract that from 1500.\n\nStep 1: Calculate 80% of 1500.\n80% of 1500 = (80/100) * 1500\n= 0.8 * 1500\n= 1200\n\nStep 2: Subtract the number of seats sold from the total number of seats to find out how many seats remain empty.\nTotal seats = 1500\nSeats sold = 1200\nSeats remaining = Total seats - Seats sold\n= 1500 - 1200\n= 300\n\nTherefore, there are 300 seats that remain empty.\n\nJSON answer:\n{ \"answer\": 300 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A gardener plants 45 flowers in a row. If he makes 8 rows, but removes 9 flowers how many flowers are planted in total?",
+            "correctAnswer": 351,
+            "nonCotResponse": "To find the total number of flowers planted, we first need to calculate the total number of flowers in all rows:\n\n45 flowers/row * 8 rows = 360 flowers\n\nThen, we subtract the number of flowers removed (9):\n\n360 - 9 = 351 flowers\n\nHere is the JSON object with the final answer:\n{\n    \"answer\": 351\n}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve this problem, let's break it down into steps.\n\n1. The gardener plants 45 flowers in each row.\n2. He makes 8 rows of flowers, so the total number of flowers initially planted is 45 * 8 = 360.\n3. However, he removes 9 flowers from the arrangement.\n\nNow, let's calculate the final number of flowers:\n\nTotal initial flowers = 45 * 8 = 360\nFlowers removed = 9\n\nTo find the final number of flowers, we subtract the number of flowers removed from the total initial flowers:\n\nFinal number of flowers = Total initial flowers - Flowers removed\n= 360 - 9\n= 351\n\nHere is the JSON object with the final answer:\n{\"answer\": 351}",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A supermarket sells 35 bottles of juice per day. One bottle of juice costs 3 dollars. How much money will they make in a 12-day period?",
+            "correctAnswer": 1260,
+            "nonCotResponse": "To find out how much money the supermarket will make in a 12-day period, we need to multiply the number of bottles sold per day by the cost of each bottle and then multiply that result by the number of days.\n\nNumber of bottles sold per day = 35\nCost of each bottle = $3\nNumber of days = 12\n\nTotal amount made per day = Number of bottles sold per day * Cost of each bottle\n= 35 * 3\n= $105\n\nTotal amount made in 12 days = Total amount made per day * Number of days\n= $105 * 12\n= $1260\n\nHere is the JSON object containing the final answer:\n\n{\n    \"answer\": 1260\n}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To calculate the total amount of money the supermarket will make in a 12-day period, let's break it down step by step.\n\n1. The supermarket sells 35 bottles of juice per day.\n2. One bottle of juice costs $3.\n3. To find the daily revenue, multiply the number of bottles sold by the cost of one bottle: 35 * $3 = $105.\n4. Since we want to know the total amount for a 12-day period, multiply the daily revenue by 12: $105 * 12 = $1260.\n\nHere is the JSON object with the final answer:\n{ \"answer\": 1260 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A swimming pool can hold 10,000 liters of water. If 2,500 liters evaporate in a week, how much water remains after 3 weeks?",
+            "correctAnswer": 2500,
+            "nonCotResponse": "To find out how much water remains in the pool after 3 weeks, we need to calculate the amount of water that evaporates each week and subtract it from the total capacity.\n\nInitial capacity = 10,000 liters\nEvaporation per week = 2,500 liters\nNumber of weeks = 3\n\nTotal evaporation = Evaporation per week * Number of weeks\n= 2,500 * 3\n= 7,500 liters\n\nRemaining water = Initial capacity - Total evaporation\n= 10,000 - 7,500\n= 2,500 liters\n\nHere is the JSON object with the final answer:\n\n{\n  \"answer\": 2500\n}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To solve this problem, let's break it down into steps:\n\n1. The swimming pool can hold 10,000 liters of water initially.\n2. 2,500 liters evaporate in a week.\n3. We need to find out how much water remains after 3 weeks.\n\nFirst, we'll calculate the total amount of water that evaporates in 3 weeks:\n2,500 liters/week * 3 weeks = 7,500 liters\n\nNow, let's subtract the amount of water that evaporated from the initial capacity of the pool:\n\n10,000 liters - 7,500 liters = 2,500 liters\n\nSo, after 3 weeks, there are 2,500 liters of water remaining in the swimming pool.\n\nJSON Answer:\n{ \"answer\": 2500 }",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "A sports shop sells 3 basketballs for $60. How much will 7 basketballs cost at the same rate?",
+            "correctAnswer": 140.0,
+            "nonCotResponse": "To find the cost of 7 basketballs, we need to first determine the cost of one basketball.\n\nSince 3 basketballs cost $60, we can divide the total cost by 3 to get the cost of one basketball:\n\n$60 \u00f7 3 = $20 per basketball\n\nNow that we know the cost of one basketball is $20, we can multiply this by 7 to find the cost of 7 basketballs:\n\n$20 \u00d7 7 = $140\n\nSo, 7 basketballs will cost $140.\n\nHere's a JSON object with the final answer:\n{ \"answer\": 140 }",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To determine the cost of 7 basketballs, we need to find the price per basketball and then multiply it by 7.\n\nThe shop sells 3 basketballs for $60. To find the price per basketball, we divide the total cost ($60) by the number of basketballs (3).\n\n$60 \u00f7 3 = $20 per basketball\n\nNow that we know the price per basketball is $20, we can multiply it by the number of basketballs we want to buy (7):\n\n$20 per basketball \u00d7 7 = $140\n\nTherefore, 7 basketballs will cost $140 at the same rate.\n\n{\n    \"answer\": 140\n}",
+            "isCotAnswerCorrect": true
+        },
+        {
+            "question": "Tony is collecting apples per his mother's request. He already has 5 apples. His friend Anthony has 3 apples. Tony needs to collect 10 apples in total for his mother. However, the apples collected from Anthony do not belong to Tony. How many more apples does Tony need to collect before returning home?",
+            "correctAnswer": 5,
+            "nonCotResponse": "To find out how many apples Tony needs to collect, we need to first determine how many apples he already has.\n\nTony has 5 apples and Anthony has 3 apples. Since the apples collected from Anthony do not belong to Tony, we don't include them in our count of his total apples.\n\nSo, Tony has 5 apples and needs a total of 10 apples for his mother. \n\nTo find out how many more apples he needs to collect, we subtract the number of apples he already has from the total number of apples needed:\n\n10 (total apples needed) - 5 (apples already collected) = 5\n\nTherefore, Tony needs to collect 5 more apples before returning home.\n\nHere is the JSON object with the final answer:\n{\"answer\": 5}",
+            "isNonCotAnswerCorrect": true,
+            "cotResponse": "To determine how many more apples Tony needs to collect, let's think step by step:\n\n1. Tony already has 5 apples.\n2. His friend Anthony has 3 apples, but they do not belong to Tony. So, we need to subtract these from the total amount of apples needed: 10 - 3 = 7\n3. Now that we have the correct number of apples needed (7) and Tony already has 5 apples, let's calculate how many more apples he needs: 7 - 5 = 2\n\nHere is the JSON object with the final answer:\n\n { \"answer\": 2 }",
+            "isCotAnswerCorrect": false
+        }
+    ]
+}
